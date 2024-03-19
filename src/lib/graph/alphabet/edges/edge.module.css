@@ -1,0 +1,23 @@
+.container {
+  cursor: pointer;
+  --_scgEdgeBackgroundColor: var(--scgEdgeBackgroundColor, #fff);
+  --_scgEdgeColor: var(--scgEdgeColor, #000);
+  &:hover {
+    --_scgEdgeColor: var(--scgEdgeColorHover, var(--scgEdgeColor, #2669cf));
+  }
+
+  .edge path {
+    transition: var(--scgEdgeTransition);
+  }
+
+  .edge .fill {
+    stroke: var(--_scgEdgeBackgroundColor);
+  }
+  .edge .stroke {
+    stroke: var(--_scgEdgeColor);
+  }
+}
+
+.noselect {
+  pointer-events: none;
+}

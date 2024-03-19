@@ -1,0 +1,25 @@
+.container {
+  user-select: none;
+  cursor: pointer;
+  --_scgNodeBackgroundColor: var(--scgNodeBackgroundColor, white);
+  --_scgNodeColor: var(--scgNodeColor, #000);
+  --_scgNodeStroke: var(--scgNodeStroke, 5px);
+  &:hover, &.highlight {
+    --_scgNodeColor: var(--scgNodeColorHover, var(--scgNodeColor, #2669cf));
+  }
+}
+
+.node {
+  fill: var(--_scgNodeBackgroundColor);
+  stroke: var(--_scgNodeColor);
+  stroke-width: var(--_scgNodeStroke);
+  transition: var(--scgNodeTransition);
+}
+
+.text {
+  cursor: pointer;
+  user-select: none;
+  &:hover {
+    fill: blue;
+  }
+}

@@ -1,0 +1,17 @@
+.graph {
+  position: relative;
+  &:not([data-dragging]) {
+    --scgEdgeTransition: d 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96);
+    --scgNodeTransition: x 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96), y 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96);
+  }
+
+  &[data-movable] {
+    cursor: grab;
+  }
+  &[data-moving] {
+    cursor: grabbing;
+  }
+  &[data-selecting] {
+    cursor: default;
+  }
+}

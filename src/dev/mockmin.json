@@ -1,0 +1,19 @@
+{
+	"nodes": [
+		{ "id": "j", "name": "Jerry", "type": "const", "label": "A" },
+		{ "id": "e", "name": "Elaine", "type": "const", "label": "B" },
+		{ "id": "k", "name": "Kramer", "type": "const" },
+		{ "id": "g", "name": "George", "type": "const", "label": "D" }
+	],
+	"edges": [
+		{ "source": "j", "target": "e", "id": "edge-0", "type": "UCommon" },
+		{ "source": "j", "target": "k", "id": "edge-1", "type": "UCommon" },
+		{ "source": "j", "target": "g", "id": "edge-2", "type": "UCommon" },
+		{ "source": "e", "target": "j", "id": "edge-3", "type": "UCommon" },
+		{ "source": "e", "target": "k", "id": "edge-4", "type": "UCommon" },
+		{ "source": "k", "target": "j", "id": "edge-5", "type": "UCommon" },
+		{ "source": "k", "target": "e", "id": "edge-6", "type": "UCommon" },
+		{ "source": "k", "target": "g", "id": "edge-7", "type": "UCommon" },
+		{ "source": "g", "target": "j", "id": "edge-8", "type": "UCommon" }
+	]
+}

@@ -1,0 +1,40 @@
+.disk {
+  animation: show 0.1s forwards cubic-bezier(0.01, 0.87, 0.53, 0.96);
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.1));
+  --scgNodeColor: #575757;
+  path {
+    fill: none;
+    stroke: #fff;
+    cursor: pointer;
+    filter: drop-shadow(0px 0px 1px #00000029);
+    transition: stroke 0.05s;
+  }
+  text {
+    font-family: monospace;
+    font-weight: 500;
+    font-size: 0.8rem;
+    fill: #999;
+  }
+  &:hover {
+    --scgNodeColor: #a8a8a8;
+  }
+  & > g:hover {
+    --scgNodeColor: #2669cf;
+    path {
+      /* PRYMARY: #2669cf */
+      stroke: #d0def3;
+    }
+    text {
+      fill: #2669cf;
+    }
+  }
+}
+
+@keyframes show {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
