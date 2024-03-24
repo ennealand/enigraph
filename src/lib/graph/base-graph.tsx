@@ -16,7 +16,6 @@ export interface Props {
   centerX: number
   centerY: number
   children?: JSX.Element | JSX.Element[]
-  areaSelection?: { x1: number; y1: number; x2: number; y2: number }
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
   onWheel?: (e: JSX.TargetedWheelEvent<SVGSVGElement>) => void
   onMouseEnter?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
@@ -27,10 +26,10 @@ export interface Props {
   onEdgeMouseUp?: (e: JSX.TargetedMouseEvent<SVGGElement>, edge: IEdge, index: number) => void
 
   /** Set of element ids to highlight */
-  highlight?: SignalLike<Set<number>>
+  highlight?: SignalLike<Set<string>>
 
   /** Set of element ids that are non-selectable */
-  noselect?: Set<string>
+  noselect?: SignalLike<Set<string> | boolean>
 
   pref?: Ref<SVGSVGElement>
 
@@ -67,6 +66,7 @@ export const useBaseGraph = (width: number, height: number) => {
 
 export const BaseGraph = (props: Props) => {
   const transform = ensureValue(props.transform)
+  const noselect = ensureValue(props.noselect)
   return (
     <div
       class={style.graph}
@@ -103,7 +103,8 @@ export const BaseGraph = (props: Props) => {
                 y2={edge.target.y}
                 mousedown={e => props.onEdgeMouseDown?.(e, edge, index)}
                 mouseup={e => props.onEdgeMouseUp?.(e, edge, index)}
-                noselect={props.noselect?.has(edge.id)}
+                highlight={ensureValue(props.highlight)?.has(edge.id)}
+                noselect={noselect && (noselect === true || noselect.has(edge.id))}
                 padding={props.padding}
               />
             ))}
@@ -118,7 +119,9 @@ export const BaseGraph = (props: Props) => {
                 label={node.label}
                 mousedown={e => props.onNodeMouseDown?.(e, node, index)}
                 mouseup={e => props.onNodeMouseUp?.(e, node, index)}
-                highlight={ensureValue(props.highlight)?.has(index)}
+                highlight={ensureValue(props.highlight)?.has(node.id)}
+                noselect={noselect && (noselect === true || noselect.has(node.id))}
+                padding={props.padding && props.padding + 1}
               />
             ))}
           </g>

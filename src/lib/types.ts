@@ -31,7 +31,6 @@ export interface EdgeProps {
   y1: number
   x2: number
   y2: number
-  noselect?: boolean
   class?: string
 }
 

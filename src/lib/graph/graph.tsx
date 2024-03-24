@@ -1,5 +1,5 @@
 import { DeepSignal } from 'deepsignal'
-import { useLayoutEffect, useMemo } from 'preact/hooks'
+import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { EdgeType, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { useBaseGraph } from './base-graph'
 import { useCreation } from './plugins/creation/creation'
@@ -33,11 +33,15 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
     const creation = useCreation({ addNode, addEdge, nodes: elements.nodes })
     const { transform, localize, onwheel, weakLocalize } = useMovable({ width, height })
 
-    const { AreaSelection, startSelection, updateSelection, selection } = useSelection({
+    const { AreaSelection, selection, startSelection, updateSelection, isSelecting } = useSelection({
       nodes: elements.nodes,
       getInnerPoint,
       weakLocalize,
+      inversion: true,
+      padding,
     })
+
+    useMovable({ width, height })
 
     const onDiskClick: DiskClickCallback = (type, x, y, _e, value) => {
       if (type === 'node') creation.createNode(...localize(x, y), value)
@@ -50,17 +54,20 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
     /// ------------- Global events ------------- ///
     /// ----------------------------------------- ///
 
-    const mousemove = (e: MouseEvent) => {
-      updateSelection(e, { deselection: e.shiftKey })
-    }
+    const mousemove = useCallback(
+      (e: MouseEvent) => {
+        updateSelection(e, { deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
+      },
+      [updateSelection]
+    )
 
-    useLayoutEffect(() => {
+    useEffect(() => {
       document.addEventListener('mousemove', mousemove, true)
-      return () => {
-        document.removeEventListener('mousemove', mousemove, true)
-      }
-    }, [elements])
+      return () => document.removeEventListener('mousemove', mousemove, true)
+    }, [mousemove])
+    useEffect(() => () => document.removeEventListener('mousemove', mousemove, true), [])
 
+    /// ------------ Render component ----------- ///
     return (
       <BaseGraph
         width={width}
@@ -71,11 +78,16 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
         padding={padding ?? 15}
         transform={transform}
         highlight={selection}
+        noselect={isSelecting}
         onWheel={e => {
           onwheel(e)
         }}
         onMouseDown={e => {
-          startSelection(e)
+          startSelection(e, {
+            deselection: e.altKey,
+            selection: e.ctrlKey || e.metaKey,
+            clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+          })
         }}
       >
         <Disk />

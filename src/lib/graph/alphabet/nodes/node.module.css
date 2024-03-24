@@ -4,8 +4,11 @@
   --_scgNodeBackgroundColor: var(--scgNodeBackgroundColor, white);
   --_scgNodeColor: var(--scgNodeColor, #000);
   --_scgNodeStroke: var(--scgNodeStroke, 3px);
+  transition: 0.2s filter;
+  filter: drop-shadow(0 0 5px transparent);
   &:hover, &.highlight {
     --_scgNodeColor: var(--scgNodeColorHover, var(--scgNodeColor, #2669cf));
+    filter: drop-shadow(0 0 5px #2669cf);
   }
 }
 
@@ -22,4 +25,8 @@
   &:hover {
     fill: blue;
   }
+}
+
+.noselect {
+  pointer-events: none;
 }

@@ -7,18 +7,19 @@ interface Props {
   x: number
   y: number
   label?: string
-  noring?: boolean
   mousedown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
   mouseup?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
   textDoubleClick?: () => void
   highlight?: boolean
+  padding?: number
+  noselect?: boolean
 }
 
-export const Node = ({ type, x, y, label, noring, mousedown, mouseup, textDoubleClick, highlight }: Props) => {
+export const Node = ({ type, noselect, x, y, label, mousedown, mouseup, textDoubleClick, highlight, padding }: Props) => {
   return (
     <>
-      <g class={`${style.container} ${highlight ? style.highlight : ''}`} onMouseDown={mousedown} onMouseUp={mouseup}>
-        {!noring && <circle cx={x} cy={y} r='35' fill='transparent' />}
+      <g class={`${style.container} ${noselect ? style.noselect : ''} ${highlight ? style.highlight : ''}`} onMouseDown={mousedown} onMouseUp={mouseup}>
+        {padding && <circle cx={x} cy={y} r={padding} fill='transparent' />}
         <use class={style.node} xlinkHref={`#scg.node.${type}`} x={x} y={y} />
       </g>
       {label && (

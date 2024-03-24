@@ -3,6 +3,7 @@ declare const styles: {
   readonly "highlight": string;
   readonly "node": string;
   readonly "text": string;
+  readonly "noselect": string;
 };
 export = styles;
 

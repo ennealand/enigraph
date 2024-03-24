@@ -2,7 +2,7 @@
   cursor: pointer;
   --_scgEdgeBackgroundColor: var(--scgEdgeBackgroundColor, #fff);
   --_scgEdgeColor: var(--scgEdgeColor, #000);
-  &:hover {
+  &:hover, &.highlight {
     --_scgEdgeColor: var(--scgEdgeColorHover, var(--scgEdgeColor, #2669cf));
   }
 
