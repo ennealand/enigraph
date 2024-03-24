@@ -1,40 +1,47 @@
-// import { INode } from '$lib/types'
-// import { DeepSignal, useDeepSignal } from 'deepsignal'
-// import { useCallback, useEffect } from 'preact/hooks'
+import { INode } from '$lib/types'
+import { useSignal } from '@preact/signals'
+import { ReadonlySignal, computed } from '@preact/signals-core'
+import { DeepSignal } from 'deepsignal'
+import { useCallback, useEffect, useMemo } from 'preact/hooks'
 
+type Props = {
+  nodes: DeepSignal<INode[]>
+  selection: ReadonlySignal<Set<string>>
+  getInnerPoint: (x: number, y: number) => readonly [number, number]
+  zoom?: ReadonlySignal<number>
+}
 
-// type Props = {
-//   nodes: DeepSignal<INode[]>
-//   getInnerPoint: (x: number, y: number) => readonly [number, number]
-// }
+export const useDraggable = (props: Props) =>
+  useMemo(() => {
+    const dragging = useSignal(false)
+    const startPoint = useSignal({ x: 0, y: 0 })
 
-// export const useDraggable = (props: Props) => {
-//   const draggable = useDeepSignal({ shift: null as { x: number, y: number } | null })
+    const startDragginig = (e: MouseEvent) => {
+      dragging.value = true
+      const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+      startPoint.value = { x, y }
+      document.addEventListener('mouseup', stopDragging, { once: true })
+    }
 
-//   const startDragging = (e: MouseEvent) => {
-//     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-//     selection.area = { x1: x, y1: y, x2: x, y2: y }
-//     document.addEventListener('mouseup', stopSelection, { once: true })
-//   }
+    const updateDragging = (e: MouseEvent) => {
+      const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+      const shiftX = startPoint.value.x - x
+      const shiftY = startPoint.value.y - y
+      const zoom = props.zoom?.value ?? 1
+      for (const node of props.nodes) {
+        if (!props.selection.value.has(node.id)) continue
+        node.x -= shiftX / zoom
+        node.y -= shiftY / zoom
+      }
+      startPoint.value = { x, y }
+    }
 
-//   const updateSelection = (e: MouseEvent) => {
-//     if (!selection.area) return
-//     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-//     selection.area.x2 = x
-//     selection.area.y2 = y
-//   }
+    const stopDragging = useCallback(() => {
+      document.removeEventListener('mouseup', stopDragging)
+      dragging.value = false
+    }, [dragging])
 
-//   const stopSelection = useCallback(() => {
-//     selection.area = null
-//   }, [selection])
+    useEffect(() => () => document.removeEventListener('mouseup', stopDragging), [dragging])
 
-//   useEffect(() => () => document.removeEventListener('mouseup', stopSelection), [selection])
-
-//   return {
-//     /** Area selection rectangle */
-//     AreaSelection: () => selection.area && <AreaSelection {...selection.area} />,
-//     selection: selection.values,
-//     updateSelection,
-//     startSelection,
-//   }
-// }
+    return { isDragging: computed(() => dragging.value), startDragginig, updateDragging }
+  }, [props.selection, props.selection, props.getInnerPoint, props.zoom])

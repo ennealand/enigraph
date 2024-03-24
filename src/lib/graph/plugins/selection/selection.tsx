@@ -19,6 +19,7 @@ export const useSelection = (props: Props) =>
       area: null as AreaSelectionProps | null,
       progress: new Set<string>(),
       values: new Set<string>(),
+      postponedClickedNodeId: null as string | null,
     })
 
     const clearSelection = useCallback(() => {
@@ -33,26 +34,52 @@ export const useSelection = (props: Props) =>
 
       // Select a single node is clicked on it
       const [localX, localY] = weakLocalize(x, y) ?? [x, y]
-      const padding = props.padding ?? 16
+      const padding = props.padding ?? 15
       const clickedNode = props.nodes.find(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
 
       const newProgress = options?.clear ? new Set<string>() : new Set(selection.values)
       if (clickedNode) {
-        if (!options?.deselection && !(props.inversion && !options?.selection && newProgress.has(clickedNode.id))) {
-          newProgress.add(clickedNode.id)
-        } else newProgress.delete(clickedNode.id)
+        const processSingleClick = (values: Set<string>) => {
+          if (!options?.deselection && !(props.inversion && !options?.selection && values.has(clickedNode.id))) {
+            values.add(clickedNode.id)
+          } else values.delete(clickedNode.id)
+        }
+        // If clear => select now; otherwise select later (on mouse move??! might be excessive -- it is!!)
+        //       ^ mouse down ^                  ^ mouse move ^  or  ^ mouse up ^ (whatever fires first)
+        // The problem is that mouse move might not be triggered (so we need to process stuff on mouse up - uh oh)
+        if (options?.clear) {
+          // process on mouse up
+          selection.postponedClickedNodeId = clickedNode.id
+        } else {
+          processSingleClick(newProgress)
+        }
       }
+      const dontClear = selection.postponedClickedNodeId && selection.values.has(selection.postponedClickedNodeId)
       batch(() => {
         selection.area = deepSignal({ x1: x, y1: y, x2: x, y2: y })
-        selection.progress = newProgress
-        if (options?.clear) selection.values = new Set<string>()
+        selection.progress = dontClear ? new Set(selection.values) : newProgress
+        if (options?.clear && !dontClear) selection.values = new Set<string>()
       })
 
+      console.log('START selection')
       document.addEventListener('mouseup', stopSelection, { once: true })
     }
 
     const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => {
       if (!selection.area) return
+      console.log('updating selection')
+      
+      // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
+      // cancel single click processing on mouse up (mouse move => not a single click)
+      if (selection.postponedClickedNodeId) {
+        // Select a newly-clicked node so it can be dragged immediately
+        selection.values.add(selection.postponedClickedNodeId)
+        selection.postponedClickedNodeId = null
+        selection.area = null
+        return
+      }
+      // this node will be automatically picked up later in this function
+      
       const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
       selection.area.x2 = x
       selection.area.y2 = y
@@ -80,9 +107,20 @@ export const useSelection = (props: Props) =>
 
     const stopSelection = () => {
       document.removeEventListener('mouseup', stopSelection)
+      if (!selection.area) return
       selection.area = null
+      let newValues: Set<string>
 
-      selection.values = new Set(selection.progress)
+      // processed the postponed single click
+      if (selection.postponedClickedNodeId) {
+        newValues = new Set()
+        newValues.add(selection.postponedClickedNodeId)
+        selection.postponedClickedNodeId = null
+      } else {
+        newValues = new Set(selection.progress)
+      }
+
+      selection.values = newValues
       selection.progress = new Set()
     }
 

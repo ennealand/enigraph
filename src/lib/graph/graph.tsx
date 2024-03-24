@@ -6,6 +6,7 @@ import { useCreation } from './plugins/creation/creation'
 import { useDisk, type DiskClickCallback } from './plugins/disk'
 import { useMovable } from './plugins/movable/movable'
 import { useSelection } from './plugins/selection/selection'
+import { useDraggable } from './plugins/draggable/draggable'
 
 export interface Props {
   elements: DeepSignal<Elements>
@@ -31,7 +32,7 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
     /// ----------------------------------------- ///
 
     const creation = useCreation({ addNode, addEdge, nodes: elements.nodes })
-    const { transform, localize, onwheel, weakLocalize } = useMovable({ width, height })
+    const { transform, localize, onwheel, weakLocalize, zoom } = useMovable({ width, height })
 
     const { AreaSelection, selection, startSelection, updateSelection, isSelecting } = useSelection({
       nodes: elements.nodes,
@@ -41,7 +42,12 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
       padding,
     })
 
-    useMovable({ width, height })
+    const { startDragginig, updateDragging, isDragging } = useDraggable({
+      nodes: elements.nodes,
+      selection,
+      getInnerPoint,
+      zoom,
+    })
 
     const onDiskClick: DiskClickCallback = (type, x, y, _e, value) => {
       if (type === 'node') creation.createNode(...localize(x, y), value)
@@ -56,9 +62,12 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
 
     const mousemove = useCallback(
       (e: MouseEvent) => {
+        if (isDragging.value) {
+          updateDragging(e)
+        }
         updateSelection(e, { deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
       },
-      [updateSelection]
+      [updateSelection, updateDragging, isDragging]
     )
 
     useEffect(() => {
@@ -79,6 +88,7 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
         transform={transform}
         highlight={selection}
         noselect={isSelecting}
+        dragging={isDragging}
         onWheel={e => {
           onwheel(e)
         }}
@@ -88,6 +98,11 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
             selection: e.ctrlKey || e.metaKey,
             clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
           })
+        }}
+        onNodeMouseDown={e => {
+          if (e.shiftKey) return
+          if (e.ctrlKey || e.metaKey) e.stopPropagation()
+          startDragginig(e)
         }}
       >
         <Disk />

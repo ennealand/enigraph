@@ -33,9 +33,9 @@ export interface Props {
 
   pref?: Ref<SVGSVGElement>
 
-  movable?: true
-  dragging?: true
-  selecting?: true
+  movable?: SignalLike<boolean>
+  dragging?: SignalLike<boolean>
+  selecting?: SignalLike<boolean>
 
   transform?: SignalLike<{ x: number; y: number; zoom: number; moving: boolean }>
   padding?: number
@@ -70,10 +70,10 @@ export const BaseGraph = (props: Props) => {
   return (
     <div
       class={style.graph}
-      data-movable={props.movable ? '' : undefined}
+      data-movable={ensureValue(props.movable) ? '' : undefined}
       data-moving={transform?.moving ? '' : undefined}
-      data-dragging={props.dragging ? '' : undefined}
-      data-selecting={props.selecting ? '' : undefined}
+      data-dragging={ensureValue(props.dragging) ? '' : undefined}
+      data-selecting={ensureValue(props.selecting) ? '' : undefined}
     >
       <svg
         ref={props.pref}

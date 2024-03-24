@@ -1,5 +1,6 @@
 import { EdgeType, Graph } from '$lib/index'
 import type { Elements, IEdge, INode } from '$lib/types'
+import { DeepSignal, deepSignal } from 'deepsignal'
 import mock from './mockmin.json'
 import MyWorker from './worker.js?worker'
 // import { simulate } from './simulation'
@@ -9,14 +10,14 @@ import { useEffect } from 'preact/hooks'
 const source = mock as unknown as Elements
 
 export const GraphEditor = () => {
-  const elements = useSignal<Elements | null>(null)
+  const elements = useSignal<DeepSignal<Elements> | null>(null)
 
   useEffect(() => {
     elements.value = source
     // simulate(elements, {animate: true})
     const worker = new MyWorker()
     worker.postMessage(source)
-    worker.onmessage = e => (elements.value = e.data)
+    worker.onmessage = e => (elements.value = deepSignal(e.data))
   }, [])
 
   const addNode = (node: INode) => {

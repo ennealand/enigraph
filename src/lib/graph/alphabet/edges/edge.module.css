@@ -2,8 +2,11 @@
   cursor: pointer;
   --_scgEdgeBackgroundColor: var(--scgEdgeBackgroundColor, #fff);
   --_scgEdgeColor: var(--scgEdgeColor, #000);
+  transition: 0.2s filter;
+  filter: drop-shadow(0 0 3px transparent);
   &:hover, &.highlight {
     --_scgEdgeColor: var(--scgEdgeColorHover, var(--scgEdgeColor, #2669cf));
+    filter: drop-shadow(0 0 3px #2669cf75);
   }
 
   .edge path {

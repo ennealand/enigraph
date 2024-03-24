@@ -19,7 +19,6 @@ type BaseDiskProps = {
       click: (type: 'edge', x: number, y: number, e: JSX.TargetedMouseEvent<SVGGElement>, value: EdgeType) => void
     }
 )
-
 export const BaseDisk = (props: BaseDiskProps) => (
   <g transform={`translate(${props.x} ${props.y})`}>
     <g class={style.disk}>
@@ -30,7 +29,7 @@ export const BaseDisk = (props: BaseDiskProps) => (
               <text x={textX} y={textY} stroke-width='90'>
                 {index + 1}
               </text>
-              <Node x={nodeX} y={nodeY} type={type} noring />
+              <Node x={nodeX} y={nodeY} type={type} />
             </g>
           ))
         : props.edgeOptions.map(({ type, x1, y1, x2, y2, textX, textY, edgeX1, edgeY1, edgeX2, edgeY2 }, index) => (

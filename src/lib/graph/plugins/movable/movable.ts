@@ -33,5 +33,5 @@ export const useMovable = (props: Props) =>
       }
     }
 
-    return { transform, centerX, centerY, localize, weakLocalize, onwheel }
+    return { transform, centerX, centerY, localize, weakLocalize, onwheel, zoom: transform.$zoom }
   }, [props.width, props.height])
