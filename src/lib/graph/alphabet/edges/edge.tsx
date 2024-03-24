@@ -1,28 +1,18 @@
 import { EdgeType } from '$lib/types'
 import { JSX } from 'preact/jsx-runtime'
-import { EdgeCommon } from './edge-common'
+import { ArcConst } from './alphabet/ArcConst'
+import { ArcConstPermNegAccess } from './alphabet/ArcConstPermNegAccess'
+import { ArcConstPermPosAccess } from './alphabet/ArcConstPermPosAccess'
+import { EdgeConst } from './alphabet/EdgeConst'
+import { ArcConstPermFuzAccess } from './alphabet/_ArcConstPermFuzAccess'
 import styles from './edge.module.css'
 
 const EDGE_TYPES = {
-  [EdgeType.UCommon]: EdgeCommon,
-  [EdgeType.DCommon]: EdgeCommon,
-  [EdgeType.UCommonConst]: EdgeCommon,
-  [EdgeType.DCommonConst]: EdgeCommon,
-  [EdgeType.UCommonVar]: EdgeCommon,
-  [EdgeType.DCommonVar]: EdgeCommon,
-  [EdgeType.Access]: EdgeCommon,
-  [EdgeType.AccessConstPosPerm]: EdgeCommon,
-  [EdgeType.AccessConstNegPerm]: EdgeCommon,
-  [EdgeType.AccessConstFuzPerm]: EdgeCommon,
-  [EdgeType.AccessConstPosTemp]: EdgeCommon,
-  [EdgeType.AccessConstNegTemp]: EdgeCommon,
-  [EdgeType.AccessConstFuzTemp]: EdgeCommon,
-  [EdgeType.AccessVarPosPerm]: EdgeCommon,
-  [EdgeType.AccessVarNegPerm]: EdgeCommon,
-  [EdgeType.AccessVarFuzPerm]: EdgeCommon,
-  [EdgeType.AccessVarPosTemp]: EdgeCommon,
-  [EdgeType.AccessVarNegTemp]: EdgeCommon,
-  [EdgeType.AccessVarFuzTemp]: EdgeCommon,
+  [EdgeType.EdgeConst]: EdgeConst,
+  [EdgeType.ArcConst]: ArcConst,
+  [EdgeType.ArcConstPermPosAccess]: ArcConstPermPosAccess,
+  [EdgeType.ArcConstPermNegAccess]: ArcConstPermNegAccess,
+  [EdgeType.ArcConstPermFuzAccess]: ArcConstPermFuzAccess,
 }
 
 interface Props {
@@ -34,15 +24,30 @@ interface Props {
   y2: number
   mousedown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
   mouseup?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
+  padding?: number
 }
 
-export const Edge = ({ type, noselect = false, x1 = 0, y1 = 0, x2 = 0, y2 = 0, mousedown, mouseup }: Props) => {
+// million-ignore
+export const Edge = ({
+  type,
+  noselect = false,
+  x1 = 0,
+  y1 = 0,
+  x2 = 0,
+  y2 = 0,
+  mousedown,
+  mouseup,
+  padding = 0,
+}: Props) => {
   const MyEdge = EDGE_TYPES[type]
+  const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+  const dx = length && ((x2 - x1) / length) * padding
+  const dy = length && ((y2 - y1) / length) * padding
 
   return (
     <g class={`${styles.container} ${noselect ? styles.noselect : ''}`} onMouseDown={mousedown} onMouseUp={mouseup}>
-      <path d={`M ${x1} ${y1} L ${x2} ${y2}`} stroke-width='35' stroke='transparent' />
-      <MyEdge x1={x1} y1={y1} x2={x2} y2={y2} noselect={noselect} />
+      <path d={`M ${x1 + dx} ${y1 + dy} L ${x2 - dx} ${y2 - dy}`} stroke-width='15' stroke='transparent' />
+      <MyEdge x1={x1 + dx} y1={y1 + dy} x2={x2 - dx} y2={y2 - dy} noselect={noselect} />
     </g>
   )
 }

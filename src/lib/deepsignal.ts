@@ -1,4 +1,5 @@
 import { computed, signal, Signal } from "@preact/signals-core";
+import { useMemo } from 'preact/hooks';
 
 const proxyToSignals = new WeakMap();
 const objToProxy = new WeakMap();
@@ -48,32 +49,83 @@ const throwOnMutation = () => {
 };
 
 const get =
-	(isArrayOfSignals: boolean) =>
+	(type: "object" | "array" | "set") =>
 	(target: object, fullKey: string, receiver: object): unknown => {
 		if (peeking) return Reflect.get(target, fullKey, receiver);
-		let returnSignal = isArrayOfSignals || fullKey[0] === "$";
-		if (!isArrayOfSignals && returnSignal && Array.isArray(target)) {
+		let returnSignal = type === "array" || fullKey[0] === "$";
+		if (type !== "array" && fullKey[0] === "$" && Array.isArray(target)) {
 			if (fullKey === "$") {
 				if (!arrayToArrayOfSignals.has(target))
 					arrayToArrayOfSignals.set(target, createProxy(target, arrayHandlers));
 				return arrayToArrayOfSignals.get(target);
 			}
 			returnSignal = fullKey === "$length";
+		} else if (type !== "set" && fullKey[0] === "$" && target instanceof Set) {
+			if (fullKey === "$") {
+				if (!arrayToArrayOfSignals.has(target))
+					arrayToArrayOfSignals.set(target, createProxy(target, setHandlers));
+				return arrayToArrayOfSignals.get(target);
+			}
+			returnSignal = fullKey === "$size";
 		}
 		if (!proxyToSignals.has(receiver)) proxyToSignals.set(receiver, new Map());
 		const signals = proxyToSignals.get(receiver);
 		const key = returnSignal ? fullKey.replace(rg, "") : fullKey;
+
+		// ===== Process Set here ===== //
+		if (target instanceof Set) {
+			let existing = signals.get(key)
+
+			if (!existing) {
+				// Start tracking
+				if (typeof descriptor(Set.prototype, key)?.value === "function") {
+					if (key === 'add' || key === 'delete' || key === 'clear') {
+						existing = computed(() => {
+							return (...args: any[]) => {
+								const result = Reflect.get(target as any, key, receiver).apply(target, args)
+								// Update `size` if tracked
+								const $size = signals.get('size')
+								if ($size) $size.value = target.size
+								const $has = signals.get('has')
+								if ($has) {
+									$has.value = Reflect.get(target, 'has', receiver).bind(target)
+									console.log('$has.value has been updated')
+								}
+								return result
+							}
+						})
+					} else {
+						existing = signal(Reflect.get(target, key, receiver).bind(target))
+					}
+				} else {
+					let value = Reflect.get(target, key, target)
+					if (shouldProxy(value)) {
+						if (!objToProxy.has(value))
+							objToProxy.set(value, createProxy(value, objectHandlers));
+						value = objToProxy.get(value);
+					}
+					existing = signal(value)
+				}
+				signals.set(key, existing);
+			}
+
+			return returnSignal ? existing : existing.value;
+		}
+
 		if (
 			!signals.has(key) &&
-			typeof descriptor(target, key)?.get === "function"
+			(typeof descriptor(target, key)?.get === "function")
 		) {
+			console.log('good', target instanceof Set, key)
 			signals.set(
 				key,
-				computed(() => Reflect.get(target, key, receiver))
+				computed(() => Reflect.get(target, key, receiver).bind(target))
 			);
 		} else {
 			let value = Reflect.get(target, key, receiver);
-			if (returnSignal && typeof value === "function") return;
+			if (returnSignal && typeof value === "function") {
+				return;
+			}
 			if (typeof key === "symbol" && wellKnownSymbols.has(key)) return value;
 			if (!signals.has(key)) {
 				if (shouldProxy(value)) {
@@ -88,7 +140,7 @@ const get =
 	};
 
 const objectHandlers = {
-	get: get(false),
+	get: get('object'),
 	set(target: object, fullKey: string, val: any, receiver: object): boolean {
 		if (typeof descriptor(target, fullKey)?.set === "function")
 			return Reflect.set(target, fullKey, val, receiver);
@@ -132,7 +184,13 @@ const objectHandlers = {
 };
 
 const arrayHandlers = {
-	get: get(true),
+	get: get('array'),
+	set: throwOnMutation,
+	deleteProperty: throwOnMutation,
+};
+
+const setHandlers = {
+	get: get('set'),
 	set: throwOnMutation,
 	deleteProperty: throwOnMutation,
 };
@@ -142,7 +200,7 @@ const wellKnownSymbols = new Set(
 		.map(key => Symbol[key as WellKnownSymbols])
 		.filter(value => typeof value === "symbol")
 );
-const supported = new Set([Object, Array]);
+const supported = new Set([Object, Array, Set]);
 const shouldProxy = (val: any): boolean => {
 	if (typeof val !== "object" || val === null) return false;
 	return supported.has(val.constructor) && !ignore.has(val);
@@ -154,6 +212,8 @@ export type DeepSignal<T> = T extends Function
 	? T
 	: T extends { [isShallow]: true }
 	? T
+	: T extends Set<unknown>
+	? DeepSignalSet<T>
 	: T extends Array<unknown>
 	? DeepSignalArray<T>
 	: T extends object
@@ -273,11 +333,17 @@ type DeepSignalArray<T> = DeepArray<ArrayType<T>> & {
 	$length?: Signal<number>;
 };
 
+type DeepSignalSet<T> = T & {
+	$size?: Signal<number>;
+};
+
 export type Shallow<T extends object> = T & { [isShallow]: true };
 
-export declare const useDeepSignal: <T extends object>(obj: T) => DeepSignal<T>;
+export const useDeepSignal = <T extends object>(obj: T): DeepSignal<T> => {
+	return useMemo(() => deepSignal(obj), []);
+};
 
-type FilterSignals<K> = K extends `${infer _P}` ? never : K;
+type FilterSignals<K> = K extends `$${infer P}` ? never : K;
 type RevertDeepSignalObject<T> = Pick<T, FilterSignals<keyof T>>;
 type RevertDeepSignalArray<T> = Omit<T, "$" | "$length">;
 

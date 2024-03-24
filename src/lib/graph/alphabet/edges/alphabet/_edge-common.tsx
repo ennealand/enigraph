@@ -1,5 +1,5 @@
 import type { EdgeProps } from '$lib/types'
-import styles from './edge.module.css'
+import styles from '../edge.module.css'
 
 export const EdgeCommon = ({ x1, y1, x2, y2 }: EdgeProps) => {
   return (

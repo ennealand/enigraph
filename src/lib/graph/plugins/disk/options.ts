@@ -13,12 +13,10 @@ export const DefaultNodeTypes = [
 ]
 
 export const DefaultEdgeTypes = [
-  EdgeType.AccessConstPosPerm,
-  EdgeType.UCommon,
-  EdgeType.DCommon,
-  EdgeType.DCommonVar,
-  EdgeType.UCommonVar,
-  EdgeType.AccessVarPosPerm,
+  EdgeType.ArcConstPermNegAccess,
+  EdgeType.ArcConstPermPosAccess,
+  EdgeType.ArcConst,
+  EdgeType.EdgeConst,
 ]
 
 export const getNodeOptions = (nodeTypes: NodeType[]) =>
@@ -48,10 +46,10 @@ export const getEdgeOptions = (edgeTypes: EdgeType[]) =>
       y2: Math.round(700 * -Math.cos(deg * (index + 1))) / 10,
       textX: Math.round(990 * Math.sin(0.12 + deg * index)) / 10 - 4,
       textY: Math.round(990 * -Math.cos(0.12 + deg * index)) / 10 + 6,
-      edgeX1: Math.round(900 * Math.sin(0.52 + deg * index)) / 10,
-      edgeY1: Math.round(900 * -Math.cos(0.52 + deg * index)) / 10,
-      edgeX2: Math.round(450 * Math.sin(0.52 + deg * index)) / 10,
-      edgeY2: Math.round(450 * -Math.cos(0.52 + deg * index)) / 10,
+      edgeX1: Math.round(450 * Math.sin(deg * (index + 0.5))) / 10,
+      edgeY1: Math.round(450 * -Math.cos(deg * (index + 0.5))) / 10,
+      edgeX2: Math.round(900 * Math.sin(deg * (index + 0.5))) / 10,
+      edgeY2: Math.round(900 * -Math.cos(deg * (index + 0.5))) / 10,
     }
   })
 

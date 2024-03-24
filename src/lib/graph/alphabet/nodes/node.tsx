@@ -1,5 +1,5 @@
 import { NodeType } from '$lib/types'
-import { JSX } from 'preact/jsx-runtime'
+import type { JSX } from 'preact/jsx-runtime'
 import style from './node.module.css'
 
 interface Props {
@@ -19,7 +19,7 @@ export const Node = ({ type, x, y, label, noring, mousedown, mouseup, textDouble
     <>
       <g class={`${style.container} ${highlight ? style.highlight : ''}`} onMouseDown={mousedown} onMouseUp={mouseup}>
         {!noring && <circle cx={x} cy={y} r='35' fill='transparent' />}
-        <use class={style.node} xlinkHref={`#scgg.node.${type}`} x={x} y={y} />
+        <use class={style.node} xlinkHref={`#scg.node.${type}`} x={x} y={y} />
       </g>
       {label && (
         <text x={x + 17} y={y + 21} class={style.text} onDblClick={textDoubleClick}>

@@ -1,5 +1,4 @@
 import preact from '@preact/preset-vite'
-// import million from 'million/compiler'
 import { defineConfig } from 'vite'
 import typedCssModulesPlugin from 'vite-plugin-typed-css-modules'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -7,10 +6,9 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    // million.vite({ auto: true }),
+    preact(),
     tsconfigPaths(),
     typedCssModulesPlugin(),
-    preact(),
   ],
   build: {
     target: 'es2020',
@@ -26,7 +24,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 5174,
   },
   css: {
     modules: {
