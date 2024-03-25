@@ -19,13 +19,14 @@ export const withDraggable = (props: Props) => {
   const startDragginig = (e: MouseEvent) => {
     dragging.value = true
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-    startPoint.value = { x, y }
-    totalShift.value = { x, y }
+    startPoint.value.x = x
+    startPoint.value.y = y
+    totalShift.value.x = 0
+    totalShift.value.y = 0
     document.addEventListener('mouseup', stopDragging, { once: true })
   }
 
   const updateDragging = (e: MouseEvent) => {
-    console.log(props.selection.value)
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
     const shiftX = startPoint.value.x - x
     const shiftY = startPoint.value.y - y
@@ -37,9 +38,21 @@ export const withDraggable = (props: Props) => {
     }
     totalShift.value.x += shiftX
     totalShift.value.y += shiftY
-    console.log(startPoint.value)
     startPoint.value.x = x
     startPoint.value.y = y
+  }
+
+  const abortDragging = (options?: { revert: boolean }) => {
+    if (!dragging.value) return
+    if (options?.revert) {
+      const zoom = props.zoom?.value ?? 1
+      for (const node of props.nodes) {
+        if (!props.selection.value.has(node.id)) continue
+        node.x += totalShift.value.x / zoom
+        node.y += totalShift.value.y / zoom
+      }
+    }
+    stopDragging()
   }
 
   const stopDragging = useCallback(() => {
@@ -49,5 +62,5 @@ export const withDraggable = (props: Props) => {
 
   useEffect(() => () => document.removeEventListener('mouseup', stopDragging), [dragging])
 
-  return { isDragging: computed(() => dragging.value), startDragginig, updateDragging }
+  return { isDragging: computed(() => dragging.value), startDragginig, updateDragging, abortDragging }
 }
