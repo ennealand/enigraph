@@ -16,8 +16,10 @@ export interface Props {
   centerX: number
   centerY: number
   children?: JSX.Element | JSX.Element[]
+  inner?: JSX.Element
+  innerHtml?: JSX.Element
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
-  onWheel?: (e: JSX.TargetedWheelEvent<SVGSVGElement>) => void
+  onWheel?: (e: JSX.TargetedWheelEvent<SVGSVGElement | HTMLDivElement>) => void
   onMouseEnter?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
   onMouseLeave?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
   onNodeMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>, node: INode, index: number) => void
@@ -124,12 +126,23 @@ export const BaseGraph = (props: Props) => {
                 padding={props.padding && props.padding + 1}
               />
             ))}
+
+            {/* User-defined inner extensions */}
+            {props.inner}
           </g>
         )}
 
         {/* User-defined extensions */}
         {props.children}
       </svg>
+      <div
+        class={style.innerHtml}
+        style={{ transform: transform && `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom}) translate(50%, 50%)` }}
+        onWheel={props.onWheel} // nonpassive | preventDefault | stopPropagation
+      >
+        {/* User-defined html extensions */}
+        {props.innerHtml}
+      </div>
     </div>
   )
 }

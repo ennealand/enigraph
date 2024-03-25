@@ -1,5 +1,6 @@
 .graph {
   position: relative;
+  overflow: hidden;
   &:not([data-dragging]) {
     --scgEdgeTransition: d 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96);
     --scgNodeTransition: x 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96), y 0.15s cubic-bezier(0.01, 0.87, 0.53, 0.96);
@@ -13,5 +14,14 @@
   }
   &[data-selecting] {
     cursor: default;
+  }
+}
+
+.innerHtml {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  & > * {
+    pointer-events: auto;
   }
 }

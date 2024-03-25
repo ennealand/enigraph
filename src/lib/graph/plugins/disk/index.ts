@@ -1,1 +1,1 @@
-export { useDisk, type DiskClickCallback } from './disk'
+export { withDisk, type DiskClickCallback } from './disk'

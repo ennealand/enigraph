@@ -7,13 +7,13 @@ import { AreaSelection, AreaSelectionProps } from './area-selection'
 type Props = {
   nodes: INode[]
   getInnerPoint: (x: number, y: number) => readonly [number, number]
-  weakLocalize?: (x: number, y: number) => readonly [number, number]
+  localize?: (x: number, y: number) => readonly [number, number]
   inversion?: true
   padding?: number
 }
 
 export const withSelection = (props: Props) => {
-  const weakLocalize = props.weakLocalize ?? ((x, y) => [x, y])
+  const localize = props.localize ?? ((x, y) => [x, y])
 
   const area = useSignal(null as AreaSelectionProps | null)
   const progress = useSignal(new Set<string>())
@@ -28,7 +28,7 @@ export const withSelection = (props: Props) => {
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
 
     // Select a single node is clicked on it
-    const [localX, localY] = weakLocalize(x, y) ?? [x, y]
+    const [localX, localY] = localize(x, y) ?? [x, y]
     const padding = props.padding ?? 15
     const clickedNode = props.nodes.findLast(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
 
@@ -78,8 +78,8 @@ export const withSelection = (props: Props) => {
     area.value.y2 = y
 
     const padding = props.padding ?? 16
-    const [x1, y1] = weakLocalize(area.value.x1, area.value.y1)
-    const [x2, y2] = weakLocalize(area.value.x2, area.value.y2)
+    const [x1, y1] = localize(area.value.x1, area.value.y1)
+    const [x2, y2] = localize(area.value.x2, area.value.y2)
     const fromX = Math.min(x1, x2) - padding
     const toX = Math.max(x1, x2) + padding
     const fromY = Math.min(y1, y2) - padding

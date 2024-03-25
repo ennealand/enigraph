@@ -49,4 +49,10 @@ export interface IEdge {
   target: INode
 }
 
-export type Elements = { nodes: INode[]; edges: IEdge[]; groups: [] }
+export interface IGroup {
+  id: string
+  label: string
+  values: Set<string>
+}
+
+export type Elements = { nodes: INode[]; edges: IEdge[]; groups: IGroup[] }

@@ -13,9 +13,9 @@ export const withMovable = (props: Props) => {
 
   const transform = useDeepSignal({ x: 0, y: 0, zoom: 1, moving: false })
   const localize = (x: number, y: number) =>
-    [(x - centerX - transform.x) / transform.zoom, (y - centerY - transform.y) / transform.zoom] as const
-  const weakLocalize = (x: number, y: number) =>
     [(x - transform.x) / transform.zoom, (y - transform.y) / transform.zoom] as const
+  const globalize = (x: number, y: number) =>
+    [x * transform.zoom + transform.x, y * transform.zoom + transform.y] as const
 
   // Dragging-based moving
   const startPoint = useSignal(null as { x: number; y: number } | null)
@@ -57,7 +57,7 @@ export const withMovable = (props: Props) => {
     centerX,
     centerY,
     localize,
-    weakLocalize,
+    globalize,
     onwheel,
     zoom: transform.$zoom,
     startMoving,

@@ -1,6 +1,6 @@
 import { INode } from '$lib/types'
 import { useSignal } from '@preact/signals'
-import { ReadonlySignal, computed } from '@preact/signals-core'
+import { ReadonlySignal, computed } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
 import { useCallback, useEffect } from 'preact/hooks'
 

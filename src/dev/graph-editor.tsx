@@ -1,5 +1,5 @@
 import { EdgeType, Graph } from '$lib/index'
-import type { Elements, IEdge, INode } from '$lib/types'
+import type { Elements, IEdge, IGroup, INode } from '$lib/types'
 import { DeepSignal, deepSignal } from 'deepsignal'
 import mock from './mockmin.json'
 import MyWorker from './worker.js?worker'
@@ -30,6 +30,10 @@ export const GraphEditor = () => {
     }
   }
 
+  const addGroup = (group: IGroup) => {
+    elements.value?.groups.push(group)
+  }
+
   // const test = useMemo(() => {
   //   const ok = deepSignal(new Set([{ wow: 3 }]))
   //   console.warn(ok)
@@ -48,9 +52,11 @@ export const GraphEditor = () => {
         elements={elements.value ?? { nodes: [], edges: [], groups: [] }}
         addNode={addNode}
         addEdge={addEdge}
+        addGroup={addGroup}
         width={1000}
         height={800}
-        edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst]}
+        padding={15}
+        edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst, EdgeType.ArcConstPermPosAccess]}
       />
     </div>
   )

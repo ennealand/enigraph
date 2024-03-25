@@ -1,6 +1,6 @@
 import { EdgeType, NodeType } from '$lib/types'
 import { useDeepSignal } from 'deepsignal'
-import { useEffect, useMemo } from 'preact/hooks'
+import { useCallback, useEffect, useMemo } from 'preact/hooks'
 import { BaseDisk } from './base-disk'
 import { DefaultEdgeTypes, DefaultNodeTypes, getEdgeOptions, getNodeOptions } from './options'
 
@@ -15,27 +15,27 @@ export type DiskClickCallback = (
     | [type: 'edge', x: number, y: number, e: MouseEvent, value: EdgeType]
 ) => void
 
-export const useDisk = (click: DiskClickCallback, options?: DiskOptions) => {
+export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
   const nodeOptions = useMemo(() => getNodeOptions(options?.nodeTypes ?? DefaultNodeTypes), [options?.nodeTypes])
   const edgeOptions = useMemo(() => getEdgeOptions(options?.edgeTypes ?? DefaultEdgeTypes), [options?.edgeTypes])
   const menu = useDeepSignal({ x: 0, y: 0, type: 'node' as OptionType, shown: false })
 
-  const mouseup = () => {
+  const mouseup = useCallback(() => {
     menu.shown = false
     cleanup()
-  }
+  }, [])
 
-  const keydown = (e: KeyboardEvent) => {
+  const keydown = useCallback((e: KeyboardEvent) => {
     if (e.code === 'Escape') menu.shown = false
     cleanup()
-  }
+  }, [])
 
   const cleanup = () => {
     document.removeEventListener('keydown', keydown)
     document.removeEventListener('mouseup', mouseup)
   }
 
-  // TODO: make sure cleaning is done safely. Otherwise wrap fns into ref.
+  // Clean up safely on unmount.
   useEffect(() => cleanup, [])
 
   const showDisk = (type: OptionType, x: number, y: number) => {
@@ -58,8 +58,6 @@ export const useDisk = (click: DiskClickCallback, options?: DiskOptions) => {
         nodeOptions={nodeOptions}
         edgeOptions={edgeOptions}
       />
-    ) : (
-      <></>
-    )
-  return { Disk, showDisk, isDiskOpened: menu.shown }
+    ) : null
+  return { Disk, showDisk, isDiskOpened: menu.$shown! }
 }

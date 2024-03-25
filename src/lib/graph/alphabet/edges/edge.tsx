@@ -28,7 +28,6 @@ interface Props {
   noselect?: boolean
 }
 
-// million-ignore
 export const Edge = ({ type, noselect, x1 = 0, y1 = 0, x2 = 0, y2 = 0, mousedown, mouseup, highlight, padding = 0 }: Props) => {
   const MyEdge = EDGE_TYPES[type]
   const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
