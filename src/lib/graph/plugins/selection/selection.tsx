@@ -1,7 +1,7 @@
 import { INode } from '$lib/types'
-import { batch, computed } from '@preact/signals'
-import { deepSignal, useDeepSignal } from 'deepsignal'
-import { useCallback, useEffect, useMemo } from 'preact/hooks'
+import { batch, useComputed, useSignal } from '@preact/signals'
+import { deepSignal } from 'deepsignal'
+import { useCallback, useEffect } from 'preact/hooks'
 import { AreaSelection, AreaSelectionProps } from './area-selection'
 
 type Props = {
@@ -12,129 +12,132 @@ type Props = {
   padding?: number
 }
 
-export const useSelection = (props: Props) =>
-  useMemo(() => {
-    const weakLocalize = props.weakLocalize ?? ((x, y) => [x, y])
-    const selection = useDeepSignal({
-      area: null as AreaSelectionProps | null,
-      progress: new Set<string>(),
-      values: new Set<string>(),
-      postponedClickedNodeId: null as string | null,
+export const withSelection = (props: Props) => {
+  const weakLocalize = props.weakLocalize ?? ((x, y) => [x, y])
+
+  const area = useSignal(null as AreaSelectionProps | null)
+  const progress = useSignal(new Set<string>())
+  const values = useSignal(new Set<string>())
+  const postponedClickedNodeId = useSignal(null as string | null)
+
+  console.log('values.value', values.value)
+
+  const clearSelection = useCallback(() => {
+    if (values.value.size) values.value = new Set()
+  }, [values])
+
+  const startSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; clear?: boolean }) => {
+    const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+
+    // Select a single node is clicked on it
+    const [localX, localY] = weakLocalize(x, y) ?? [x, y]
+    const padding = props.padding ?? 15
+    const clickedNode = props.nodes.find(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
+
+    const newProgress = options?.clear ? new Set<string>() : new Set(values.value)
+    if (clickedNode) {
+      const processSingleClick = (values: Set<string>) => {
+        if (!options?.deselection && !(props.inversion && !options?.selection && values.has(clickedNode.id))) {
+          values.add(clickedNode.id)
+        } else values.delete(clickedNode.id)
+      }
+      // If clear => select now; otherwise select later (on mouse move??! might be excessive -- it is!!)
+      //       ^ mouse down ^                  ^ mouse move ^  or  ^ mouse up ^ (whatever fires first)
+      // The problem is that mouse move might not be triggered (so we need to process stuff on mouse up - uh oh)
+      if (options?.clear) {
+        // process on mouse up
+        postponedClickedNodeId.value = clickedNode.id
+      } else {
+        processSingleClick(newProgress)
+      }
+    }
+    const dontClear = postponedClickedNodeId.value && values.value.has(postponedClickedNodeId.value)
+    batch(() => {
+      area.value = deepSignal({ x1: x, y1: y, x2: x, y2: y })
+      progress.value = dontClear ? new Set(values.value) : newProgress
+      if (options?.clear && !dontClear) values.value = new Set<string>()
     })
 
-    const clearSelection = useCallback(() => {
-      if (selection.values.size) selection.values = new Set()
-    }, [selection])
+    console.log('START selection')
+    document.addEventListener('mouseup', stopSelection, { once: true })
+  }
 
-    const startSelection = (
-      e: MouseEvent,
-      options?: { deselection?: boolean; selection?: boolean; clear?: boolean }
-    ) => {
-      const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+  const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => {
+    if (!area.value) return
+    console.log('updating selection')
 
-      // Select a single node is clicked on it
-      const [localX, localY] = weakLocalize(x, y) ?? [x, y]
-      const padding = props.padding ?? 15
-      const clickedNode = props.nodes.find(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
-
-      const newProgress = options?.clear ? new Set<string>() : new Set(selection.values)
-      if (clickedNode) {
-        const processSingleClick = (values: Set<string>) => {
-          if (!options?.deselection && !(props.inversion && !options?.selection && values.has(clickedNode.id))) {
-            values.add(clickedNode.id)
-          } else values.delete(clickedNode.id)
-        }
-        // If clear => select now; otherwise select later (on mouse move??! might be excessive -- it is!!)
-        //       ^ mouse down ^                  ^ mouse move ^  or  ^ mouse up ^ (whatever fires first)
-        // The problem is that mouse move might not be triggered (so we need to process stuff on mouse up - uh oh)
-        if (options?.clear) {
-          // process on mouse up
-          selection.postponedClickedNodeId = clickedNode.id
-        } else {
-          processSingleClick(newProgress)
-        }
-      }
-      const dontClear = selection.postponedClickedNodeId && selection.values.has(selection.postponedClickedNodeId)
-      batch(() => {
-        selection.area = deepSignal({ x1: x, y1: y, x2: x, y2: y })
-        selection.progress = dontClear ? new Set(selection.values) : newProgress
-        if (options?.clear && !dontClear) selection.values = new Set<string>()
-      })
-
-      console.log('START selection')
-      document.addEventListener('mouseup', stopSelection, { once: true })
+    // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
+    // cancel single click processing on mouse up (mouse move => not a single click)
+    if (postponedClickedNodeId.value) {
+      // Select a newly-clicked node so it can be dragged immediately
+      values.value.add(postponedClickedNodeId.value)
+      postponedClickedNodeId.value = null
+      area.value = null
+      return
     }
+    // this node will be automatically picked up later in this function
 
-    const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => {
-      if (!selection.area) return
-      console.log('updating selection')
-      
-      // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
-      // cancel single click processing on mouse up (mouse move => not a single click)
-      if (selection.postponedClickedNodeId) {
-        // Select a newly-clicked node so it can be dragged immediately
-        selection.values.add(selection.postponedClickedNodeId)
-        selection.postponedClickedNodeId = null
-        selection.area = null
-        return
-      }
-      // this node will be automatically picked up later in this function
-      
-      const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-      selection.area.x2 = x
-      selection.area.y2 = y
+    const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+    area.value.x2 = x
+    area.value.y2 = y
 
-      const padding = props.padding ?? 16
-      const [x1, y1] = weakLocalize(selection.area.x1, selection.area.y1)
-      const [x2, y2] = weakLocalize(selection.area.x2, selection.area.y2)
-      const fromX = Math.min(x1, x2) - padding
-      const toX = Math.max(x1, x2) + padding
-      const fromY = Math.min(y1, y2) - padding
-      const toY = Math.max(y1, y2) + padding
+    const padding = props.padding ?? 16
+    const [x1, y1] = weakLocalize(area.value.x1, area.value.y1)
+    const [x2, y2] = weakLocalize(area.value.x2, area.value.y2)
+    const fromX = Math.min(x1, x2) - padding
+    const toX = Math.max(x1, x2) + padding
+    const fromY = Math.min(y1, y2) - padding
+    const toY = Math.max(y1, y2) + padding
 
-      const newProgress = new Set<string>()
-      for (const node of props.nodes) {
-        if (node.x >= fromX && node.x <= toX && node.y >= fromY && node.y <= toY) {
-          if (!options?.deselection && !(props.inversion && !options?.selection && selection.values.has(node.id))) {
-            newProgress.add(node.id)
-          }
-        } else if (selection.values.has(node.id)) {
+    const newProgress = new Set<string>()
+    for (const node of props.nodes) {
+      if (node.x >= fromX && node.x <= toX && node.y >= fromY && node.y <= toY) {
+        if (!options?.deselection && !(props.inversion && !options?.selection && values.value.has(node.id))) {
           newProgress.add(node.id)
         }
+      } else if (values.value.has(node.id)) {
+        newProgress.add(node.id)
       }
-      selection.progress = newProgress
+    }
+    progress.value = newProgress
+  }
+
+  const stopSelection = useCallback(() => {
+    document.removeEventListener('mouseup', stopSelection)
+    if (!area.value) return
+    area.value = null
+    let newValues: Set<string>
+
+    // process the postponed single click
+    if (postponedClickedNodeId.value) {
+      newValues = new Set()
+      newValues.add(postponedClickedNodeId.value)
+      postponedClickedNodeId.value = null
+    } else {
+      newValues = new Set(progress.value)
     }
 
-    const stopSelection = () => {
-      document.removeEventListener('mouseup', stopSelection)
-      if (!selection.area) return
-      selection.area = null
-      let newValues: Set<string>
+    console.log(newValues)
+    values.value = newValues
+    progress.value = new Set()
+  }, [])
 
-      // processed the postponed single click
-      if (selection.postponedClickedNodeId) {
-        newValues = new Set()
-        newValues.add(selection.postponedClickedNodeId)
-        selection.postponedClickedNodeId = null
-      } else {
-        newValues = new Set(selection.progress)
-      }
+  useEffect(() => () => document.removeEventListener('mouseup', stopSelection), [stopSelection])
 
-      selection.values = newValues
-      selection.progress = new Set()
-    }
+  useEffect(() => {
+    console.warn('hola')
+    return () => console.warn('bye')
+  }, [])
 
-    useEffect(() => () => document.removeEventListener('mouseup', stopSelection), [selection])
-
-    return {
-      /** Area selection rectangle */
-      AreaSelection: useCallback(() => selection.area && <AreaSelection {...selection.area} />, [selection]),
-      selection: computed(() => (selection.area ? selection.progress : selection.values)),
-      isSelecting: computed(
-        () => !!selection.area && (selection.area.x1 !== selection.area.x2 || selection.area.y1 !== selection.area.y2)
-      ),
-      clearSelection,
-      startSelection,
-      updateSelection,
-    }
-  }, [props.nodes, props.getInnerPoint, props.weakLocalize, props.inversion])
+  return {
+    /** Area selection rectangle */
+    AreaSelection: useCallback(() => area.value && <AreaSelection {...area.value} />, [area]),
+    selection: useComputed(() => area.value ? progress.value : values.value),
+    isSelecting: useComputed(
+      () => !!area.value && (area.value.x1 !== area.value.x2 || area.value.y1 !== area.value.y2)
+    ),
+    clearSelection,
+    startSelection,
+    updateSelection,
+  }
+}

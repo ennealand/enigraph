@@ -47,11 +47,8 @@ export const useBaseGraph = (width: number, height: number) => {
   const ref = useRef<SVGSVGElement>(null)
   const centerX = width && useMemo(() => width / 2, [width])
   const centerY = height && useMemo(() => height / 2, [height])
-  const component = useCallback(
-    (props: Omit<Props, HookedProps> & { [K in HookedProps]?: Props[K] }) => (
-      <BaseGraph width={width} height={height} centerX={centerX} centerY={centerY} {...props} pref={ref} />
-    ),
-    [width, height]
+  const component = (props: Omit<Props, HookedProps> & { [K in HookedProps]?: Props[K] }) => (
+    <BaseGraph width={width} height={height} centerX={centerX} centerY={centerY} {...props} pref={ref} />
   )
   const getInnerPoint = useCallback(
     (x: number, y: number): [number, number] => {
