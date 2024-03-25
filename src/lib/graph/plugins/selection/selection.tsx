@@ -20,8 +20,6 @@ export const withSelection = (props: Props) => {
   const values = useSignal(new Set<string>())
   const postponedClickedNodeId = useSignal(null as string | null)
 
-  console.log('values.value', values.value)
-
   const clearSelection = useCallback(() => {
     if (values.value.size) values.value = new Set()
   }, [values])
@@ -32,7 +30,7 @@ export const withSelection = (props: Props) => {
     // Select a single node is clicked on it
     const [localX, localY] = weakLocalize(x, y) ?? [x, y]
     const padding = props.padding ?? 15
-    const clickedNode = props.nodes.find(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
+    const clickedNode = props.nodes.findLast(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
 
     const newProgress = options?.clear ? new Set<string>() : new Set(values.value)
     if (clickedNode) {
@@ -58,13 +56,11 @@ export const withSelection = (props: Props) => {
       if (options?.clear && !dontClear) values.value = new Set<string>()
     })
 
-    console.log('START selection')
     document.addEventListener('mouseup', stopSelection, { once: true })
   }
 
   const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => {
     if (!area.value) return
-    console.log('updating selection')
 
     // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
     // cancel single click processing on mouse up (mouse move => not a single click)
@@ -90,7 +86,8 @@ export const withSelection = (props: Props) => {
     const toY = Math.max(y1, y2) + padding
 
     const newProgress = new Set<string>()
-    for (const node of props.nodes) {
+    for (const index of props.nodes.keys()) {
+      const node = props.nodes.at(-index - 1)!
       if (node.x >= fromX && node.x <= toX && node.y >= fromY && node.y <= toY) {
         if (!options?.deselection && !(props.inversion && !options?.selection && values.value.has(node.id))) {
           newProgress.add(node.id)
@@ -117,7 +114,6 @@ export const withSelection = (props: Props) => {
       newValues = new Set(progress.value)
     }
 
-    console.log(newValues)
     values.value = newValues
     progress.value = new Set()
   }, [])
