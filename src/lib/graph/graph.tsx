@@ -4,9 +4,10 @@ import { EdgeType, NodeType, type Elements, type IEdge, type INode } from '../ty
 import { useBaseGraph } from './base-graph'
 import { useCreation } from './plugins/creation/creation'
 import { useDisk, type DiskClickCallback } from './plugins/disk'
+import { useDraggable } from './plugins/draggable/draggable'
 import { useMovable } from './plugins/movable/movable'
 import { useSelection } from './plugins/selection/selection'
-import { useDraggable } from './plugins/draggable/draggable'
+import { useDuplication } from './plugins/duplication/duplication'
 
 export interface Props {
   elements: DeepSignal<Elements>
@@ -31,6 +32,7 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
     /// ---------------- Plugins ---------------- ///
     /// ----------------------------------------- ///
 
+    const duplication = useDuplication({ addNode, addEdge, nodes: elements.nodes })
     const creation = useCreation({ addNode, addEdge, nodes: elements.nodes })
     const { transform, localize, onwheel, weakLocalize, zoom } = useMovable({ width, height })
 
@@ -54,7 +56,7 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
       else creation.startDrawingEdge(x, y, value)
     }
 
-    const { Disk } = useDisk(onDiskClick, { nodeTypes, edgeTypes })
+    const { Disk, showDisk } = useDisk(onDiskClick, { nodeTypes, edgeTypes })
 
     /// ----------------------------------------- ///
     /// ------------- Global events ------------- ///
@@ -93,16 +95,36 @@ export const Graph = ({ elements, width, height, padding, addEdge, addNode, edge
           onwheel(e)
         }}
         onMouseDown={e => {
-          startSelection(e, {
-            deselection: e.altKey,
-            selection: e.ctrlKey || e.metaKey,
-            clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
-          })
+          // Left click
+          if (e.buttons === 1) {
+            startSelection(e, {
+              deselection: e.altKey,
+              selection: e.ctrlKey || e.metaKey,
+              clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+            })
+            return
+          }
+
+          // Right click
+          if (e.buttons === 2) {
+            //  Do something
+            return
+          }
         }}
         onNodeMouseDown={e => {
-          if (e.shiftKey) return
-          if (e.ctrlKey || e.metaKey) e.stopPropagation()
-          startDragginig(e)
+          // Left click
+          if (e.buttons === 1) {
+            if (e.shiftKey) return
+
+            // if
+
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+              e.stopPropagation()
+              return
+            }
+            startDragginig(e)
+            return
+          }
         }}
       >
         <Disk />
