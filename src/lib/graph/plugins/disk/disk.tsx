@@ -59,5 +59,5 @@ export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
         edgeOptions={edgeOptions}
       />
     ) : null
-  return { Disk, showDisk, isDiskOpened: menu.$shown! }
-}
+    return { Disk, showDisk, isDiskOpened: menu.$shown! }
+  }

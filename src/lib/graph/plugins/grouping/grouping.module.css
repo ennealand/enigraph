@@ -1,0 +1,34 @@
+.placeholder .group {
+  fill: #00000008;
+  stroke: transparent;
+  cursor: pointer;
+
+  &.opened {
+    pointer-events: none;
+  }
+}
+
+.group {
+  fill: transparent;
+  stroke: #f1f1f1;
+  rx: 24px;
+  stroke-width: 1;
+  transition:
+    fill 100ms,
+    stroke 100ms;
+
+  &:hover {
+    fill: #4f95ff1c;
+    stroke: #357ce749;
+  }
+
+  &.selected {
+    fill: #4f95ff1c;
+    stroke: #357ce749;
+  }
+
+  &.opened {
+    fill: #00000003;
+    stroke: transparent;
+  }
+}

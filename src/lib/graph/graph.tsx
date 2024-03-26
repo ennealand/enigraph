@@ -1,12 +1,13 @@
 import { useComputed } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
-import { useCallback, useEffect } from 'preact/hooks'
+import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { EdgeType, IGroup, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { Edge } from './alphabet'
 import { useBaseGraph } from './base-graph'
 import { CreationEdge, withCreation } from './plugins/creation/creation'
 import { withDisk } from './plugins/disk'
 import { withDraggable } from './plugins/draggable/draggable'
+import { withGrouping } from './plugins/grouping/grouping'
 import { MenuButton, withMenu } from './plugins/menu/menu'
 import { withMovable } from './plugins/movable/movable'
 import { withSelection } from './plugins/selection/selection'
@@ -52,7 +53,7 @@ export const Graph = ({
     getInnerPoint,
   })
 
-  const { AreaSelection, selection, startSelection, updateSelection, isSelecting } = withSelection({
+  const { AreaSelection, selection, startSelection, updateSelection, clearSelection, isSelecting } = withSelection({
     nodes: elements.nodes,
     getInnerPoint,
     localize,
@@ -79,19 +80,35 @@ export const Graph = ({
 
   const { Disk, showDisk, isDiskOpened } = withDisk(
     (type, x, y, _e, value) => {
-      if (type === 'node') createNode(...localize(x, y), value)
+      if (menuNodePosition.current && menuNodePosition.current.x === x && menuNodePosition.current.y === y) {
+        const array = type === 'node' ? elements.nodes : elements.edges
+        for (const element of array) {
+          if (!selection.value.has(element.id)) continue
+          element.type = value
+        }
+      } else if (type === 'node') createNode(...localize(x, y), value)
       else startDrawingEdge(x, y, value)
     },
     { nodeTypes, edgeTypes }
   )
 
+  const menuNodePosition = useRef<{ x: number; y: number } | null>(null)
   const { Menu } = withMenu({
     nodes: elements.nodes,
     selection,
     visible: useComputed(() => !isSelecting.value && !isDragging.value && !isDiskOpened.value && !isDrawingEdges.value),
     buttons: useComputed<MenuButton[]>(() => {
       return [
-        { content: <span>T</span>, action: () => alert(222) },
+        {
+          content: <span>T</span>,
+          action: (_, x, y) => {
+            showDisk('node', ...globalize(x, y))
+            menuNodePosition.current = { x, y }
+            // WARN: No clean up (intended), but would be great to clean up later.
+            // TODO: Come up with a generic solution of adding and cleaning up global events.
+            document.addEventListener('mouseup', () => (menuNodePosition.current = null), { once: true })
+          },
+        },
         { content: <span>A</span>, action: (_, x, y) => showDisk('edge', ...globalize(x, y)) },
         {
           content: <span>G</span>,
@@ -101,7 +118,11 @@ export const Graph = ({
     }),
   })
 
-  // const grouping = useGrouping({ addNode, addEdge, nodes: elements.nodes })
+  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
+    nodes: elements.nodes,
+    groups: elements.groups,
+    selection,
+  })
 
   /// ----------------------------------------- ///
   /// ------------- Global events ------------- ///
@@ -137,7 +158,7 @@ export const Graph = ({
       elements={elements}
       padding={padding}
       transform={transform}
-      highlight={selection}
+      highlight={useComputed(() => selectedGroup.value || selection.value)}
       noselect={isSelecting}
       dragging={useComputed(() => isDragging.value || isDrawingEdges.value)}
       onWheel={e => {
@@ -145,6 +166,11 @@ export const Graph = ({
         if (isDrawingEdges.value) updateDrawingEdges(e)
       }}
       onMouseDown={e => {
+        deselectGroup()
+        if (e.target === e.currentTarget) {
+          closeAllGroups()
+        }
+
         // Left click
         if (e.buttons === 1) {
           startSelection(e, {
@@ -186,7 +212,35 @@ export const Graph = ({
           showDisk('edge', ...globalize(node.x, node.y))
         }
       }}
-      inner={<>{DrawingEdges && <DrawingEdges />}</>}
+      before={
+        <>
+          <Group
+            onMouseDown={useCallback((e: MouseEvent, id: string) => {
+              // e.stopPropagation()
+              // console.log('closing before')
+              // closeGroup(id)
+            }, [])}
+          />
+        </>
+      }
+      inner={
+        <>
+          <Group
+            placeholder
+            onMouseDown={useCallback((e: MouseEvent, id: string) => {
+              e.stopPropagation()
+              if (selectedGroup.value) {
+                closeAllGroups()
+                openGroup(id)
+              } else {
+                selectGroup(id)
+                clearSelection()
+              }
+            }, [])}
+          />
+          {DrawingEdges && <DrawingEdges />}
+        </>
+      }
       innerHtml={<Menu />}
     >
       <Disk />

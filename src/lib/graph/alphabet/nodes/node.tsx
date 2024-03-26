@@ -1,6 +1,7 @@
 import { NodeType } from '$lib/types'
 import type { JSX } from 'preact/jsx-runtime'
 import style from './node.module.css'
+import { cl } from '$lib/utils'
 
 interface Props {
   type: NodeType
@@ -15,10 +16,25 @@ interface Props {
   noselect?: boolean
 }
 
-export const Node = ({ type, noselect, x, y, label, mousedown, mouseup, textDoubleClick, highlight, padding }: Props) => {
+export const Node = ({
+  type,
+  noselect,
+  x,
+  y,
+  label,
+  mousedown,
+  mouseup,
+  textDoubleClick,
+  highlight,
+  padding,
+}: Props) => {
   return (
-    <>
-      <g class={`${style.container} ${noselect ? style.noselect : ''} ${highlight ? style.highlight : ''}`} onMouseDown={mousedown} onMouseUp={mouseup}>
+    <g>
+      <g
+        class={cl(style.container, noselect && style.noselect, highlight && style.highlight)}
+        onMouseDown={mousedown}
+        onMouseUp={mouseup}
+      >
         {padding && <circle cx={x} cy={y} r={padding} fill='transparent' />}
         <use class={style.node} xlinkHref={`#scg.node.${type}`} x={x} y={y} />
       </g>
@@ -27,6 +43,6 @@ export const Node = ({ type, noselect, x, y, label, mousedown, mouseup, textDoub
           {label}
         </text>
       )}
-    </>
+    </g>
   )
 }

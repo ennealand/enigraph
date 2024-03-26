@@ -31,7 +31,10 @@ export const GraphEditor = () => {
   }
 
   const addGroup = (group: IGroup) => {
-    elements.value?.groups.push(group)
+    if (!elements.value) return
+    elements.value.groups.push(deepSignal(group))
+    elements.value.groups = [...elements.value.groups]
+    elements.value = { ...elements.value }
   }
 
   // const test = useMemo(() => {

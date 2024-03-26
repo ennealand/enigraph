@@ -2,9 +2,10 @@ import { INode } from '$lib/types'
 import { ReadonlySignal, useComputed, useSignal } from '@preact/signals'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
 import { BaseMenu, MenuButton } from './base-menu'
+import { DeepSignal } from 'deepsignal'
 
 type Props = {
-  nodes: INode[]
+  nodes: DeepSignal<INode[]>
   selection: ReadonlySignal<Set<string>>
   visible: ReadonlySignal<boolean>
   buttons: ReadonlySignal<MenuButton[]>
@@ -58,7 +59,7 @@ export const withMenu = (props: Props) => {
       />
     ) : null
 
-  return { Menu: component, hideMenu }
+  return { Menu: component, hideMenu, menuNodePosition: position }
 }
 
 export { type MenuButton }

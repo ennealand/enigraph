@@ -16,6 +16,7 @@ export interface Props {
   centerX: number
   centerY: number
   children?: JSX.Element | JSX.Element[]
+  before?: JSX.Element
   inner?: JSX.Element
   innerHtml?: JSX.Element
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
@@ -94,6 +95,9 @@ export const BaseGraph = (props: Props) => {
 
         {props.elements && (
           <g transform={transform && `translate(${transform.x} ${transform.y}) scale(${transform.zoom})`}>
+            {/* User-defined inner before-extensions */}
+            {props.before}
+
             {/* Map edges to Edge component */}
             {props.elements.edges.map((edge, index) => (
               <Edge
