@@ -62,9 +62,17 @@ export const Graph = ({
     padding,
   })
 
+  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
+    nodes: elements.nodes,
+    groups: elements.groups,
+    selection,
+  })
+
+  const highlight = useComputed(() => selectedGroup.value || selection.value)
+
   const { startDragginig, updateDragging, isDragging } = withDraggable({
     nodes: elements.nodes,
-    selection,
+    selection: highlight,
     getInnerPoint,
     zoom,
   })
@@ -76,12 +84,6 @@ export const Graph = ({
     localize,
     nodes: elements.nodes,
     Edge: useCallback((props: CreationEdge) => <Edge {...props} noselect />, []),
-    selection,
-  })
-
-  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
-    nodes: elements.nodes,
-    groups: elements.groups,
     selection,
   })
 
@@ -165,7 +167,7 @@ export const Graph = ({
       elements={elements}
       padding={padding}
       transform={transform}
-      highlight={useComputed(() => selectedGroup.value || selection.value)}
+      highlight={highlight}
       noselect={isSelecting}
       dragging={useComputed(() => isDragging.value || isDrawingEdges.value)}
       onWheel={e => {
@@ -236,9 +238,18 @@ export const Graph = ({
             placeholder
             onMouseDown={useCallback((e: MouseEvent, id: string) => {
               e.stopPropagation()
+              startDragginig(e)
               if (selectedGroup.value) {
-                closeAllGroups()
-                openGroup(id)
+                const mouseup = () => {
+                  closeAllGroups()
+                  openGroup(id)
+                  document.removeEventListener('mousemove', mousemove)
+                }
+                const mousemove = () => {
+                  document.removeEventListener('mouseup', mouseup)
+                }
+                document.addEventListener('mouseup', mouseup, { once: true })
+                document.addEventListener('mousemove', mousemove, { once: true })
               } else {
                 selectGroup(id)
                 clearSelection()
