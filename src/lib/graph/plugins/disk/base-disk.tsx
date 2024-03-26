@@ -33,7 +33,7 @@ export const BaseDisk = (props: BaseDiskProps) => (
               <text x={textX} y={textY} stroke-width='90'>
                 {index + 1}
               </text>
-              <Node x={nodeX} y={nodeY} type={type} />
+              <Node x={nodeX} y={nodeY} type={type} noselect />
             </g>
           ))
         : props.edgeOptions.map(({ type, x1, y1, x2, y2, textX, textY, edgeX1, edgeY1, edgeX2, edgeY2 }, index) => (

@@ -53,6 +53,12 @@ export interface IGroup {
   id: string
   label: string
   values: Set<string>
+  position: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
 }
 
 export type Elements = { nodes: INode[]; edges: IEdge[]; groups: IGroup[] }

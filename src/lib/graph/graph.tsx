@@ -7,6 +7,7 @@ import { useBaseGraph } from './base-graph'
 import { CreationEdge, withCreation } from './plugins/creation/creation'
 import { withDisk } from './plugins/disk'
 import { withDraggable } from './plugins/draggable/draggable'
+import { getGroupPosition } from './plugins/grouping'
 import { withGrouping } from './plugins/grouping/grouping'
 import { MenuButton, withMenu } from './plugins/menu/menu'
 import { withMovable } from './plugins/movable/movable'
@@ -78,6 +79,12 @@ export const Graph = ({
     selection,
   })
 
+  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
+    nodes: elements.nodes,
+    groups: elements.groups,
+    selection,
+  })
+
   const { Disk, showDisk, isDiskOpened } = withDisk(
     (type, x, y, _e, value) => {
       if (menuNodePosition.current && menuNodePosition.current.x === x && menuNodePosition.current.y === y) {
@@ -104,7 +111,7 @@ export const Graph = ({
           action: (_, x, y) => {
             showDisk('node', ...globalize(x, y))
             menuNodePosition.current = { x, y }
-            // WARN: No clean up (intended), but would be great to clean up later.
+            // WARN: No clean up (intended), but would be great to have one later.
             // TODO: Come up with a generic solution of adding and cleaning up global events.
             document.addEventListener('mouseup', () => (menuNodePosition.current = null), { once: true })
           },
@@ -112,16 +119,16 @@ export const Graph = ({
         { content: <span>A</span>, action: (_, x, y) => showDisk('edge', ...globalize(x, y)) },
         {
           content: <span>G</span>,
-          action: () => addGroup({ id: `${elements.groups.length}`, label: '', values: selection.value }),
+          action: () =>
+            addGroup({
+              id: `${elements.groups.length}`,
+              label: '',
+              values: selection.value,
+              position: getGroupPosition(elements.nodes, selection.value),
+            }),
         },
       ]
     }),
-  })
-
-  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
-    nodes: elements.nodes,
-    groups: elements.groups,
-    selection,
   })
 
   /// ----------------------------------------- ///
@@ -215,7 +222,7 @@ export const Graph = ({
       before={
         <>
           <Group
-            onMouseDown={useCallback((e: MouseEvent, id: string) => {
+            onMouseDown={useCallback((_e: MouseEvent, _id: string) => {
               // e.stopPropagation()
               // console.log('closing before')
               // closeGroup(id)
