@@ -3,6 +3,7 @@ export { Graph, type Props as GraphProps } from './graph/graph'
 export {
   type INode as GraphNode,
   type IEdge as GraphEdge,
+  type IGroup as GraphGroup,
   type Elements as GraphElements,
   NodeType,
   EdgeType,

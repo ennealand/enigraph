@@ -35,7 +35,6 @@ export const withMenu = (props: Props) => {
       shown.value = false
       self.clearTimeout(timer.current)
       timer.current = self.setTimeout(() => {
-        console.log('hey there')
         shown.value = true
         document.addEventListener('mousedown', hideMenu, { once: true, capture: true })
       }, 600)

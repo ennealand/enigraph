@@ -46,7 +46,6 @@ export const withCreation = (props: Props) => {
       }
     }
     drawingEdges.values = newValues
-    console.log('starting...', drawingEdges.values.length)
   }
 
   const updateDrawingEdges = (e: MouseEvent) => {
@@ -59,11 +58,11 @@ export const withCreation = (props: Props) => {
   }
 
   const component = useCallback(() => props.Edge ? <DrawingEdges Edge={props.Edge} edges={drawingEdges.values} /> : null, [drawingEdges])
-  const isDrawingEdges = useComputed(() => !!drawingEdges.values.length)
+  const isDrawingEdges = useComputed(() => !!drawingEdges.$values?.value.length)
   return { createNode, startDrawingEdge, updateDrawingEdges, DrawingEdges: component, isDrawingEdges }
 }
 
-const DrawingEdges = (props: { Edge: NonNullable<Props['Edge']>; edges: DrawingEdge[] }) => {
+const DrawingEdges = (props: { Edge: NonNullable<Props['Edge']>; edges: DeepSignal<DrawingEdge[]> }) => {
   return (
     <g>
       {props.edges.map((edge, index) => (

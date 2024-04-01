@@ -85,7 +85,7 @@ export const BaseGraph = (props: Props) => {
         viewBox={`-${props.centerX} -${props.centerY} ${props.width} ${props.height}`}
         width={`${props.width}px`}
         height={`${props.height}px`}
-        onContextMenu={e => e.preventDefault()}
+        onContextMenu={e => (e.preventDefault(), e.stopPropagation())}
         onMouseDown={props.onMouseDown}
         onWheel={props.onWheel} // nonpassive | preventDefault | stopPropagation
         onMouseEnter={props.onMouseEnter}
