@@ -5,7 +5,7 @@ import { useCallback } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 
 type Props = {
-  addNode(node: DeepSignal<INode>): void
+  addNode(node: INode): void
   addEdge(edge: IEdge): void
   nodes: DeepSignal<INode[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]

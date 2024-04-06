@@ -1,7 +1,7 @@
 import { IGroup, INode } from '$lib/types'
-import { ReadonlySignal, useComputed, useSignal, useSignalEffect } from '@preact/signals'
+import { ReadonlySignal, effect, useComputed, useSignal } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
-import { useCallback } from 'preact/hooks'
+import { useCallback, useEffect } from 'preact/hooks'
 import { BaseGroup } from './base-group'
 import { getGroupPosition } from './group-position'
 import style from './grouping.module.css'
@@ -16,19 +16,18 @@ export const withGrouping = (props: Props) => {
   const opened = useSignal(new Set<string>())
   const selected = useSignal<string | null>(null)
 
-  // TODO: Unable to track props.nodes and props.groups for updates. wth
-  // Dummy fix: track selection
-  useSignalEffect(() => {
-    props.selection.value
-    for (const group of props.groups) {
-      // NOTE: Might worth a partial update instead? (any reason to though?)
-      const newPosition = getGroupPosition(props.nodes, group.values)
-      for (const [key, value] of Object.entries(newPosition)) {
-        if (group.position[key as keyof typeof newPosition] !== value)
-          group.position[key as keyof typeof newPosition] = value
+  useEffect(() => {
+    return effect(() => {
+      for (const group of props.groups) {
+        // NOTE: Might worth a partial update instead? (any reason to though?)
+        const newPosition = getGroupPosition(props.nodes, group.values)
+        for (const [key, value] of Object.entries(newPosition)) {
+          if (group.position[key as keyof typeof newPosition] !== value)
+            group.position[key as keyof typeof newPosition] = value
+        }
       }
-    }
-  })
+    })
+  }, [props.nodes, props.groups])
 
   const openGroup = (id: string) => {
     opened.value.add(id)
