@@ -8,9 +8,10 @@ type Props = {
   addNode(node: INode): void
   addEdge(edge: IEdge): void
   nodes: DeepSignal<INode[]>
+  edges: DeepSignal<IEdge[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize: (x: number, y: number) => readonly [number, number]
-  selection?: ReadonlySignal<Set<string>>
+  selection?: ReadonlySignal<Set<number>>
   Edge?: (props: CreationEdge) => JSX.Element
 }
 
@@ -26,12 +27,12 @@ export const withCreation = (props: Props) => {
   const drawingEdges = useDeepSignal({ values: [] as DrawingEdge[] })
 
   const createNode = (x: number, y: number, type: NodeType) => {
-    const newNode = { id: `new-node-${props.nodes.length}`, type, x, y }
+    const newNode = { id: props.nodes.length + 1, type, x, y }
     props.addNode(newNode)
 
     if (drawingEdges.values.length) {
       for (const [index, { type, source }] of drawingEdges.values.entries()) {
-        props.addEdge({ id: `new-edge-${props.nodes.length + index}`, type, source, target: newNode })
+        props.addEdge({ id: props.edges.length + 1 + index, type, source, target: newNode })
       }
       drawingEdges.values = []
     }
@@ -57,7 +58,10 @@ export const withCreation = (props: Props) => {
     }
   }
 
-  const component = useCallback(() => props.Edge ? <DrawingEdges Edge={props.Edge} edges={drawingEdges.values} /> : null, [drawingEdges])
+  const component = useCallback(
+    () => (props.Edge ? <DrawingEdges Edge={props.Edge} edges={drawingEdges.values} /> : null),
+    [drawingEdges]
+  )
   const isDrawingEdges = useComputed(() => !!drawingEdges.$values?.value.length)
   return { createNode, startDrawingEdge, updateDrawingEdges, DrawingEdges: component, isDrawingEdges }
 }

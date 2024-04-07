@@ -1,6 +1,6 @@
 import { INode } from '$lib/types'
 
-export const getGroupPosition = (nodes: INode[], ids: Set<string>) => {
+export const getGroupPosition = (nodes: INode[], ids: Set<number>) => {
   let top = Infinity
   let bottom = -Infinity
   let left = Infinity

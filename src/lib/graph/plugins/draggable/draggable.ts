@@ -6,7 +6,7 @@ import { useCallback, useEffect } from 'preact/hooks'
 
 type Props = {
   nodes: DeepSignal<INode[]>
-  selection: ReadonlySignal<Set<string>>
+  selection: ReadonlySignal<Set<number>>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   zoom?: ReadonlySignal<number>
 }

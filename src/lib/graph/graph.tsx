@@ -23,7 +23,7 @@ export interface Props {
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
   padding?: number
-  objectSelection?: { type: 'group'; action: (id: string) => void, values: Set<string>, indicators?: Map<string, string> }
+  objectSelection?: { type: 'group'; action: (id: number) => void, values: Set<number>, indicators?: Map<number, string> }
 }
 
 export const Graph = ({
@@ -85,6 +85,7 @@ export const Graph = ({
     getInnerPoint,
     localize,
     nodes: elements.nodes,
+    edges: elements.edges,
     Edge: useCallback((props: CreationEdge) => <Edge {...props} noselect />, []),
     selection,
   })
@@ -125,7 +126,7 @@ export const Graph = ({
           content: <span>G</span>,
           action: () =>
             addGroup({
-              id: `${elements.groups.length}`,
+              id: elements.groups.length + 1,
               label: '',
               values: selection.value,
               position: getGroupPosition(elements.nodes, selection.value),
@@ -232,7 +233,7 @@ export const Graph = ({
           <Group
             nohighlight={!!objectSelection}
             customSelection={objectSelection && new Set(objectSelection.values)}
-            onMouseDown={useCallback((_e: MouseEvent, _id: string) => {
+            onMouseDown={useCallback((_e: MouseEvent, _id: number) => {
               // e.stopPropagation()
               // console.log('closing before')
               // closeGroup(id)
@@ -247,7 +248,7 @@ export const Graph = ({
             nohighlight={!!objectSelection}
             customSelection={objectSelection?.values}
             customIndicators={objectSelection?.indicators}
-            onMouseDown={useCallback((e: MouseEvent, id: string) => {
+            onMouseDown={useCallback((e: MouseEvent, id: number) => {
               if (objectSelection && objectSelection.type === 'group') {
                 objectSelection.action(id)
                 return

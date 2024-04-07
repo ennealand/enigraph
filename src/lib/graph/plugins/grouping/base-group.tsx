@@ -3,12 +3,12 @@ import style from './grouping.module.css'
 import { cl } from '$lib/utils'
 
 type Props = {
-  id: string
+  id: number
   top: number
   bottom: number
   left: number
   right: number
-  onMouseDown?: (e: MouseEvent, id: string) => void
+  onMouseDown?: (e: MouseEvent, id: number) => void
   opened: boolean
   selected: boolean
   indicator?: string

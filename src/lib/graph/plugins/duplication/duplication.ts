@@ -18,12 +18,12 @@ export const useDuplication = (props: Props) => {
   })
 
   const createNode = (x: number, y: number, type: NodeType) => {
-    const newNode = { id: String(props.nodes.length + 10), type, x, y }
+    const newNode = { id: props.nodes.length + 1, type, x, y }
     props.addNode(newNode)
 
     if (drawingEdges.values.size) {
       for (const { type, source } of drawingEdges.values) {
-        props.addEdge({ id: String(props.nodes.length + 10), type, source, target: newNode })
+        props.addEdge({ id: props.nodes.length + 1, type, source, target: newNode })
       }
       drawingEdges.values.clear()
     }

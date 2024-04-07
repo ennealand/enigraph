@@ -61,7 +61,7 @@ export const GraphEditor = () => {
   }
 
   const foo = useSignal<
-    { type: 'group'; action: (id: string) => void; values: Set<string>; indicators?: Map<string, string> } | undefined
+    { type: 'group'; action: (id: number) => void; values: Set<number>; indicators?: Map<number, string> } | undefined
   >(undefined)
 
   return (
@@ -73,7 +73,7 @@ export const GraphEditor = () => {
             ? undefined
             : {
                 type: 'group',
-                action(groupId: string) {
+                action(groupId) {
                   console.log('got a new group selected:', groupId)
                   if (this.indicators) {
                     for (const [id, indicator] of this.indicators) {

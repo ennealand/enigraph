@@ -29,10 +29,10 @@ export interface Props {
   onEdgeMouseUp?: (e: JSX.TargetedMouseEvent<SVGGElement>, edge: IEdge, index: number) => void
 
   /** Set of element ids to highlight */
-  highlight?: SignalLike<Set<string>>
+  highlight?: SignalLike<Set<number>>
 
   /** Set of element ids that are non-selectable */
-  noselect?: SignalLike<Set<string> | boolean>
+  noselect?: SignalLike<Set<number> | boolean>
 
   pref?: Ref<SVGSVGElement>
 

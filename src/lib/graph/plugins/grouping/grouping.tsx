@@ -9,12 +9,12 @@ import style from './grouping.module.css'
 type Props = {
   nodes: DeepSignal<INode[]>
   groups: DeepSignal<IGroup[]>
-  selection: ReadonlySignal<Set<string>>
+  selection: ReadonlySignal<Set<number>>
 }
 
 export const withGrouping = (props: Props) => {
-  const opened = useSignal(new Set<string>())
-  const selected = useSignal<string | null>(null)
+  const opened = useSignal(new Set<number>())
+  const selected = useSignal<number | null>(null)
 
   useEffect(() => {
     return effect(() => {
@@ -29,13 +29,13 @@ export const withGrouping = (props: Props) => {
     })
   }, [props.nodes, props.groups])
 
-  const openGroup = (id: string) => {
+  const openGroup = (id: number) => {
     opened.value.add(id)
     opened.value = new Set(opened.value)
     if (id === selected.value) selected.value = null
   }
 
-  const closeGroup = (id: string) => {
+  const closeGroup = (id: number) => {
     opened.value.delete(id)
     opened.value = new Set(opened.value)
   }
@@ -44,7 +44,7 @@ export const withGrouping = (props: Props) => {
     opened.value = new Set()
   }
 
-  const selectGroup = (id: string) => (selected.value = id)
+  const selectGroup = (id: number) => (selected.value = id)
   const deselectGroup = () => (selected.value = null)
   const selectedGroup = useComputed(
     () => selected.value && props.groups.find(({ id }) => id === selected.value)?.values
@@ -54,9 +54,9 @@ export const withGrouping = (props: Props) => {
     (args: {
       placeholder?: true
       nohighlight?: boolean
-      customSelection?: Set<string>
-      customIndicators?: Map<string, string>
-      onMouseDown?: (e: MouseEvent, id: string) => void
+      customSelection?: Set<number>
+      customIndicators?: Map<number, string>
+      onMouseDown?: (e: MouseEvent, id: number) => void
     }) => {
       return (
         <g class={args.placeholder && style.placeholder}>

@@ -35,7 +35,7 @@ export interface EdgeProps {
 }
 
 export interface INode {
-  id: string
+  id: number
   type: NodeType
   label?: string
   x: number
@@ -43,16 +43,16 @@ export interface INode {
 }
 
 export interface IEdge {
-  id: string
+  id: number
   type: EdgeType
   source: INode
   target: INode
 }
 
 export interface IGroup {
-  id: string
+  id: number
   label: string
-  values: Set<string>
+  values: Set<number>
   position: {
     top: number
     bottom: number

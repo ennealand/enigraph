@@ -6,7 +6,7 @@ import { DeepSignal } from 'deepsignal'
 
 type Props = {
   nodes: DeepSignal<INode[]>
-  selection: ReadonlySignal<Set<string>>
+  selection: ReadonlySignal<Set<number>>
   visible: ReadonlySignal<boolean>
   buttons: ReadonlySignal<MenuButton[]>
   padding?: number

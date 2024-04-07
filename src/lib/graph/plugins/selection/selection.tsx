@@ -16,9 +16,9 @@ export const withSelection = (props: Props) => {
   const localize = props.localize ?? ((x, y) => [x, y])
 
   const area = useSignal(null as AreaSelectionProps | null)
-  const progress = useSignal(new Set<string>())
-  const values = useSignal(new Set<string>())
-  const postponedClickedNodeId = useSignal(null as string | null)
+  const progress = useSignal(new Set<number>())
+  const values = useSignal(new Set<number>())
+  const postponedClickedNodeId = useSignal(null as number | null)
 
   const clearSelection = useCallback(() => {
     if (values.value.size) values.value = new Set()
@@ -32,9 +32,9 @@ export const withSelection = (props: Props) => {
     const padding = props.padding ?? 15
     const clickedNode = props.nodes.findLast(({ x, y }) => Math.sqrt((x - localX) ** 2 + (y - localY) ** 2) <= padding)
 
-    const newProgress = options?.clear ? new Set<string>() : new Set(values.value)
+    const newProgress = options?.clear ? new Set<number>() : new Set(values.value)
     if (clickedNode) {
-      const processSingleClick = (values: Set<string>) => {
+      const processSingleClick = (values: Set<number>) => {
         if (!options?.deselection && !(props.inversion && !options?.selection && values.has(clickedNode.id))) {
           values.add(clickedNode.id)
         } else values.delete(clickedNode.id)
@@ -53,7 +53,7 @@ export const withSelection = (props: Props) => {
     batch(() => {
       area.value = deepSignal({ x1: x, y1: y, x2: x, y2: y })
       progress.value = dontClear ? new Set(values.value) : newProgress
-      if (options?.clear && !dontClear) values.value = new Set<string>()
+      if (options?.clear && !dontClear) values.value = new Set<number>()
     })
 
     document.addEventListener('mouseup', stopSelection, { once: true })
@@ -85,7 +85,7 @@ export const withSelection = (props: Props) => {
     const fromY = Math.min(y1, y2) - padding
     const toY = Math.max(y1, y2) + padding
 
-    const newProgress = new Set<string>()
+    const newProgress = new Set<number>()
     for (const index of props.nodes.keys()) {
       const node = props.nodes.at(-index - 1)!
       if (node.x >= fromX && node.x <= toX && node.y >= fromY && node.y <= toY) {
@@ -103,7 +103,7 @@ export const withSelection = (props: Props) => {
     document.removeEventListener('mouseup', stopSelection)
     if (!area.value) return
     area.value = null
-    let newValues: Set<string>
+    let newValues: Set<number>
 
     // process the postponed single click
     if (postponedClickedNodeId.value) {
