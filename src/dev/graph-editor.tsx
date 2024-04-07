@@ -69,6 +69,11 @@ export const GraphEditor = () => {
     node.label = label
   }
 
+  const changeNodePosition = (node: INode, x: number, y: number) => {
+    node.x = x
+    node.y = y
+  }
+
   const foo = useSignal<
     { type: 'group'; action: (id: number) => void; values: Set<number>; indicators?: Map<number, string> } | undefined
   >(undefined)
@@ -108,6 +113,7 @@ export const GraphEditor = () => {
           addEdge={addEdge}
           addGroup={addGroup}
           changeNodeLabel={changeNodeLabel}
+          changeNodePosition={changeNodePosition}
           width={1000}
           height={800}
           padding={15}

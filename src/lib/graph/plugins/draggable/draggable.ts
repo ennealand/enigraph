@@ -8,6 +8,7 @@ type Props = {
   nodes: DeepSignal<INode[]>
   selection: ReadonlySignal<Set<number>>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
+  changeNodePosition(element: INode, x: number, y: number): void
   zoom?: ReadonlySignal<number>
 }
 
@@ -33,8 +34,7 @@ export const withDraggable = (props: Props) => {
     const zoom = props.zoom?.value ?? 1
     for (const node of props.nodes) {
       if (!props.selection.value.has(node.id)) continue
-      node.x -= shiftX / zoom
-      node.y -= shiftY / zoom
+      props.changeNodePosition(node, node.x - shiftX / zoom, node.y - shiftY / zoom)
     }
     totalShift.value.x += shiftX
     totalShift.value.y += shiftY
@@ -48,8 +48,7 @@ export const withDraggable = (props: Props) => {
       const zoom = props.zoom?.value ?? 1
       for (const node of props.nodes) {
         if (!props.selection.value.has(node.id)) continue
-        node.x += totalShift.value.x / zoom
-        node.y += totalShift.value.y / zoom
+        props.changeNodePosition(node, node.x + totalShift.value.x / zoom, node.y + totalShift.value.y / zoom)
       }
     }
     stopDragging()
