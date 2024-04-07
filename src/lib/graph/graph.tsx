@@ -90,8 +90,9 @@ export const Graph = ({
     selection,
   })
 
-  const { Disk, showDisk, isDiskOpened } = withDisk(
+  const { Disk, showDisk, hideDisk, isDiskOpened } = withDisk(
     (type, x, y, _e, value) => {
+      hideDisk()
       if (menuNodePosition.current && menuNodePosition.current.x === x && menuNodePosition.current.y === y) {
         const array = type === 'node' ? elements.nodes : elements.edges
         for (const element of array) {
@@ -101,7 +102,7 @@ export const Graph = ({
       } else if (type === 'node') createNode(...localize(x, y), value)
       else startDrawingEdge(x, y, value)
     },
-    { nodeTypes, edgeTypes }
+    { nodeTypes, edgeTypes, getInnerPoint }
   )
 
   const menuNodePosition = useRef<{ x: number; y: number } | null>(null)
@@ -179,6 +180,7 @@ export const Graph = ({
       }}
       onMouseDown={e => {
         if (objectSelection) return
+        if (isDiskOpened) hideDisk()
 
         deselectGroup()
         if (e.target === e.currentTarget) {
@@ -206,6 +208,7 @@ export const Graph = ({
       }}
       onNodeMouseDown={(e, node) => {
         if (objectSelection) return
+        if (isDiskOpened) hideDisk()
 
         // Left click
         if (e.buttons === 1) {
@@ -253,6 +256,7 @@ export const Graph = ({
                 objectSelection.action(id)
                 return
               }
+              if (isDiskOpened) hideDisk()
 
               e.stopPropagation()
               startDragginig(e)
@@ -277,7 +281,7 @@ export const Graph = ({
         </>
       }
       innerHtml={<Menu />}
-    >
+      >
       <Disk />
       <AreaSelection />
     </BaseGraph>

@@ -7,6 +7,7 @@ import { DefaultEdgeTypes, DefaultNodeTypes, getEdgeOptions, getNodeOptions } fr
 type DiskOptions = {
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
+  getInnerPoint?: (x: number, y: number) => readonly [number, number]
 }
 export type OptionType = 'node' | 'edge'
 export type DiskClickCallback = (
@@ -20,14 +21,21 @@ export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
   const edgeOptions = useMemo(() => getEdgeOptions(options?.edgeTypes ?? DefaultEdgeTypes), [options?.edgeTypes])
   const menu = useDeepSignal({ x: 0, y: 0, type: 'node' as OptionType, shown: false })
 
-  const mouseup = useCallback(() => {
+  const mouseup = useCallback((e: MouseEvent) => {
+    if (options?.getInnerPoint) {
+      const [x, y] = options.getInnerPoint(e.clientX, e.clientY)
+      const r = Math.sqrt((menu.x - x) ** 2 + (menu.y - y) ** 2)
+      if (r <= 5) return
+    }
     menu.shown = false
     cleanup()
   }, [])
 
   const keydown = useCallback((e: KeyboardEvent) => {
-    if (e.code === 'Escape') menu.shown = false
-    cleanup()
+    if (e.code === 'Escape') {
+      menu.shown = false
+      cleanup()
+    }
   }, [])
 
   const cleanup = () => {
@@ -48,6 +56,10 @@ export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
     document.addEventListener('keydown', keydown, { once: true })
   }
 
+  const hideDisk = () => {
+    menu.shown = false
+  }
+
   const Disk = () =>
     menu.shown ? (
       <BaseDisk
@@ -59,5 +71,5 @@ export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
         edgeOptions={edgeOptions}
       />
     ) : null
-    return { Disk, showDisk, isDiskOpened: menu.$shown! }
+    return { Disk, showDisk, hideDisk, isDiskOpened: menu.$shown! }
   }
