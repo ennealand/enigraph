@@ -8,7 +8,6 @@ type Props = {
   addNode(node: INode): void
   addEdge(edge: IEdge): void
   nodes: DeepSignal<INode[]>
-  edges: DeepSignal<IEdge[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize: (x: number, y: number) => readonly [number, number]
   selection?: ReadonlySignal<Set<number>>
@@ -27,12 +26,12 @@ export const withCreation = (props: Props) => {
   const drawingEdges = useDeepSignal({ values: [] as DrawingEdge[] })
 
   const createNode = (x: number, y: number, type: NodeType) => {
-    const newNode = { id: props.nodes.length + 1, type, x, y }
+    const newNode = { id: 0, type, x, y }
     props.addNode(newNode)
 
     if (drawingEdges.values.length) {
-      for (const [index, { type, source }] of drawingEdges.values.entries()) {
-        props.addEdge({ id: props.edges.length + 1 + index, type, source, target: newNode })
+      for (const { type, source } of drawingEdges.values) {
+        props.addEdge({ id: 0, type, source, target: newNode })
       }
       drawingEdges.values = []
     }

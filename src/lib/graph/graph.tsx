@@ -85,7 +85,6 @@ export const Graph = ({
     getInnerPoint,
     localize,
     nodes: elements.nodes,
-    edges: elements.edges,
     Edge: useCallback((props: CreationEdge) => <Edge {...props} noselect />, []),
     selection,
   })
@@ -127,7 +126,7 @@ export const Graph = ({
           content: <span>G</span>,
           action: () =>
             addGroup({
-              id: elements.groups.length + 1,
+              id: 0,
               label: '',
               values: selection.value,
               position: getGroupPosition(elements.nodes, selection.value),

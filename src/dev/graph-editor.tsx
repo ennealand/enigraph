@@ -46,17 +46,22 @@ export const GraphEditor = () => {
   }, [])
 
   const addNode = (node: INode) => {
-    elements.value?.nodes.push(node)
+    if (!elements.value) return
+    node.id = elements.value.nodes.length + 1
+    elements.value.nodes.push(node)
   }
 
   const addEdge = (edge: IEdge) => {
+    if (!elements.value) return
     if (edge.source !== edge.target) {
-      elements.value?.edges.push(edge)
+      edge.id = elements.value.edges.length + 1000001
+      elements.value.edges.push(edge)
     }
   }
 
   const addGroup = (group: IGroup) => {
     if (!elements.value) return
+    group.id = elements.value.groups.length + 2000001
     elements.value.groups.push(group)
   }
 
