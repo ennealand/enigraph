@@ -27,12 +27,16 @@ export interface Props {
   onNodeMouseUp?: (e: JSX.TargetedMouseEvent<SVGGElement>, node: INode, index: number) => void
   onEdgeMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>, edge: IEdge, index: number) => void
   onEdgeMouseUp?: (e: JSX.TargetedMouseEvent<SVGGElement>, edge: IEdge, index: number) => void
+  onTextDoubleClick?: (node: INode) => void
 
   /** Set of element ids to highlight */
   highlight?: SignalLike<Set<number>>
 
   /** Set of element ids that are non-selectable */
   noselect?: SignalLike<Set<number> | boolean>
+
+  /** Set of element ids that have labels disabled */
+  nolabels?: SignalLike<Set<number> | boolean>
 
   pref?: Ref<SVGSVGElement>
 
@@ -70,6 +74,7 @@ export const useBaseGraph = (width: number, height: number) => {
 export const BaseGraph = (props: Props) => {
   const transform = ensureValue(props.transform)
   const noselect = ensureValue(props.noselect)
+  const nolabels = ensureValue(props.nolabels)
   return (
     <div
       class={style.graph}
@@ -122,12 +127,13 @@ export const BaseGraph = (props: Props) => {
                 type={node.type}
                 x={Math.round(node.x) || 0}
                 y={Math.round(node.y) || 0}
-                label={node.label}
+                label={nolabels && (nolabels === true || nolabels.has(node.id)) ? undefined : node.label}
                 mousedown={e => props.onNodeMouseDown?.(e, node, index)}
                 mouseup={e => props.onNodeMouseUp?.(e, node, index)}
                 highlight={ensureValue(props.highlight)?.has(node.id)}
                 noselect={noselect && (noselect === true || noselect.has(node.id))}
                 padding={props.padding && props.padding + 1}
+                textDoubleClick={() => props.onTextDoubleClick?.(node)}
               />
             ))}
 
@@ -141,7 +147,10 @@ export const BaseGraph = (props: Props) => {
       </svg>
       <div
         class={style.innerHtml}
-        style={{ transform: transform && `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom}) translate(50%, 50%)` }}
+        style={{
+          transform:
+            transform && `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom}) translate(50%, 50%)`,
+        }}
         onWheel={props.onWheel} // nonpassive | preventDefault | stopPropagation
       >
         {/* User-defined html extensions */}

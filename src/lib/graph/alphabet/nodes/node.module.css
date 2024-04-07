@@ -23,7 +23,7 @@
   cursor: pointer;
   user-select: none;
   &:hover {
-    fill: blue;
+    fill: #2669cf;
   }
 }
 

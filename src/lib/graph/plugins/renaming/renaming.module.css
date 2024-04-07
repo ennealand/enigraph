@@ -1,0 +1,20 @@
+.component {
+  position: absolute;
+  background: radial-gradient(circle at -20% -40%, transparent 20%, #ffffff 25%);
+  top: 1rem;
+  border-left: 2px solid #2669cf;
+  border-bottom: 2px solid #2669cf;
+  border-bottom-left-radius: 12px;
+  padding-left: 3.8px;
+  padding-top: 4px;
+}
+
+.input {
+  background: transparent;
+  outline: unset;
+  border: unset;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 2px;
+  border-radius: 5px;
+}

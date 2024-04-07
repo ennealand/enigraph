@@ -65,6 +65,10 @@ export const GraphEditor = () => {
     elements.value.groups.push(group)
   }
 
+  const changeNodeLabel = (node: INode, label: string) => {
+    node.label = label
+  }
+
   const foo = useSignal<
     { type: 'group'; action: (id: number) => void; values: Set<number>; indicators?: Map<number, string> } | undefined
   >(undefined)
@@ -103,6 +107,7 @@ export const GraphEditor = () => {
           addNode={addNode}
           addEdge={addEdge}
           addGroup={addGroup}
+          changeNodeLabel={changeNodeLabel}
           width={1000}
           height={800}
           padding={15}

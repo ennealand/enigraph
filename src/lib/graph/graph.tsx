@@ -11,6 +11,7 @@ import { getGroupPosition } from './plugins/grouping'
 import { withGrouping } from './plugins/grouping/grouping'
 import { MenuButton, withMenu } from './plugins/menu/menu'
 import { withMovable } from './plugins/movable/movable'
+import { withRenaming } from './plugins/renaming/renaming'
 import { withSelection } from './plugins/selection/selection'
 
 export interface Props {
@@ -18,12 +19,18 @@ export interface Props {
   addNode(node: DeepSignal<INode>): void
   addEdge(edge: IEdge): void
   addGroup(group: IGroup): void
+  changeNodeLabel?(element: INode, label: string): void
   width: number
   height: number
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
   padding?: number
-  objectSelection?: { type: 'group'; action: (id: number) => void, values: Set<number>, indicators?: Map<number, string> }
+  objectSelection?: {
+    type: 'group'
+    action: (id: number) => void
+    values: Set<number>
+    indicators?: Map<number, string>
+  }
 }
 
 export const Graph = ({
@@ -34,6 +41,7 @@ export const Graph = ({
   addNode,
   addEdge,
   addGroup,
+  changeNodeLabel,
   edgeTypes,
   nodeTypes,
   objectSelection,
@@ -64,13 +72,18 @@ export const Graph = ({
     padding,
   })
 
-  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } = withGrouping({
-    nodes: elements.nodes,
-    groups: elements.groups,
-    selection,
-  })
+  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } = withGrouping(
+    {
+      nodes: elements.nodes,
+      groups: elements.groups,
+      selection,
+    }
+  )
 
-  const highlight = useComputed(() => objectSelection?.values || selectedGroup.value || selection.value)
+  const { RenamingArea, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
+  const nolabels = useComputed(() => isRenaming.value ? new Set([isRenaming.value.node.id]) : false)
+
+  const highlight = useComputed(() => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value)
 
   const { startDragginig, updateDragging, isDragging } = withDraggable({
     nodes: elements.nodes,
@@ -108,9 +121,9 @@ export const Graph = ({
   const { Menu } = withMenu({
     nodes: elements.nodes,
     selection,
-    visible: useComputed(() => !isSelecting.value && !isDragging.value && !isDiskOpened.value && !isDrawingEdges.value),
+    visible: useComputed(() => !isSelecting.value && !isDragging.value && !isDiskOpened.value && !isDrawingEdges.value && !isRenaming.value),
     buttons: useComputed<MenuButton[]>(() => {
-      return [
+      const buttons: MenuButton[] = [
         {
           content: <span>T</span>,
           action: (_, x, y) => {
@@ -133,6 +146,16 @@ export const Graph = ({
             }),
         },
       ]
+      if (changeNodeLabel && selection.value.size === 1) {
+        const node = elements.nodes.find(_ => selection.value.has(_.id))
+        if (node) {
+          buttons.push({
+            content: <span>I</span>,
+            action: () => startRenaming(node),
+          })
+        }
+      }
+      return buttons
     }),
   })
 
@@ -173,6 +196,8 @@ export const Graph = ({
       highlight={objectSelection ? undefined : highlight}
       noselect={!!objectSelection || isSelecting}
       dragging={useComputed(() => isDragging.value || isDrawingEdges.value)}
+      onTextDoubleClick={node => startRenaming(node)}
+      nolabels={nolabels}
       onWheel={e => {
         onwheel(e)
         if (isDrawingEdges.value) updateDrawingEdges(e)
@@ -250,37 +275,45 @@ export const Graph = ({
             nohighlight={!!objectSelection}
             customSelection={objectSelection?.values}
             customIndicators={objectSelection?.indicators}
-            onMouseDown={useCallback((e: MouseEvent, id: number) => {
-              if (objectSelection && objectSelection.type === 'group') {
-                objectSelection.action(id)
-                return
-              }
-              if (isDiskOpened) hideDisk()
+            onMouseDown={useCallback(
+              (e: MouseEvent, id: number) => {
+                if (objectSelection && objectSelection.type === 'group') {
+                  objectSelection.action(id)
+                  return
+                }
+                if (isDiskOpened) hideDisk()
 
-              e.stopPropagation()
-              startDragginig(e)
-              if (selectedGroupId.value === id) {
-                const mouseup = () => {
-                  closeAllGroups()
-                  openGroup(id)
-                  document.removeEventListener('mousemove', mousemove)
+                e.stopPropagation()
+                startDragginig(e)
+                if (selectedGroupId.value === id) {
+                  const mouseup = () => {
+                    closeAllGroups()
+                    openGroup(id)
+                    document.removeEventListener('mousemove', mousemove)
+                  }
+                  const mousemove = () => {
+                    document.removeEventListener('mouseup', mouseup)
+                  }
+                  document.addEventListener('mouseup', mouseup, { once: true })
+                  document.addEventListener('mousemove', mousemove, { once: true })
+                } else {
+                  selectGroup(id)
+                  clearSelection()
                 }
-                const mousemove = () => {
-                  document.removeEventListener('mouseup', mouseup)
-                }
-                document.addEventListener('mouseup', mouseup, { once: true })
-                document.addEventListener('mousemove', mousemove, { once: true })
-              } else {
-                selectGroup(id)
-                clearSelection()
-              }
-            }, [objectSelection])}
+              },
+              [objectSelection]
+            )}
           />
           {DrawingEdges && <DrawingEdges />}
         </>
       }
-      innerHtml={<Menu />}
-      >
+      innerHtml={
+        <>
+          <Menu />
+          <RenamingArea />
+        </>
+      }
+    >
       <Disk />
       <AreaSelection />
     </BaseGraph>
