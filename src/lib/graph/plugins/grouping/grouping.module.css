@@ -32,3 +32,17 @@
     stroke: transparent;
   }
 }
+
+.circle {
+  fill: #e8efff;
+  stroke-width: 3px;
+  stroke: #357ce7;
+  cursor: pointer;
+}
+
+.indicator {
+  font-weight: 600;
+  fill: #357ce7;
+  user-select: none;
+  cursor: pointer;
+}

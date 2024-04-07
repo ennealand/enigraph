@@ -17,7 +17,32 @@ export const GraphEditor = () => {
     // simulate(elements, {animate: true})
     const worker = new MyWorker()
     worker.postMessage(source)
-    worker.onmessage = e => (elements.value = deepSignal(e.data))
+    worker.onmessage = e =>
+      (elements.value = deepSignal({
+        ...e.data,
+        groups: [
+          {
+            id: 'z',
+            values: new Set(['g', 'e']),
+            position: {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            },
+          },
+          {
+            id: 'w',
+            values: new Set(['k', 'j']),
+            position: {
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            },
+          },
+        ],
+      }))
   }, [])
 
   const addNode = (node: INode) => {
@@ -35,30 +60,51 @@ export const GraphEditor = () => {
     elements.value.groups.push(group)
   }
 
-  // const test = useMemo(() => {
-  //   const ok = deepSignal(new Set([{ wow: 3 }]))
-  //   console.warn(ok)
-  //   console.warn('1', ok.has({wow: 2}))
-  //   console.warn('1', ok.has({wow: 2}))
-  //   console.warn(ok.$size)
-  //   const d = {wow: 5}
-  //   console.warn('2', ok.add(d))
-  //   console.warn('5', ok.has(d))
-  //   console.warn(ok.$size)
-  // }, [])
+  const foo = useSignal<
+    { type: 'group'; action: (id: string) => void; values: Set<string>; indicators?: Map<string, string> } | undefined
+  >(undefined)
 
   return (
-    <div style={{ border: 'solid red 3px', width: 'fit-content', margin: '10rem', borderRadius: '0.8rem' }}>
-      <Graph
-        elements={elements.value ?? { nodes: [], edges: [], groups: [] }}
-        addNode={addNode}
-        addEdge={addEdge}
-        addGroup={addGroup}
-        width={1000}
-        height={800}
-        padding={15}
-        edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst, EdgeType.ArcConstPermPosAccess]}
-      />
-    </div>
+    <>
+      <input
+        type='checkbox'
+        onChange={() => {
+          foo.value = foo.value
+            ? undefined
+            : {
+                type: 'group',
+                action(groupId: string) {
+                  console.log('got a new group selected:', groupId)
+                  if (this.indicators) {
+                    for (const [id, indicator] of this.indicators) {
+                      if (id !== groupId && indicator === '2') this.indicators.delete(id)
+                    }
+                    if (this.indicators.get(groupId) === '2') this.indicators.delete(groupId)
+                    else this.indicators.set(groupId, '2')
+                    this.values = new Set(this.indicators.keys())
+                  }
+                  foo.value = { ...foo.value! }
+                },
+                values: new Set(),
+                indicators: new Map(),
+              }
+        }}
+      >
+        Fine
+      </input>
+      <div style={{ border: 'solid red 3px', width: 'fit-content', margin: '10rem', borderRadius: '0.8rem' }}>
+        <Graph
+          elements={elements.value ?? { nodes: [], edges: [], groups: [] }}
+          addNode={addNode}
+          addEdge={addEdge}
+          addGroup={addGroup}
+          width={1000}
+          height={800}
+          padding={15}
+          edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst, EdgeType.ArcConstPermPosAccess]}
+          objectSelection={foo.value}
+        />
+      </div>
+    </>
   )
 }

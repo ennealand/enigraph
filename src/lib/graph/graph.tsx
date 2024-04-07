@@ -23,6 +23,7 @@ export interface Props {
   nodeTypes?: NodeType[]
   edgeTypes?: EdgeType[]
   padding?: number
+  objectSelection?: { type: 'group'; action: (id: string) => void, values: Set<string>, indicators?: Map<string, string> }
 }
 
 export const Graph = ({
@@ -35,6 +36,7 @@ export const Graph = ({
   addGroup,
   edgeTypes,
   nodeTypes,
+  objectSelection,
 }: Props) => {
   /// ----------------------------------------- ///
   /// ----------------- Core ------------------ ///
@@ -62,13 +64,13 @@ export const Graph = ({
     padding,
   })
 
-  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup } = withGrouping({
+  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } = withGrouping({
     nodes: elements.nodes,
     groups: elements.groups,
     selection,
   })
 
-  const highlight = useComputed(() => selectedGroup.value || selection.value)
+  const highlight = useComputed(() => objectSelection?.values || selectedGroup.value || selection.value)
 
   const { startDragginig, updateDragging, isDragging } = withDraggable({
     nodes: elements.nodes,
@@ -167,14 +169,16 @@ export const Graph = ({
       elements={elements}
       padding={padding}
       transform={transform}
-      highlight={highlight}
-      noselect={isSelecting}
+      highlight={objectSelection ? undefined : highlight}
+      noselect={!!objectSelection || isSelecting}
       dragging={useComputed(() => isDragging.value || isDrawingEdges.value)}
       onWheel={e => {
         onwheel(e)
         if (isDrawingEdges.value) updateDrawingEdges(e)
       }}
       onMouseDown={e => {
+        if (objectSelection) return
+
         deselectGroup()
         if (e.target === e.currentTarget) {
           closeAllGroups()
@@ -200,6 +204,8 @@ export const Graph = ({
         }
       }}
       onNodeMouseDown={(e, node) => {
+        if (objectSelection) return
+
         // Left click
         if (e.buttons === 1) {
           if (e.shiftKey) return
@@ -224,6 +230,8 @@ export const Graph = ({
       before={
         <>
           <Group
+            nohighlight={!!objectSelection}
+            customSelection={objectSelection && new Set(objectSelection.values)}
             onMouseDown={useCallback((_e: MouseEvent, _id: string) => {
               // e.stopPropagation()
               // console.log('closing before')
@@ -236,10 +244,18 @@ export const Graph = ({
         <>
           <Group
             placeholder
+            nohighlight={!!objectSelection}
+            customSelection={objectSelection?.values}
+            customIndicators={objectSelection?.indicators}
             onMouseDown={useCallback((e: MouseEvent, id: string) => {
+              if (objectSelection && objectSelection.type === 'group') {
+                objectSelection.action(id)
+                return
+              }
+
               e.stopPropagation()
               startDragginig(e)
-              if (selectedGroup.value) {
+              if (selectedGroupId.value === id) {
                 const mouseup = () => {
                   closeAllGroups()
                   openGroup(id)
@@ -254,7 +270,7 @@ export const Graph = ({
                 selectGroup(id)
                 clearSelection()
               }
-            }, [])}
+            }, [objectSelection])}
           />
           {DrawingEdges && <DrawingEdges />}
         </>

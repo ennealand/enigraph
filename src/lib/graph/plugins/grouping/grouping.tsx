@@ -51,7 +51,13 @@ export const withGrouping = (props: Props) => {
   )
 
   const Group = useCallback(
-    (args: { placeholder?: true; onMouseDown?: (e: MouseEvent, id: string) => void }) => {
+    (args: {
+      placeholder?: true
+      nohighlight?: boolean
+      customSelection?: Set<string>
+      customIndicators?: Map<string, string>
+      onMouseDown?: (e: MouseEvent, id: string) => void
+    }) => {
       return (
         <g class={args.placeholder && style.placeholder}>
           {props.groups.map(group => (
@@ -60,8 +66,13 @@ export const withGrouping = (props: Props) => {
               id={group.id}
               {...group.position}
               onMouseDown={args.onMouseDown}
-              opened={opened.value.has(group.id)}
-              selected={selected.value === group.id}
+              opened={!args.nohighlight && opened.value.has(group.id)}
+              selected={
+                args.customSelection
+                  ? args.customSelection.has(group.id)
+                  : !args.nohighlight && selected.value === group.id
+              }
+              indicator={args.customIndicators?.get(group.id)}
             />
           ))}
         </g>
@@ -70,5 +81,14 @@ export const withGrouping = (props: Props) => {
     [props.groups]
   )
 
-  return { Group, openGroup, closeGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup }
+  return {
+    Group,
+    openGroup,
+    closeGroup,
+    closeAllGroups,
+    selectGroup,
+    deselectGroup,
+    selectedGroup,
+    selectedGroupId: selected,
+  }
 }

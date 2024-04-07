@@ -3,6 +3,8 @@ declare const styles: {
   readonly "group": string;
   readonly "opened": string;
   readonly "selected": string;
+  readonly "circle": string;
+  readonly "indicator": string;
 };
 export = styles;
 
