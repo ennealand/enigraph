@@ -57,12 +57,24 @@ export const withCreation = (props: Props) => {
     }
   }
 
+  const createEdges = (selection: Set<number>, nodes: DeepSignal<INode[]>) => {
+    if (drawingEdges.values.length) {
+      for (const { type, source } of drawingEdges.values) {
+        for (const node of nodes) {
+          if (!selection.has(node.id)) continue
+          props.addEdge({ id: 0, type, source, target: node })
+        }
+      }
+      drawingEdges.values = []
+    }
+  }
+
   const component = useCallback(
     () => (props.Edge ? <DrawingEdges Edge={props.Edge} edges={drawingEdges.values} /> : null),
     [drawingEdges]
   )
   const isDrawingEdges = useComputed(() => !!drawingEdges.$values?.value.length)
-  return { createNode, startDrawingEdge, updateDrawingEdges, DrawingEdges: component, isDrawingEdges }
+  return { createNode, startDrawingEdge, updateDrawingEdges, createEdges, DrawingEdges: component, isDrawingEdges }
 }
 
 const DrawingEdges = (props: { Edge: NonNullable<Props['Edge']>; edges: DeepSignal<DrawingEdge[]> }) => {

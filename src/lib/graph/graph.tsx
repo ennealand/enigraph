@@ -72,6 +72,7 @@ export const Graph = ({
     localize,
     inversion: true,
     padding,
+    onSelectionStop: useCallback((selection: Set<number>) => createEdges(selection, elements.nodes), [elements.nodes]),
   })
 
   const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } = withGrouping(
@@ -83,9 +84,11 @@ export const Graph = ({
   )
 
   const { RenamingArea, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
-  const nolabels = useComputed(() => isRenaming.value ? new Set([isRenaming.value.node.id]) : false)
+  const nolabels = useComputed(() => (isRenaming.value ? new Set([isRenaming.value.node.id]) : false))
 
-  const highlight = useComputed(() => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value)
+  const highlight = useComputed(
+    () => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value
+  )
 
   const { startDragginig, updateDragging, isDragging } = withDraggable({
     nodes: elements.nodes,
@@ -95,7 +98,7 @@ export const Graph = ({
     changeNodePosition,
   })
 
-  const { createNode, startDrawingEdge, updateDrawingEdges, DrawingEdges, isDrawingEdges } = withCreation({
+  const { createNode, startDrawingEdge, updateDrawingEdges, createEdges, DrawingEdges, isDrawingEdges } = withCreation({
     addNode,
     addEdge,
     getInnerPoint,
@@ -124,7 +127,9 @@ export const Graph = ({
   const { Menu } = withMenu({
     nodes: elements.nodes,
     selection,
-    visible: useComputed(() => !isSelecting.value && !isDragging.value && !isDiskOpened.value && !isDrawingEdges.value && !isRenaming.value),
+    visible: useComputed(
+      () => !isSelecting.value && !isDragging.value && !isDiskOpened.value && !isDrawingEdges.value && !isRenaming.value
+    ),
     buttons: useComputed<MenuButton[]>(() => {
       const buttons: MenuButton[] = [
         {

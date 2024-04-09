@@ -8,6 +8,7 @@ type Props = {
   nodes: INode[]
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
+  onSelectionStop?: (selection: Set<number>) => void
   inversion?: true
   padding?: number
 }
@@ -114,16 +115,17 @@ export const withSelection = (props: Props) => {
       newValues = new Set(progress.value)
     }
 
+    props.onSelectionStop?.(newValues)
     values.value = newValues
     progress.value = new Set()
-  }, [])
+  }, [props.onSelectionStop])
 
   useEffect(() => () => document.removeEventListener('mouseup', stopSelection), [stopSelection])
 
-  useEffect(() => {
-    console.warn('hola')
-    return () => console.warn('bye')
-  }, [])
+  // useEffect(() => {
+  //   console.warn('hola')
+  //   return () => console.warn('bye')
+  // }, [])
 
   return {
     /** Area selection rectangle */
