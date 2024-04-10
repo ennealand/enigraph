@@ -74,6 +74,13 @@ export const GraphEditor = () => {
     node.y = y
   }
 
+  const removeNode = (id: number) => {
+    if (!elements.value) return
+    elements.value.groups.forEach(g => g.values.delete(id))
+    elements.value.edges = elements.value.edges.filter(e => e.source.id !== id && e.target.id !== id)
+    elements.value.nodes = elements.value.nodes.filter(n => n.id !== id)
+  }
+
   const foo = useSignal<
     { type: 'group'; action: (id: number) => void; values: Set<number>; indicators?: Map<number, string> } | undefined
   >(undefined)
@@ -114,6 +121,7 @@ export const GraphEditor = () => {
           addGroup={addGroup}
           changeNodeLabel={changeNodeLabel}
           changeNodePosition={changeNodePosition}
+          removeNode={removeNode}
           width={1000}
           height={800}
           padding={15}

@@ -21,6 +21,7 @@ export interface Props {
   addGroup(group: IGroup): void
   changeNodeLabel?(element: INode, label: string): void
   changeNodePosition(element: INode, x: number, y: number): void
+  removeNode?(id: number): void
   width: number
   height: number
   nodeTypes?: NodeType[]
@@ -44,6 +45,7 @@ export const Graph = ({
   addGroup,
   changeNodeLabel,
   changeNodePosition,
+  removeNode,
   edgeTypes,
   nodeTypes,
   objectSelection,
@@ -152,7 +154,7 @@ export const Graph = ({
               values: selection.value,
               position: getGroupPosition(elements.nodes, selection.value),
             }),
-        },
+        }
       ]
       if (changeNodeLabel && selection.value.size === 1) {
         const node = elements.nodes.find(_ => selection.value.has(_.id))
@@ -162,6 +164,14 @@ export const Graph = ({
             action: () => startRenaming(node),
           })
         }
+      }
+      if (removeNode) {
+        buttons.push({
+          content: <span>D</span>,
+          action: () => {
+            for (const id of selection.value) removeNode(id)
+          },
+        })
       }
       return buttons
     }),
