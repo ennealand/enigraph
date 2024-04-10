@@ -1,7 +1,7 @@
 import { JSX } from 'preact/jsx-runtime'
 import style from './menu.module.css'
 
-export type MenuButton = { content: JSX.Element; action: (e: MouseEvent, x: number, y: number) => void }
+export type MenuButton = { content: JSX.Element | undefined; action: (e: MouseEvent, x: number, y: number) => void }
 
 type Props = { x: number; y: number; buttons: MenuButton[]; leave: () => void; shown: boolean; padding: number }
 export const BaseMenu = (props: Props) => {

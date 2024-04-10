@@ -1,6 +1,7 @@
 import { useComputed } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
 import { useCallback, useEffect, useRef } from 'preact/hooks'
+import type { JSX } from 'preact/jsx-runtime'
 import { EdgeType, IGroup, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { Edge } from './alphabet'
 import { useBaseGraph } from './base-graph'
@@ -33,6 +34,7 @@ export interface Props {
     values: Set<number>
     indicators?: Map<number, string>
   }
+  buttonIcons?: Partial<Record<'type' | 'arrow' | 'group' | 'rename' | 'delete', JSX.Element>>
 }
 
 export const Graph = ({
@@ -49,6 +51,7 @@ export const Graph = ({
   edgeTypes,
   nodeTypes,
   objectSelection,
+  buttonIcons
 }: Props) => {
   /// ----------------------------------------- ///
   /// ----------------- Core ------------------ ///
@@ -135,7 +138,7 @@ export const Graph = ({
     buttons: useComputed<MenuButton[]>(() => {
       const buttons: MenuButton[] = [
         {
-          content: <span>T</span>,
+          content: buttonIcons ? buttonIcons.type : <span>T</span>,
           action: (_, x, y) => {
             showDisk('node', ...globalize(x, y))
             menuNodePosition.current = { x, y }
@@ -144,9 +147,9 @@ export const Graph = ({
             document.addEventListener('mouseup', () => (menuNodePosition.current = null), { once: true })
           },
         },
-        { content: <span>A</span>, action: (_, x, y) => showDisk('edge', ...globalize(x, y)) },
+        { content: buttonIcons ? buttonIcons.arrow : <span>A</span>, action: (_, x, y) => showDisk('edge', ...globalize(x, y)) },
         {
-          content: <span>G</span>,
+          content: buttonIcons ? buttonIcons.group : <span>G</span>,
           action: () =>
             addGroup({
               id: 0,
@@ -154,26 +157,26 @@ export const Graph = ({
               values: selection.value,
               position: getGroupPosition(elements.nodes, selection.value),
             }),
-        }
+        },
       ]
       if (changeNodeLabel && selection.value.size === 1) {
         const node = elements.nodes.find(_ => selection.value.has(_.id))
         if (node) {
           buttons.push({
-            content: <span>I</span>,
+            content: buttonIcons ? buttonIcons.rename : <span>I</span>,
             action: () => startRenaming(node),
           })
         }
       }
       if (removeNode) {
         buttons.push({
-          content: <span>D</span>,
+          content: buttonIcons ? buttonIcons.delete : <span>D</span>,
           action: () => {
             for (const id of selection.value) removeNode(id)
           },
         })
       }
-      return buttons
+      return buttons.filter(button => button.content)
     }),
   })
 
