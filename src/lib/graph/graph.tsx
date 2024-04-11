@@ -89,7 +89,7 @@ export const Graph = ({
   )
 
   const { RenamingArea, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
-  const nolabels = useComputed(() => (isRenaming.value ? new Set([isRenaming.value.node.id]) : false))
+  const nolabels = useComputed(() => (isRenaming.value ? new Set([isRenaming.value.node.id]) : undefined))
 
   const highlight = useComputed(
     () => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value

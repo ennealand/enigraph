@@ -31,7 +31,7 @@ export const withMenu = (props: Props) => {
   })
 
   useEffect(() => {
-    if (props.selection.value.size && props.visible.value) {
+    if (props.selection.value?.size && props.visible.value) {
       shown.value = false
       self.clearTimeout(timer.current)
       timer.current = self.setTimeout(() => {

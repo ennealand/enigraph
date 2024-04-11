@@ -66,7 +66,7 @@ export const withGrouping = (props: Props) => {
               id={group.id}
               {...group.position}
               onMouseDown={args.onMouseDown}
-              opened={!args.nohighlight && opened.value.has(group.id)}
+              opened={!args.nohighlight && opened.value?.has(group.id)}
               selected={
                 args.customSelection
                   ? args.customSelection.has(group.id)

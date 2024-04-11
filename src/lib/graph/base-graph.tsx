@@ -36,7 +36,7 @@ export interface Props {
   noselect?: SignalLike<Set<number> | boolean>
 
   /** Set of element ids that have labels disabled */
-  nolabels?: SignalLike<Set<number> | boolean>
+  nolabels?: SignalLike<Set<number> | true | undefined>
 
   pref?: Ref<SVGSVGElement>
 
