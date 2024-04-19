@@ -114,20 +114,23 @@ export const GraphEditor = () => {
         Fine
       </input>
       <div style={{ border: 'solid red 3px', width: 'fit-content', margin: '10rem', borderRadius: '0.8rem' }}>
-        <Graph
-          elements={elements.value ?? { nodes: [], edges: [], groups: [] }}
-          addNode={addNode}
-          addEdge={addEdge}
-          addGroup={addGroup}
-          changeNodeLabel={changeNodeLabel}
-          changeNodePosition={changeNodePosition}
-          removeNode={removeNode}
-          width={1000}
-          height={800}
-          padding={15}
-          edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst, EdgeType.ArcConstPermPosAccess]}
-          objectSelection={foo.value}
-        />
+        {elements.value && (
+          <Graph
+            elements={elements.value}
+            addNode={addNode}
+            addEdge={addEdge}
+            addGroup={addGroup}
+            changeNodeLabel={changeNodeLabel}
+            changeNodePosition={changeNodePosition}
+            nodePositionChanged={() => console.warn('Node position changed')}
+            removeNode={removeNode}
+            width={1000}
+            height={800}
+            padding={15}
+            edgeTypes={[EdgeType.ArcConst, EdgeType.EdgeConst, EdgeType.ArcConstPermPosAccess]}
+            objectSelection={foo.value}
+          />
+        )}
       </div>
     </>
   )
