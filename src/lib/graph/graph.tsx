@@ -21,7 +21,8 @@ export interface Props {
   addEdge(edge: IEdge): void
   addGroup(group: IGroup): void
   changeNodeLabel?(element: INode, label: string): void
-  changeNodePosition(element: INode, x: number, y: number): void
+  changeNodePosition?(element: INode, x: number, y: number): void
+  nodePositionChanged?(element: INode): void
   removeNode?(id: number): void
   width: number
   height: number
@@ -47,6 +48,7 @@ export const Graph = ({
   addGroup,
   changeNodeLabel,
   changeNodePosition,
+  nodePositionChanged,
   removeNode,
   edgeTypes,
   nodeTypes,
@@ -101,6 +103,7 @@ export const Graph = ({
     getInnerPoint,
     zoom,
     changeNodePosition,
+    nodePositionChanged,
   })
 
   const { createNode, startDrawingEdge, updateDrawingEdges, createEdges, DrawingEdges, isDrawingEdges } = withCreation({
