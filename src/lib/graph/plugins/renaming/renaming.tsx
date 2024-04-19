@@ -16,7 +16,6 @@ export const withRenaming = (props: Props) => {
   }
 
   const stopRenaming = () => {
-    console.warn('I just set you to null')
     isRenaming.value = null
   }
 
