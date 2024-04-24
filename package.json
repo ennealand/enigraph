@@ -1,5 +1,5 @@
 {
-  "name": "@ennealand/enigraph",
+  "name": "enigraph",
   "version": "0.0.10",
   "type": "module",
   "scripts": {
