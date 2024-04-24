@@ -1,12 +1,12 @@
 import { EdgeType, IEdge, INode, NodeType } from '$lib/types'
 import { ReadonlySignal, useComputed } from '@preact/signals'
-import { DeepSignal, useDeepSignal } from 'deepsignal'
+import { useDeepSignal } from 'deepsignal'
 import { JSX } from 'preact/jsx-runtime'
 
 type Props = {
   addNode(node: INode): void
   addEdge(edge: IEdge): void
-  nodes: DeepSignal<INode[]>
+  nodes: INode[]
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize: (x: number, y: number) => readonly [number, number]
   selection?: ReadonlySignal<Set<number>>
@@ -17,7 +17,7 @@ export type CreationEdge = { x1: number; y1: number; x2: number; y2: number; typ
 
 type DrawingEdge = {
   type: EdgeType
-  source: DeepSignal<INode>
+  source: INode
   target: { x: number; y: number }
 }
 
@@ -56,7 +56,7 @@ export const useCreation = (props: Props) => {
     }
   }
 
-  const createEdges = (selection: Set<number>, nodes: DeepSignal<INode[]>) => {
+  const createEdges = (selection: Set<number>, nodes: INode[]) => {
     if (drawingEdges.values.length) {
       for (const { type, source } of drawingEdges.values) {
         for (const node of nodes) {
@@ -68,12 +68,12 @@ export const useCreation = (props: Props) => {
     }
   }
 
-  const creationProps = props.Edge && { Edge: props.Edge, edges: drawingEdges.values }
+  const creationProps = props.Edge && { Edge: props.Edge, edges: drawingEdges.values as DrawingEdge[] }
   const isDrawingEdges = useComputed(() => !!drawingEdges.$values?.value.length)
   return { createNode, startDrawingEdge, updateDrawingEdges, createEdges, isDrawingEdges, creationProps }
 }
 
-type DrawingEdgeProps = { Edge: NonNullable<Props['Edge']>; edges: DeepSignal<DrawingEdge[]> }
+type DrawingEdgeProps = { Edge: NonNullable<Props['Edge']>; edges: DrawingEdge[] }
 export const DrawingEdges = ({ Edge, edges }: DrawingEdgeProps) => {
   return (
     <g>

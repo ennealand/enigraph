@@ -1,14 +1,13 @@
 import { IGroup, INode } from '$lib/types'
 import { ReadonlySignal, effect, useComputed, useSignal } from '@preact/signals'
-import { DeepSignal } from 'deepsignal'
 import { useEffect } from 'preact/hooks'
 import { BaseGroup } from './base-group'
 import { getGroupPosition } from './group-position'
 import style from './grouping.module.css'
 
 type Props = {
-  nodes: DeepSignal<INode[]>
-  groups: DeepSignal<IGroup[]>
+  nodes: INode[]
+  groups: IGroup[]
   selection: ReadonlySignal<Set<number>>
 }
 
