@@ -4,16 +4,17 @@ import { useCallback, useEffect, useRef } from 'preact/hooks'
 import type { JSX } from 'preact/jsx-runtime'
 import { EdgeType, IGroup, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { Edge } from './alphabet'
-import { useBaseGraph } from './base-graph'
-import { CreationEdge, withCreation } from './plugins/creation/creation'
+import { BaseGraph, useBaseGraph } from './base-graph'
+import { DrawingEdges, withCreation, type CreationEdge } from './plugins/creation/creation'
 import { withDisk } from './plugins/disk'
+import { Disk } from './plugins/disk/disk'
 import { withDraggable } from './plugins/draggable/draggable'
 import { getGroupPosition } from './plugins/grouping'
-import { withGrouping } from './plugins/grouping/grouping'
-import { MenuButton, withMenu } from './plugins/menu/menu'
+import { Groups, withGrouping } from './plugins/grouping/grouping'
+import { Menu, MenuButton, withMenu } from './plugins/menu/menu'
 import { withMovable } from './plugins/movable/movable'
-import { withRenaming } from './plugins/renaming/renaming'
-import { withSelection } from './plugins/selection/selection'
+import { RenamingArea, withRenaming } from './plugins/renaming/renaming'
+import { AreaSelection, withSelection } from './plugins/selection/selection'
 
 export interface Props {
   elements: DeepSignal<Elements>
@@ -53,13 +54,13 @@ export const Graph = ({
   edgeTypes,
   nodeTypes,
   objectSelection,
-  buttonIcons
+  buttonIcons,
 }: Props) => {
   /// ----------------------------------------- ///
   /// ----------------- Core ------------------ ///
   /// ----------------------------------------- ///
 
-  const { BaseGraph, getInnerPoint } = useBaseGraph(width, height)
+  const { baseGraphProps, getInnerPoint } = useBaseGraph(width, height)
 
   /// ----------------------------------------- ///
   /// ---------------- Plugins ---------------- ///
@@ -73,7 +74,7 @@ export const Graph = ({
     getInnerPoint,
   })
 
-  const { AreaSelection, selection, startSelection, updateSelection, clearSelection, isSelecting } = withSelection({
+  const { selectionProps, selection, startSelection, updateSelection, clearSelection, isSelecting } = withSelection({
     nodes: elements.nodes,
     getInnerPoint,
     localize,
@@ -82,15 +83,14 @@ export const Graph = ({
     onSelectionStop: useCallback((selection: Set<number>) => createEdges(selection, elements.nodes), [elements.nodes]),
   })
 
-  const { Group, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } = withGrouping(
-    {
+  const { groupingProps, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } =
+    withGrouping({
       nodes: elements.nodes,
       groups: elements.groups,
       selection,
-    }
-  )
+    })
 
-  const { RenamingArea, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
+  const { renamingProps, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
   const nolabels = useComputed(() => (isRenaming.value ? new Set([isRenaming.value.node.id]) : undefined))
 
   const highlight = useComputed(
@@ -106,17 +106,19 @@ export const Graph = ({
     nodePositionChanged,
   })
 
-  const { createNode, startDrawingEdge, updateDrawingEdges, createEdges, DrawingEdges, isDrawingEdges } = withCreation({
-    addNode,
-    addEdge,
-    getInnerPoint,
-    localize,
-    nodes: elements.nodes,
-    Edge: useCallback((props: CreationEdge) => <Edge {...props} noselect />, []),
-    selection,
-  })
+  const { creationProps, createNode, startDrawingEdge, updateDrawingEdges, createEdges, isDrawingEdges } = withCreation(
+    {
+      addNode,
+      addEdge,
+      getInnerPoint,
+      localize,
+      nodes: elements.nodes,
+      Edge: NonSelectableEdge,
+      selection,
+    }
+  )
 
-  const { Disk, showDisk, hideDisk, isDiskOpened } = withDisk(
+  const { diskProps, showDisk, hideDisk, isDiskOpened } = withDisk(
     (type, x, y, _e, value) => {
       hideDisk()
       if (menuNodePosition.current && menuNodePosition.current.x === x && menuNodePosition.current.y === y) {
@@ -132,7 +134,7 @@ export const Graph = ({
   )
 
   const menuNodePosition = useRef<{ x: number; y: number } | null>(null)
-  const { Menu } = withMenu({
+  const { menuProps } = withMenu({
     nodes: elements.nodes,
     selection,
     visible: useComputed(
@@ -150,7 +152,10 @@ export const Graph = ({
             document.addEventListener('mouseup', () => (menuNodePosition.current = null), { once: true })
           },
         },
-        { content: buttonIcons ? buttonIcons.arrow : <span>A</span>, action: (_, x, y) => showDisk('edge', ...globalize(x, y)) },
+        {
+          content: buttonIcons ? buttonIcons.arrow : <span>A</span>,
+          action: (_, x, y) => showDisk('edge', ...globalize(x, y)),
+        },
         {
           content: buttonIcons ? buttonIcons.group : <span>G</span>,
           action: () =>
@@ -210,10 +215,7 @@ export const Graph = ({
   /// ------------ Render component ----------- ///
   return (
     <BaseGraph
-      width={width}
-      height={height}
-      centerX={width / 2}
-      centerY={height / 2}
+      {...baseGraphProps}
       elements={elements}
       padding={padding}
       transform={transform}
@@ -281,7 +283,8 @@ export const Graph = ({
       }}
       before={
         <>
-          <Group
+          <Groups
+            {...groupingProps}
             nohighlight={!!objectSelection}
             customSelection={objectSelection && new Set(objectSelection.values)}
             onMouseDown={useCallback((_e: MouseEvent, _id: number) => {
@@ -294,7 +297,8 @@ export const Graph = ({
       }
       inner={
         <>
-          <Group
+          <Groups
+            {...groupingProps}
             placeholder
             nohighlight={!!objectSelection}
             customSelection={objectSelection?.values}
@@ -328,18 +332,20 @@ export const Graph = ({
               [objectSelection]
             )}
           />
-          {DrawingEdges && <DrawingEdges />}
+          {creationProps && <DrawingEdges {...creationProps} />}
         </>
       }
       innerHtml={
         <>
-          <Menu />
-          <RenamingArea />
+          {menuProps && <Menu {...menuProps} />}
+          {renamingProps && <RenamingArea {...renamingProps} />}
         </>
       }
     >
-      <Disk />
-      <AreaSelection />
+      {diskProps && <Disk {...diskProps} />}
+      {selectionProps && <AreaSelection {...selectionProps} />}
     </BaseGraph>
   )
 }
+
+const NonSelectableEdge = (props: CreationEdge) => <Edge {...props} noselect />

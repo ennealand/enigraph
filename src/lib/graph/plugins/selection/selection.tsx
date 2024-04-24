@@ -2,7 +2,7 @@ import { INode } from '$lib/types'
 import { batch, useComputed, useSignal } from '@preact/signals'
 import { deepSignal } from 'deepsignal'
 import { useCallback, useEffect } from 'preact/hooks'
-import { AreaSelection, AreaSelectionProps } from './area-selection'
+import { type AreaSelectionProps } from './area-selection'
 
 type Props = {
   nodes: INode[]
@@ -129,8 +129,8 @@ export const withSelection = (props: Props) => {
 
   return {
     /** Area selection rectangle */
-    AreaSelection: useCallback(() => area.value && <AreaSelection {...area.value} />, [area]),
-    selection: useComputed(() => area.value ? progress.value : values.value),
+    selectionProps: area.value,
+    selection: useComputed(() => (area.value ? progress.value : values.value)),
     isSelecting: useComputed(
       () => !!area.value && (area.value.x1 !== area.value.x2 || area.value.y1 !== area.value.y2)
     ),
@@ -139,3 +139,5 @@ export const withSelection = (props: Props) => {
     updateSelection,
   }
 }
+
+export { AreaSelection } from './area-selection'

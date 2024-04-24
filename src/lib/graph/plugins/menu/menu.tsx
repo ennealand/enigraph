@@ -47,18 +47,16 @@ export const withMenu = (props: Props) => {
 
   useEffect(() => document.removeEventListener('mousedown', hideMenu, { capture: true }), [])
 
-  const component = () =>
-    position.value ? (
-      <BaseMenu
-        {...position.value}
-        buttons={props.buttons.value}
-        leave={hideMenu}
-        shown={shown.value}
-        padding={props.padding ?? 0}
-      />
-    ) : null
+  const menuProps = position.value && {
+    ...position.value,
+    buttons: props.buttons.value,
+    leave: hideMenu,
+    shown: shown.value,
+    padding: props.padding ?? 0,
+  }
 
-  return { Menu: component, hideMenu, menuNodePosition: position }
+  return { menuProps, hideMenu, menuNodePosition: position }
 }
 
 export { type MenuButton }
+export const Menu = BaseMenu

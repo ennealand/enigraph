@@ -1,7 +1,6 @@
 import { EdgeType, IEdge, INode, NodeType } from '$lib/types'
 import { ReadonlySignal, useComputed } from '@preact/signals'
 import { DeepSignal, useDeepSignal } from 'deepsignal'
-import { useCallback } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 
 type Props = {
@@ -69,19 +68,17 @@ export const withCreation = (props: Props) => {
     }
   }
 
-  const component = useCallback(
-    () => (props.Edge ? <DrawingEdges Edge={props.Edge} edges={drawingEdges.values} /> : null),
-    [drawingEdges]
-  )
+  const creationProps = props.Edge && { Edge: props.Edge, edges: drawingEdges.values }
   const isDrawingEdges = useComputed(() => !!drawingEdges.$values?.value.length)
-  return { createNode, startDrawingEdge, updateDrawingEdges, createEdges, DrawingEdges: component, isDrawingEdges }
+  return { createNode, startDrawingEdge, updateDrawingEdges, createEdges, isDrawingEdges, creationProps }
 }
 
-const DrawingEdges = (props: { Edge: NonNullable<Props['Edge']>; edges: DeepSignal<DrawingEdge[]> }) => {
+type DrawingEdgeProps = { Edge: NonNullable<Props['Edge']>; edges: DeepSignal<DrawingEdge[]> }
+export const DrawingEdges = ({ Edge, edges }: DrawingEdgeProps) => {
   return (
     <g>
-      {props.edges.map((edge, index) => (
-        <props.Edge
+      {edges.map((edge, index) => (
+        <Edge
           key={index}
           type={edge.type}
           x1={edge.source.x}

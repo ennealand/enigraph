@@ -60,16 +60,18 @@ export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
     menu.shown = false
   }
 
-  const Disk = () =>
-    menu.shown ? (
-      <BaseDisk
-        x={menu.x}
-        y={menu.y}
-        type={menu.type}
-        click={click}
-        nodeOptions={nodeOptions}
-        edgeOptions={edgeOptions}
-      />
-    ) : null
-    return { Disk, showDisk, hideDisk, isDiskOpened: menu.$shown! }
-  }
+  const diskProps = menu.shown
+    ? {
+        x: menu.x,
+        y: menu.y,
+        type: menu.type,
+        click: click,
+        nodeOptions: nodeOptions,
+        edgeOptions: edgeOptions,
+      }
+    : null
+
+  return { diskProps, showDisk, hideDisk, isDiskOpened: menu.$shown! }
+}
+
+export const Disk = BaseDisk

@@ -15,7 +15,7 @@ export interface Props {
   height: number
   centerX: number
   centerY: number
-  children?: JSX.Element | JSX.Element[]
+  children?: JSX.Element | (JSX.Element | null)[]
   before?: JSX.Element
   inner?: JSX.Element
   innerHtml?: JSX.Element
@@ -48,18 +48,11 @@ export interface Props {
   padding?: number
 }
 
-type HookedProps = 'width' | 'height' | 'centerX' | 'centerY'
-
 export const useBaseGraph = (width: number, height: number) => {
   const ref = useRef<SVGSVGElement>(null)
   const centerX = width && useMemo(() => width / 2, [width])
   const centerY = height && useMemo(() => height / 2, [height])
-  const component = useCallback(
-    (props: Omit<Props, HookedProps> & { [K in HookedProps]?: Props[K] }) => (
-      <BaseGraph width={width} height={height} centerX={centerX} centerY={centerY} {...props} pref={ref} />
-    ),
-    [width, height]
-  )
+  const baseGraphProps = { width, height, centerX, centerY, pref: ref }
   const getInnerPoint = useCallback(
     (x: number, y: number): [number, number] => {
       if (!ref.current) return [0, 0]
@@ -68,7 +61,7 @@ export const useBaseGraph = (width: number, height: number) => {
     },
     [ref.current]
   )
-  return { BaseGraph: component, getInnerPoint }
+  return { baseGraphProps, ref, getInnerPoint }
 }
 
 export const BaseGraph = (props: Props) => {

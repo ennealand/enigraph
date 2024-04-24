@@ -1,7 +1,7 @@
 import { INode } from '$lib/types'
 import { useSignal } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
-import { useCallback, useEffect, useRef } from 'preact/hooks'
+import { useEffect, useRef } from 'preact/hooks'
 import { JSX } from 'preact/jsx-runtime'
 import style from './renaming.module.css'
 
@@ -19,20 +19,14 @@ export const withRenaming = (props: Props) => {
     isRenaming.value = null
   }
 
-  const component = useCallback(
-    () =>
-      isRenaming.value && (
-        <RenamingArea
-          x={Math.round(isRenaming.value.node.x) || 0}
-          y={Math.round(isRenaming.value.node.y) || 0}
-          value={isRenaming.value.node.label ?? ''}
-          submit={value => isRenaming.value && (props.submit?.(isRenaming.value.node, value), stopRenaming())}
-        />
-      ),
-    [isRenaming]
-  )
+  const renamingProps = isRenaming.value && {
+    x: Math.round(isRenaming.value.node.x) || 0,
+    y: Math.round(isRenaming.value.node.y) || 0,
+    value: isRenaming.value.node.label ?? '',
+    submit: (value: string) => isRenaming.value && (props.submit?.(isRenaming.value.node, value), stopRenaming()),
+  }
 
-  return { RenamingArea: component, startRenaming, stopRenaming, isRenaming }
+  return { startRenaming, stopRenaming, isRenaming, renamingProps }
 }
 
 export const RenamingArea = (props: { x: number; y: number; value: string; submit: (newValue: string) => void }) => {
@@ -44,7 +38,10 @@ export const RenamingArea = (props: { x: number; y: number; value: string; submi
   }
 
   return (
-    <div class={style.component} style={{ transform: `translate(${props.x + 19 - 5.8 - 3.5}px, ${props.y - 11 - 5.8}px)` }}>
+    <div
+      class={style.component}
+      style={{ transform: `translate(${props.x + 19 - 5.8 - 3.5}px, ${props.y - 11 - 5.8}px)` }}
+    >
       <input
         ref={ref}
         class={style.input}

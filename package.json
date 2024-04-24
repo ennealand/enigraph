@@ -4,9 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode lib && tsc --p ./tsconfig.build.json && echo \"import './style.css';$(cat ./dist/index.js)\" > ./dist/index.js",
-    "build:app": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "vite build --mode lib && tsc --p ./tsconfig.build.json && echo \"import './style.css';$(cat ./dist/index.js)\" > ./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
@@ -27,7 +25,6 @@
     "@types/d3": "^7.4.3",
     "@types/node": "^20.11.21",
     "d3": "^7.8.5",
-    "million": "^3.0.6",
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",

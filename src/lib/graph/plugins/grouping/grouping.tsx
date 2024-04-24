@@ -1,7 +1,7 @@
 import { IGroup, INode } from '$lib/types'
 import { ReadonlySignal, effect, useComputed, useSignal } from '@preact/signals'
 import { DeepSignal } from 'deepsignal'
-import { useCallback, useEffect } from 'preact/hooks'
+import { useEffect } from 'preact/hooks'
 import { BaseGroup } from './base-group'
 import { getGroupPosition } from './group-position'
 import style from './grouping.module.css'
@@ -50,39 +50,10 @@ export const withGrouping = (props: Props) => {
     () => selected.value && props.groups.find(({ id }) => id === selected.value)?.values
   )
 
-  const Group = useCallback(
-    (args: {
-      placeholder?: true
-      nohighlight?: boolean
-      customSelection?: Set<number>
-      customIndicators?: Map<number, string>
-      onMouseDown?: (e: MouseEvent, id: number) => void
-    }) => {
-      return (
-        <g class={args.placeholder && style.placeholder}>
-          {props.groups.map(group => (
-            <BaseGroup
-              key={group.id}
-              id={group.id}
-              {...group.position}
-              onMouseDown={args.onMouseDown}
-              opened={!args.nohighlight && opened.value?.has(group.id)}
-              selected={
-                args.customSelection
-                  ? args.customSelection.has(group.id)
-                  : !args.nohighlight && selected.value === group.id
-              }
-              indicator={args.customIndicators?.get(group.id)}
-            />
-          ))}
-        </g>
-      )
-    },
-    [props.groups]
-  )
+  const groupingProps = { opened: opened.value, selected: selected.value, groups: props.groups }
 
   return {
-    Group,
+    groupingProps,
     openGroup,
     closeGroup,
     closeAllGroups,
@@ -91,4 +62,36 @@ export const withGrouping = (props: Props) => {
     selectedGroup,
     selectedGroupId: selected,
   }
+}
+
+export const Groups = (props: {
+  groups: IGroup[]
+  opened: Set<number>
+  selected: number | null
+
+  placeholder?: true
+  nohighlight?: boolean
+  customSelection?: Set<number>
+  customIndicators?: Map<number, string>
+  onMouseDown?: (e: MouseEvent, id: number) => void
+}) => {
+  return (
+    <g class={props.placeholder && style.placeholder}>
+      {props.groups.map(group => (
+        <BaseGroup
+          key={group.id}
+          id={group.id}
+          {...group.position}
+          onMouseDown={props.onMouseDown}
+          opened={!props.nohighlight && props.opened.has(group.id)}
+          selected={
+            props.customSelection
+              ? props.customSelection.has(group.id)
+              : !props.nohighlight && props.selected === group.id
+          }
+          indicator={props.customIndicators?.get(group.id)}
+        />
+      ))}
+    </g>
+  )
 }
