@@ -16,7 +16,7 @@ export type DiskClickCallback = (
     | [type: 'edge', x: number, y: number, e: MouseEvent, value: EdgeType]
 ) => void
 
-export const withDisk = (click: DiskClickCallback, options?: DiskOptions) => {
+export const useDisk = (click: DiskClickCallback, options?: DiskOptions) => {
   const nodeOptions = useMemo(() => getNodeOptions(options?.nodeTypes ?? DefaultNodeTypes), [options?.nodeTypes])
   const edgeOptions = useMemo(() => getEdgeOptions(options?.edgeTypes ?? DefaultEdgeTypes), [options?.edgeTypes])
   const menu = useDeepSignal({ x: 0, y: 0, type: 'node' as OptionType, shown: false })

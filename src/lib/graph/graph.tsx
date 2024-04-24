@@ -5,16 +5,16 @@ import type { JSX } from 'preact/jsx-runtime'
 import { EdgeType, IGroup, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { Edge } from './alphabet'
 import { BaseGraph, useBaseGraph } from './base-graph'
-import { DrawingEdges, withCreation, type CreationEdge } from './plugins/creation/creation'
-import { withDisk } from './plugins/disk'
+import { DrawingEdges, useCreation, type CreationEdge } from './plugins/creation/creation'
+import { useDisk } from './plugins/disk'
 import { Disk } from './plugins/disk/disk'
-import { withDraggable } from './plugins/draggable/draggable'
+import { useDraggable } from './plugins/draggable/draggable'
 import { getGroupPosition } from './plugins/grouping'
-import { Groups, withGrouping } from './plugins/grouping/grouping'
-import { Menu, MenuButton, withMenu } from './plugins/menu/menu'
-import { withMovable } from './plugins/movable/movable'
-import { RenamingArea, withRenaming } from './plugins/renaming/renaming'
-import { AreaSelection, withSelection } from './plugins/selection/selection'
+import { Groups, useGrouping } from './plugins/grouping/grouping'
+import { Menu, MenuButton, useMenu } from './plugins/menu/menu'
+import { useMovable } from './plugins/movable/movable'
+import { RenamingArea, useRenaming } from './plugins/renaming/renaming'
+import { AreaSelection, useSelection } from './plugins/selection/selection'
 
 export interface Props {
   elements: DeepSignal<Elements>
@@ -68,13 +68,13 @@ export const Graph = ({
 
   // const duplication = useDuplication({ addNode, addEdge, nodes: elements.nodes })
 
-  const { transform, onwheel, localize, globalize, zoom } = withMovable({
+  const { transform, onwheel, localize, globalize, zoom } = useMovable({
     width,
     height,
     getInnerPoint,
   })
 
-  const { selectionProps, selection, startSelection, updateSelection, clearSelection, isSelecting } = withSelection({
+  const { selectionProps, selection, startSelection, updateSelection, clearSelection, isSelecting } = useSelection({
     nodes: elements.nodes,
     getInnerPoint,
     localize,
@@ -84,20 +84,20 @@ export const Graph = ({
   })
 
   const { groupingProps, openGroup, closeAllGroups, selectGroup, deselectGroup, selectedGroup, selectedGroupId } =
-    withGrouping({
+    useGrouping({
       nodes: elements.nodes,
       groups: elements.groups,
       selection,
     })
 
-  const { renamingProps, startRenaming, isRenaming } = withRenaming({ submit: changeNodeLabel })
+  const { renamingProps, startRenaming, isRenaming } = useRenaming({ submit: changeNodeLabel })
   const nolabels = useComputed(() => (isRenaming.value ? new Set([isRenaming.value.node.id]) : undefined))
 
   const highlight = useComputed(
     () => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value
   )
 
-  const { startDragginig, updateDragging, isDragging } = withDraggable({
+  const { startDragginig, updateDragging, isDragging } = useDraggable({
     nodes: elements.nodes,
     selection: highlight,
     getInnerPoint,
@@ -106,7 +106,7 @@ export const Graph = ({
     nodePositionChanged,
   })
 
-  const { creationProps, createNode, startDrawingEdge, updateDrawingEdges, createEdges, isDrawingEdges } = withCreation(
+  const { creationProps, createNode, startDrawingEdge, updateDrawingEdges, createEdges, isDrawingEdges } = useCreation(
     {
       addNode,
       addEdge,
@@ -118,7 +118,7 @@ export const Graph = ({
     }
   )
 
-  const { diskProps, showDisk, hideDisk, isDiskOpened } = withDisk(
+  const { diskProps, showDisk, hideDisk, isDiskOpened } = useDisk(
     (type, x, y, _e, value) => {
       hideDisk()
       if (menuNodePosition.current && menuNodePosition.current.x === x && menuNodePosition.current.y === y) {
@@ -134,7 +134,7 @@ export const Graph = ({
   )
 
   const menuNodePosition = useRef<{ x: number; y: number } | null>(null)
-  const { menuProps } = withMenu({
+  const { menuProps } = useMenu({
     nodes: elements.nodes,
     selection,
     visible: useComputed(
@@ -148,7 +148,7 @@ export const Graph = ({
             showDisk('node', ...globalize(x, y))
             menuNodePosition.current = { x, y }
             // WARN: No clean up (intended), but would be great to have one later.
-            // TODO: Come up with a generic solution of adding and cleaning up global events.
+            // TODO: Come up use a generic solution of adding and cleaning up global events.
             document.addEventListener('mouseup', () => (menuNodePosition.current = null), { once: true })
           },
         },

@@ -12,7 +12,7 @@ type Props = {
   padding?: number
 }
 
-export const withMenu = (props: Props) => {
+export const useMenu = (props: Props) => {
   const shown = useSignal(false)
   const timer = useRef(0)
 

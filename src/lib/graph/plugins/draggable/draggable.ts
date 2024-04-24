@@ -13,7 +13,7 @@ type Props = {
   zoom?: ReadonlySignal<number>
 }
 
-export const withDraggable = (props: Props) => {
+export const useDraggable = (props: Props) => {
   const dragging = useSignal(false)
   const startPoint = useSignal({ x: 0, y: 0 })
   const totalShift = useSignal({ x: 0, y: 0 })

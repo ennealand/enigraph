@@ -1,2 +1,2 @@
 export { getGroupPosition } from './group-position'
-export { withGrouping } from './grouping'
+export { useGrouping } from './grouping'

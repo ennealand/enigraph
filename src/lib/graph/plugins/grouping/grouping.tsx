@@ -12,7 +12,7 @@ type Props = {
   selection: ReadonlySignal<Set<number>>
 }
 
-export const withGrouping = (props: Props) => {
+export const useGrouping = (props: Props) => {
   const opened = useSignal(new Set<number>())
   const selected = useSignal<number | null>(null)
 

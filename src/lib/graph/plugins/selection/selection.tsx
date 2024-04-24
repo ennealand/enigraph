@@ -13,7 +13,7 @@ type Props = {
   padding?: number
 }
 
-export const withSelection = (props: Props) => {
+export const useSelection = (props: Props) => {
   const localize = props.localize ?? ((x, y) => [x, y])
 
   const area = useSignal(null as AreaSelectionProps | null)

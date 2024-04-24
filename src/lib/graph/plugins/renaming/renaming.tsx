@@ -9,7 +9,7 @@ type Props = {
   submit?: (element: INode, newValue: string) => void
 }
 
-export const withRenaming = (props: Props) => {
+export const useRenaming = (props: Props) => {
   const isRenaming = useSignal(null as { node: DeepSignal<INode> } | null)
   const startRenaming = (node: DeepSignal<INode>) => {
     isRenaming.value = { node }

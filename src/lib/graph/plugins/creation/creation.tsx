@@ -21,7 +21,7 @@ type DrawingEdge = {
   target: { x: number; y: number }
 }
 
-export const withCreation = (props: Props) => {
+export const useCreation = (props: Props) => {
   const drawingEdges = useDeepSignal({ values: [] as DrawingEdge[] })
 
   const createNode = (x: number, y: number, type: NodeType) => {

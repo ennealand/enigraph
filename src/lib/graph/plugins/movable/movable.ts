@@ -7,7 +7,7 @@ type Props = {
   getInnerPoint: (x: number, y: number) => readonly [number, number]
 }
 
-export const withMovable = (props: Props) => {
+export const useMovable = (props: Props) => {
   const centerX = props.width / 2
   const centerY = props.height / 2
 
