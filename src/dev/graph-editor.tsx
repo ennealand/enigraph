@@ -7,7 +7,10 @@ import MyWorker from './worker.js?worker'
 import { useSignal } from '@preact/signals'
 import { useEffect } from 'preact/hooks'
 
-const source = mock as unknown as Elements
+const source = {
+  ...(mock as unknown as Elements),
+  groups: (mock as unknown as Elements).groups.map(g => ({ ...g, values: new Set(g.values) })),
+}
 
 export const GraphEditor = () => {
   const elements = useSignal<DeepSignal<Elements> | null>(null)
@@ -17,32 +20,7 @@ export const GraphEditor = () => {
     // simulate(elements, {animate: true})
     const worker = new MyWorker()
     worker.postMessage(source)
-    worker.onmessage = e =>
-      (elements.value = deepSignal({
-        ...e.data,
-        groups: [
-          {
-            id: 'z',
-            values: new Set(['g', 'e']),
-            position: {
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            },
-          },
-          {
-            id: 'w',
-            values: new Set(['k', 'j']),
-            position: {
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            },
-          },
-        ],
-      }))
+    worker.onmessage = e => (elements.value = deepSignal(e.data))
   }, [])
 
   const addNode = (node: INode) => {

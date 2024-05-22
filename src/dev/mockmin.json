@@ -16,5 +16,26 @@
     { "source": "k", "target": "g", "id": "edge-7", "type": "EdgeConst" },
     { "source": "g", "target": "j", "id": "edge-8", "type": "EdgeConst" }
   ],
-  "groups": []
+  "groups": [
+    {
+      "id": "z",
+      "values": ["g", "e"],
+      "position": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      }
+    },
+    {
+      "id": "w",
+      "values": ["k", "j"],
+      "position": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      }
+    }
+  ]
 }
