@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode lib && tsc --p ./tsconfig.build.json && echo \"import './style.css';$(cat ./dist/index.js)\" > ./dist/index.js"
+    "build": "vite build --mode lib && tsc --p ./tsconfig.build.json && echo \"document.head.insertAdjacentHTML('beforeend','<link rel=\\\"stylesheet\\\" href=\\\"../../dist/style.css\\\"/>');$(cat ./dist/index.js)\" > ./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
