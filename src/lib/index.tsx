@@ -12,6 +12,9 @@ export {
 import { Graph, Props } from './graph/graph'
 export default (id: string, props: Props) => render(<Graph {...props} />, document.getElementById(id)!)
 
+export * from 'deepsignal'
+export * from '@preact/signals'
+
 // import { deepSignal, useDeepSignal } from 'deepsignal'
 // import { Elements } from './types'
 // export const useCreateGraph = () => useDeepSignal<Elements>({ nodes: [], edges: [] })
