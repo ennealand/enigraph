@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enigraph Example</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module">
+    import mount, { signal, deepSignal } from 'https://esm.sh/enigraph?bundle-deps'
+    const elements = deepSignal({ nodes: [], edges: [], groups: [] })
+    const width = signal(800)
+    const height = signal(600)
+    onload = () => (onresize(), mount('graph', { width, height, elements }))
+    onresize = () => {
+      const rect = document.querySelector('#graph').getBoundingClientRect()
+      width.value = rect.width
+      height.value = rect.height
+    }
+  </script>
+</head>
+
+<body>
+  <div class="playground">
+    <div class="header">
+      <h2>Playground</h2>
+      <button>Clear</button>
+    </div>
+    <div id="graph"></div>
+  </div>
+</body>
+
+</html>
