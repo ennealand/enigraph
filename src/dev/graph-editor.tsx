@@ -91,7 +91,7 @@ export const GraphEditor = () => {
       >
         Fine
       </input>
-      <div style={{ border: 'solid red 3px', width: 'fit-content', margin: '10rem', borderRadius: '0.8rem' }}>
+      <div style={{ border: 'solid red 3px', width: 'fit-content', margin: '4rem auto', borderRadius: '0.8rem' }}>
         {elements.value && (
           <Graph
             elements={elements.value}

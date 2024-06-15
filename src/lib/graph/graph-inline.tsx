@@ -5,16 +5,16 @@ import type { JSX } from 'preact/jsx-runtime'
 import { EdgeType, IGroup, NodeType, type Elements, type IEdge, type INode } from '../types'
 import { Edge } from './alphabet'
 import { BaseGraph, useBaseGraph } from './base-graph'
-import { DrawingEdges, useCreation, type CreationEdge } from './plugins/creation/creation'
-import { useDisk } from './plugins/disk'
-import { Disk } from './plugins/disk/disk'
-import { useDraggable } from './plugins/draggable/draggable'
-import { getGroupPosition } from './plugins/grouping'
-import { Groups, useGrouping } from './plugins/grouping/grouping'
-import { Menu, MenuButton, useMenu } from './plugins/menu/menu'
-import { useMovable } from './plugins/movable/movable'
-import { RenamingArea, useRenaming } from './plugins/renaming/renaming'
-import { AreaSelection, useSelection } from './plugins/selection/selection'
+import { DrawingEdges, useCreation, type CreationEdge } from '../plugins/creation/creation'
+import { useDisk } from '../plugins/disk'
+import { Disk } from '../plugins/disk/disk'
+import { withDraggable } from '../plugins/draggable/draggable'
+import { getGroupPosition } from '../plugins/grouping'
+import { Groups, useGrouping } from '../plugins/grouping/grouping'
+import { Menu, MenuButton, useMenu } from '../plugins/menu/menu'
+import { useMovable } from '../plugins/movable/movable'
+import { RenamingArea, useRenaming } from '../plugins/renaming/renaming'
+import { AreaSelection, useSelection } from '../plugins/selection/selection'
 
 export interface Props {
   elements: DeepSignal<Elements>
@@ -97,7 +97,7 @@ export const Graph = ({
     () => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value
   )
 
-  const { startDragginig, updateDragging, isDragging } = useDraggable({
+  const { startDragginig, updateDragging, isDragging, abortDragging } = withDraggable({
     nodes: elements.nodes,
     selection: highlight,
     getInnerPoint,

@@ -1,5 +1,5 @@
-import { useSignal } from '@preact/signals'
-import { useDeepSignal } from 'deepsignal'
+import { Signal, useSignal } from '@preact/signals'
+import { DeepSignal, useDeepSignal } from 'deepsignal'
 
 type Props = {
   width: number
@@ -7,7 +7,25 @@ type Props = {
   getInnerPoint: (x: number, y: number) => readonly [number, number]
 }
 
-export const useMovable = (props: Props) => {
+type MovableContext = {
+  transform: DeepSignal<{
+    x: number
+    y: number
+    zoom: number
+    moving: boolean
+  }>
+  centerX: number
+  centerY: number
+  localize: (x: number, y: number) => readonly [number, number]
+  globalize: (x: number, y: number) => readonly [number, number]
+  onwheel: (e: WheelEvent) => void
+  zoom: Signal<number> | undefined
+  startMoving: (e: MouseEvent) => void
+  updateMoving: (e: MouseEvent) => void
+  stopMoving: () => void
+}
+
+export const useMovable = (props: Props): MovableContext => {
   const centerX = props.width / 2
   const centerY = props.height / 2
 

@@ -1,5 +1,5 @@
 import { render } from 'preact'
-export { Graph, type Props as GraphProps } from './graph/graph'
+export { Graph, type Props as GraphProps } from './graph/graph-inline'
 export {
   type INode as GraphNode,
   type IEdge as GraphEdge,
@@ -9,7 +9,7 @@ export {
   EdgeType,
 } from './types'
 
-import { Graph, Props } from './graph/graph'
+import { Graph, Props } from './graph/graph-inline'
 export default (id: string, props: Props) => render(<Graph {...props} />, document.getElementById(id)!)
 
 export * from 'deepsignal'
