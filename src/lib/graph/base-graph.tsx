@@ -1,6 +1,7 @@
 import type { ReadonlySignal } from '@preact/signals'
 import type { Ref } from 'preact/hooks'
 import type { JSX } from 'preact/jsx-runtime'
+import './base-graph.css'
 
 type Props = {
   components: {

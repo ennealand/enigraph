@@ -1,0 +1,14 @@
+.enigraph {
+  position: relative;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.htmlAfter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  & > * {
+    pointer-events: auto;
+  }
+}
