@@ -3,7 +3,6 @@ import { type JSX, render } from 'preact'
 import { useRef } from 'preact/hooks'
 import { BaseGraph } from './base-graph'
 
-// type GraphPlugin<Exports extends Record<string, any>> = Exports
 type Events = {
   [K in keyof JSX.HTMLAttributes<HTMLDivElement> as K extends `on${infer E}`
     ? `graph:${Uncapitalize<E>}`
@@ -14,7 +13,14 @@ type Events = {
     : never]-?: JSX.HTMLAttributes<SVGSVGElement>[K]
 }
 
-type InitialContext = { width: number; height: number; getInnerPoint: (x: number, y: number) => [number, number] }
+type InitialContext = {
+  width: ReadonlySignal<number>
+  height: ReadonlySignal<number>
+  centerX: ReadonlySignal<number>
+  centerY: ReadonlySignal<number>
+  getInnerPoint: (x: number, y: number) => [number, number]
+}
+
 type PropertiesOnly<T> = { [K in keyof T as K extends `on${string}` ? never : K]?: T[K] }
 type Config = {
   before?: (() => JSX.Element)[]
@@ -104,7 +110,7 @@ export class EnigraphFactory<
         return [x - rect.x - centerX.value, y - rect.y - centerY.value]
       }
 
-      const ctx = { width, height, getInnerPoint } as unknown as Context
+      const ctx = { width, height, centerX, centerY, getInnerPoint } as unknown as Context
       for (const plugin of this.#plugins) {
         Object.assign(ctx, plugin(ctx))
       }

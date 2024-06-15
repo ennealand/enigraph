@@ -1,4 +1,4 @@
-import type { ReadonlySignal } from '@preact/signals'
+import { useComputed, type ReadonlySignal } from '@preact/signals'
 import type { Ref } from 'preact/hooks'
 import type { JSX } from 'preact/jsx-runtime'
 import './base-graph.css'
@@ -54,10 +54,11 @@ export const BaseGraph = (props: Props) => {
       >
         {props.staticBefore?.map(Fn => <Fn />)}
         <g
-          transform={
-            props.transform &&
-            `translate(${props.transform.value.x} ${props.transform.value.y}) scale(${props.transform.value.zoom})`
-          }
+          transform={useComputed(
+            () =>
+              props.transform &&
+              `translate(${props.transform.value.x} ${props.transform.value.y}) scale(${props.transform.value.zoom})`
+          )}
         >
           {props.before?.map(Fn => <Fn />)}
           {props.components.map(({ name, component, items }) => (
@@ -69,11 +70,11 @@ export const BaseGraph = (props: Props) => {
       </svg>
       <div
         class='htmlAfter'
-        style={{
-          transform:
+        style={useComputed(
+          () =>
             props.transform &&
-            `translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`,
-        }}
+            `transform:translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`
+        )}
       >
         {props.htmlAfter?.map(Fn => <Fn />)}
       </div>

@@ -12,7 +12,7 @@ import { withDraggable } from '../plugins/draggable/draggable'
 import { getGroupPosition } from '../plugins/grouping'
 import { Groups, useGrouping } from '../plugins/grouping/grouping'
 import { Menu, MenuButton, useMenu } from '../plugins/menu/menu'
-import { useMovable } from '../plugins/movable/movable'
+import { withMovable } from '../plugins/movable/movable'
 import { RenamingArea, useRenaming } from '../plugins/renaming/renaming'
 import { AreaSelection, useSelection } from '../plugins/selection/selection'
 
@@ -68,7 +68,7 @@ export const Graph = ({
 
   // const duplication = useDuplication({ addNode, addEdge, nodes: elements.nodes })
 
-  const { transform, onwheel, localize, globalize, zoom } = useMovable({
+  const { transform, onwheel, localize, globalize, zoom } = withMovable({
     width,
     height,
     getInnerPoint,

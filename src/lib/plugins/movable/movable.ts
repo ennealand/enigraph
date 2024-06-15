@@ -1,39 +1,40 @@
-import { Signal, useSignal } from '@preact/signals'
-import { DeepSignal, useDeepSignal } from 'deepsignal'
+import { ReadonlySignal, signal, Signal, useComputed, useSignal } from '@preact/signals'
 
 type Props = {
-  width: number
-  height: number
+  width: ReadonlySignal<number>
+  height: ReadonlySignal<number>
+  centerX: ReadonlySignal<number>
+  centerY: ReadonlySignal<number>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
 }
 
 type MovableContext = {
-  transform: DeepSignal<{
-    x: number
-    y: number
-    zoom: number
-    moving: boolean
+  transform: ReadonlySignal<{
+    x: Signal<number>
+    y: Signal<number>
+    zoom: Signal<number>
+    moving: Signal<boolean>
   }>
-  centerX: number
-  centerY: number
   localize: (x: number, y: number) => readonly [number, number]
   globalize: (x: number, y: number) => readonly [number, number]
   onwheel: (e: WheelEvent) => void
-  zoom: Signal<number> | undefined
   startMoving: (e: MouseEvent) => void
   updateMoving: (e: MouseEvent) => void
   stopMoving: () => void
 }
 
-export const useMovable = (props: Props): MovableContext => {
-  const centerX = props.width / 2
-  const centerY = props.height / 2
-
-  const transform = useDeepSignal({ x: 0, y: 0, zoom: 1, moving: false })
+export const withMovable = (props: Props): MovableContext => {
+  const transform = useComputed(() => ({ x: signal(0), y: signal(0), zoom: signal(1), moving: signal(false) }))
   const localize = (x: number, y: number) =>
-    [(x - transform.x) / transform.zoom, (y - transform.y) / transform.zoom] as const
+    [
+      (x - transform.value.x.value) / transform.value.zoom.value,
+      (y - transform.value.y.value) / transform.value.zoom.value,
+    ] as const
   const globalize = (x: number, y: number) =>
-    [x * transform.zoom + transform.x, y * transform.zoom + transform.y] as const
+    [
+      x * transform.value.zoom.value + transform.value.x.value,
+      y * transform.value.zoom.value + transform.value.y.value,
+    ] as const
 
   // Dragging-based moving
   const startPoint = useSignal(null as { x: number; y: number } | null)
@@ -58,26 +59,25 @@ export const useMovable = (props: Props): MovableContext => {
     e.preventDefault()
     if (e.ctrlKey) {
       let deltaZoom = e.deltaY * 0.01
-      if (transform.zoom - deltaZoom < 0.1) deltaZoom = transform.zoom - 0.1
-      else if (transform.zoom - deltaZoom > 5) deltaZoom = transform.zoom - 5
+      if (transform.value.zoom.value - deltaZoom < 0.1) deltaZoom = transform.value.zoom.value - 0.1
+      else if (transform.value.zoom.value - deltaZoom > 5) deltaZoom = transform.value.zoom.value - 5
 
-      transform.x += (deltaZoom / transform.zoom) * (e.offsetX - centerX - transform.x)
-      transform.y += (deltaZoom / transform.zoom) * (e.offsetY - centerY - transform.y)
-      transform.zoom -= deltaZoom
+      transform.value.x.value +=
+        (deltaZoom / transform.value.zoom.value) * (e.offsetX - props.centerX.value - transform.value.x.value)
+      transform.value.y.value +=
+        (deltaZoom / transform.value.zoom.value) * (e.offsetY - props.centerY.value - transform.value.y.value)
+      transform.value.zoom.value -= deltaZoom
     } else {
-      transform.x -= e.deltaX
-      transform.y -= e.deltaY
+      transform.value.x.value -= e.deltaX
+      transform.value.y.value -= e.deltaY
     }
   }
 
   return {
     transform,
-    centerX,
-    centerY,
     localize,
     globalize,
     onwheel,
-    zoom: transform.$zoom,
     startMoving,
     updateMoving,
     stopMoving,

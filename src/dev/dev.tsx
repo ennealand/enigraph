@@ -1,4 +1,5 @@
 import { EnigraphFactory } from '$lib/graph/factory'
+import { withMovable } from '$lib/plugins/movable'
 import { ReadonlySignal, signal } from '@preact/signals'
 import { render } from 'preact'
 
@@ -9,9 +10,8 @@ const Enigraph = new EnigraphFactory()
     console.log('text is rendered')
     return <text>{props.xyz}</text>
   })
-  .configure(() => ({
-    svgProps: { style },
-  }))
+  .plug(withMovable)
+  .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .plug(() => ({ MyHTMLComponent: () => <div>Three Apples</div> }))
   .on('svg:mouseDown', (_, e) => {
     e.preventDefault()
