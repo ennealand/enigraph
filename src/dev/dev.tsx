@@ -12,6 +12,7 @@ const Enigraph = new EnigraphFactory()
   .configure(() => ({
     svgProps: { style },
   }))
+  .plug(() => ({ MyHTMLComponent: () => <div>Three Apples</div> }))
   .on('svg:mouseDown', (_, e) => {
     e.preventDefault()
     style.value = style.value === 'background:pink' ? 'background:skyblue' : 'background:pink'
@@ -20,6 +21,10 @@ const Enigraph = new EnigraphFactory()
     e.preventDefault()
     nodes.value[0].xyz.value = nodes.value[0].xyz.value === 'hello' ? 'world' : 'hello'
   })
+  .configure(ctx => ({
+    svgProps: { style },
+    htmlAfter: [ctx.MyHTMLComponent],
+  }))
   .create()
 
 const nodes = signal([{ id: 0, xyz: signal('hello') }])

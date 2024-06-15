@@ -18,7 +18,7 @@ export interface Props {
   children?: JSX.Element | (JSX.Element | null)[]
   before?: JSX.Element
   inner?: JSX.Element
-  innerHtml?: JSX.Element
+  htmlAfter?: JSX.Element
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
   onWheel?: (e: JSX.TargetedWheelEvent<SVGSVGElement | HTMLDivElement>) => void
   onMouseEnter?: (e: JSX.TargetedMouseEvent<SVGSVGElement>) => void
@@ -151,7 +151,7 @@ export const BaseGraph = (props: Props) => {
         {props.children}
       </svg>
       <div
-        class={style.innerHtml}
+        class={style.htmlAfter}
         style={{
           transform:
             transform && `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom}) translate(50%, 50%)`,
@@ -159,7 +159,7 @@ export const BaseGraph = (props: Props) => {
         onWheel={props.onWheel} // nonpassive | preventDefault | stopPropagation
       >
         {/* User-defined html extensions */}
-        {props.innerHtml}
+        {props.htmlAfter}
       </div>
     </div>
   )

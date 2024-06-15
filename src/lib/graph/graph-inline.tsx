@@ -335,7 +335,7 @@ export const Graph = ({
           {creationProps && <DrawingEdges {...creationProps} />}
         </>
       }
-      innerHtml={
+      htmlAfter={
         <>
           {menuProps && <Menu {...menuProps} />}
           {renamingProps && <RenamingArea {...renamingProps} />}
