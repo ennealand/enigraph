@@ -15,6 +15,16 @@ type Events = {
 }
 
 type InitialContext = { width: number; height: number; getInnerPoint: (x: number, y: number) => [number, number] }
+type PropertiesOnly<T> = { [K in keyof T as K extends `on${string}` ? never : K]?: T[K] }
+type Config = {
+  before?: (() => JSX.Element)[]
+  after?: (() => JSX.Element)[]
+  staticBefore?: (() => JSX.Element)[]
+  staticAfter?: (() => JSX.Element)[]
+  htmlAfter?: (() => JSX.Element)[]
+  enigraphProps?: PropertiesOnly<JSX.HTMLAttributes<HTMLDivElement>>
+  svgProps?: PropertiesOnly<JSX.HTMLAttributes<SVGSVGElement>>
+}
 
 export class EnigraphFactory<
   Context extends Record<string, unknown> = InitialContext,
@@ -25,6 +35,7 @@ export class EnigraphFactory<
   #components = {} as { [Name in keyof Components]: (props: Components[Name]) => JSX.Element }
   #plugins: ((ctx: Context) => Record<string, unknown>)[] = []
   #events = new Map<keyof Events, (ctx: Context, e: Parameters<Events[keyof Events]>[0]) => void>()
+  #config?: (ctx: Context) => Config
 
   add<Name extends string, ComponentProps extends { id: string | number }>(
     name: Name,
@@ -44,7 +55,16 @@ export class EnigraphFactory<
     return this
   }
 
-  #getEventProps = <E extends Element>(ctx: Context, prefix: keyof Events extends `${infer P}:${string}` ? P : never) =>
+  configure(config: (ctx: Context) => Config) {
+    this.#config = config
+    return this
+  }
+
+  #getEventProps = <E extends Element>(
+    ctx: Context,
+    prefix: keyof Events extends `${infer P}:${string}` ? P : never,
+    base: JSX.HTMLAttributes<E> = {}
+  ) =>
     useComputed(
       (): JSX.HTMLAttributes<E> =>
         Array.from(this.#events.entries()).reduce(
@@ -55,7 +75,7 @@ export class EnigraphFactory<
               ) => fn(ctx, e)),
             a
           ),
-          {} as JSX.HTMLAttributes<E>
+          base
         )
     )
 
@@ -84,16 +104,28 @@ export class EnigraphFactory<
         return [x - rect.x - centerX.value, y - rect.y - centerY.value]
       }
 
-      const context = { width, height, getInnerPoint } as unknown as Context
+      const ctx = { width, height, getInnerPoint } as unknown as Context
       for (const plugin of this.#plugins) {
-        Object.assign(context, plugin(context))
+        Object.assign(ctx, plugin(ctx))
       }
 
-      const enigraphProps = this.#getEventProps<HTMLDivElement>(context, 'graph')
-      const svgProps = this.#getEventProps<SVGSVGElement>(context, 'svg')
+      const { enigraphProps: baseEnigraphProps, svgProps: baseSvgProps, ...config } = this.#config?.(ctx) ?? {}
+      const enigraphProps = this.#getEventProps<HTMLDivElement>(ctx, 'graph', baseEnigraphProps)
+      const svgProps = this.#getEventProps<SVGSVGElement>(ctx, 'svg', baseSvgProps)
 
-      const data = { components, width, height, centerX, centerY, enigraphProps, svgProps }
-      return <BaseGraph pref={ref} {...data} />
+      console.log('enigraph is rendered')
+
+      const data = {
+        components,
+        width,
+        height,
+        centerX,
+        centerY,
+        enigraphProps,
+        svgProps,
+        transform: ctx.transform as never,
+      }
+      return <BaseGraph pref={ref} {...data} {...config} />
     }
     Enigraph.mount = (selector: string, props: Props) =>
       render(<Enigraph {...props} />, document.querySelector(selector)!)

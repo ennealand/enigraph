@@ -16,12 +16,11 @@ type Props = {
   centerX: ReadonlySignal<number>
   centerY: ReadonlySignal<number>
   transform?: ReadonlySignal<{ x: ReadonlySignal<number>; y: ReadonlySignal<number>; zoom: ReadonlySignal<number> }>
-  before?: JSX.Element
-  after?: JSX.Element
-  staticBefore?: JSX.Element
-  staticAfter?: JSX.Element
-  htmlBefore?: JSX.Element
-  htmlAfter?: JSX.Element
+  before?: (() => JSX.Element)[]
+  after?: (() => JSX.Element)[]
+  staticBefore?: (() => JSX.Element)[]
+  staticAfter?: (() => JSX.Element)[]
+  htmlAfter?: (() => JSX.Element)[]
 }
 
 export const List = <Props extends { id: string | number }>({
@@ -40,6 +39,7 @@ export const List = <Props extends { id: string | number }>({
 )
 
 export const BaseGraph = (props: Props) => {
+  console.log('Base enigraph is rendered')
   return (
     <div class='enigraph' {...props.enigraphProps.value}>
       <svg
@@ -51,30 +51,30 @@ export const BaseGraph = (props: Props) => {
         height={`${props.height}px`}
         {...props.svgProps.value}
       >
-        {props.staticBefore}
+        {props.staticBefore?.map(Fn => <Fn />)}
         <g
           transform={
             props.transform &&
             `translate(${props.transform.value.x} ${props.transform.value.y}) scale(${props.transform.value.zoom})`
           }
         >
-          {props.before}
+          {props.before?.map(Fn => <Fn />)}
           {props.components.map(({ name, component, items }) => (
             <List key={name} Component={component} items={items} />
           ))}
-          {props.after}
-          {props.staticAfter}
+          {props.after?.map(Fn => <Fn />)}
         </g>
+        {props.staticAfter?.map(Fn => <Fn />)}
       </svg>
       <div
-        class={'style.innerHtml'}
+        class='htmlAfter'
         style={{
           transform:
             props.transform &&
             `translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`,
         }}
       >
-        {props.htmlAfter}
+        {props.htmlAfter?.map(Fn => <Fn />)}
       </div>
     </div>
   )
