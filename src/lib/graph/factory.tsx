@@ -48,7 +48,10 @@ export class EnigraphFactory<
     component: (props: ComponentProps) => JSX.Element
   ) {
     ;(this.#components as Record<Name, unknown>)[name] = component
-    return this as unknown as EnigraphFactory<Context, Components & Record<Name, ComponentProps>>
+    return this as unknown as EnigraphFactory<
+      Context & Record<`${Name}s`, ReadonlySignal<ComponentProps[]>>,
+      Components & Record<Name, ComponentProps>
+    >
   }
 
   plug<Exports extends Record<string, unknown>>(plugin: (ctx: Context) => Exports) {
@@ -92,16 +95,6 @@ export class EnigraphFactory<
     const Enigraph = ({ width, height, ...props }: Props) => {
       const ref = useRef<SVGSVGElement>(null)
 
-      const components = Object.entries(this.#components).map(([name, component]) => {
-        const items = (props as Record<string, unknown>)[name + 's']
-        if (!items) throw new Error(`Missing '${name}s' prop`)
-        return { name, component, items } as {
-          name: string
-          component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
-          items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
-        }
-      })
-
       const centerX = useComputed(() => width.value / 2)
       const centerY = useComputed(() => height.value / 2)
       const getInnerPoint = (x: number, y: number): [number, number] => {
@@ -110,10 +103,26 @@ export class EnigraphFactory<
         return [x - rect.x - centerX.value, y - rect.y - centerY.value]
       }
 
-      const ctx = { width, height, centerX, centerY, getInnerPoint } as unknown as Context
-      for (const plugin of this.#plugins) {
-        Object.assign(ctx, plugin(ctx))
+      let ctx = { width, height, centerX, centerY, getInnerPoint } as unknown as Context
+
+      for (const name of Object.keys(this.#components)) {
+        const items = (props as Record<string, unknown>)[name + 's']
+        if (!items) throw new Error(`Missing '${name}s' prop`)
+        ;(ctx as Record<string, unknown>)[name + 's'] = items
       }
+
+      for (const plugin of this.#plugins) {
+        ctx = { ...ctx, ...plugin(ctx) }
+      }
+
+      const components = Object.entries(this.#components).map(([name, component]) => {
+        const items = (ctx as Record<string, unknown>)[name + 's']
+        return { name, component, items } as {
+          name: string
+          component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
+          items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
+        }
+      })
 
       const { enigraphProps: baseEnigraphProps, svgProps: baseSvgProps, ...config } = this.#config?.(ctx) ?? {}
       const enigraphProps = this.#getEventProps<HTMLDivElement>(ctx, 'graph', baseEnigraphProps)

@@ -31,13 +31,16 @@ export const List = <Props extends { id: string | number }>({
 }: {
   Component: (props: Props) => JSX.Element
   items: ReadonlySignal<Props[]>
-} & JSX.HTMLAttributes<SVGGElement>) => (
-  <g {...props}>
-    {items.value.map(item => (
-      <Component key={item.id} {...item} />
-    ))}
-  </g>
-)
+} & JSX.HTMLAttributes<SVGGElement>) => {
+  console.log('list render')
+  return items.value.length ? (
+    <g {...props}>
+      {items.value.map(item => (
+        <Component key={item.id} {...item} />
+      ))}
+    </g>
+  ) : null
+}
 
 export const BaseGraph = (props: Props) => {
   console.log('Base enigraph is rendered')
@@ -54,10 +57,10 @@ export const BaseGraph = (props: Props) => {
       >
         {props.staticBefore?.map(Fn => <Fn />)}
         <g
-          transform={useComputed(
-            () =>
-              props.transform &&
-              `translate(${props.transform.value.x} ${props.transform.value.y}) scale(${props.transform.value.zoom})`
+          transform={useComputed(() =>
+            (props.before || props.after || props.components.some(x => x.items.value.length)) && props.transform
+              ? `translate(${props.transform.value.x} ${props.transform.value.y}) scale(${props.transform.value.zoom})`
+              : undefined
           )}
         >
           {props.before?.map(Fn => <Fn />)}
@@ -68,16 +71,18 @@ export const BaseGraph = (props: Props) => {
         </g>
         {props.staticAfter?.map(Fn => <Fn />)}
       </svg>
-      {props.htmlAfter?.length && <div
-        class='htmlAfter'
-        style={useComputed(
-          () =>
-            props.transform &&
-            `transform:translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`
-        )}
-      >
-        {props.htmlAfter?.map(Fn => <Fn />)}
-      </div>}
+      {props.htmlAfter?.length && (
+        <div
+          class='htmlAfter'
+          style={useComputed(
+            () =>
+              props.transform &&
+              `transform:translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`
+          )}
+        >
+          {props.htmlAfter?.map(Fn => <Fn />)}
+        </div>
+      )}
     </div>
   )
 }

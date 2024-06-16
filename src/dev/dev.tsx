@@ -1,8 +1,10 @@
 import { Alphabet } from '$lib/components/scg/alphabet'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
+import { BaseNodeProps } from '$lib/components/scg/node/types'
 import { ComponentProps, EnigraphFactory } from '$lib/graph/factory'
+import { withAutohide } from '$lib/plugins/autohide'
 import { withMovable } from '$lib/plugins/movable'
-import { signal } from '@preact/signals'
+import { effect, ReadonlySignal, signal, untracked, useComputed, useSignal, useSignalEffect } from '@preact/signals'
 import { render } from 'preact'
 
 const style = signal('background:skyblue')
@@ -13,8 +15,12 @@ const nodeSize = signal(10)
 const factory = new EnigraphFactory()
   .add('node', (props: BasicNodeProps) => <Node {...props} padding={nodePadding} />)
   .plug(withMovable)
+  .plug(withAutohide)
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
-  .configure(_ctx => ({ svgProps: { style }, staticBefore: [() => <Alphabet size={nodeSize} />] }))
+  .configure(_ctx => ({
+    svgProps: { style },
+    staticBefore: [() => <Alphabet size={nodeSize} />],
+  }))
 
 const Enigraph = factory.create()
 const nodes = signal<ComponentProps<typeof factory, 'node'>[]>([
