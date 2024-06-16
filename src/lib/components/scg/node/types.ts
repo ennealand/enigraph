@@ -1,5 +1,4 @@
 import { ReadonlySignal } from '@preact/signals'
-import { JSX } from 'preact'
 
 export type BaseNodeProps<Id, NodeType> = {
   id: Id
@@ -8,7 +7,3 @@ export type BaseNodeProps<Id, NodeType> = {
   x: ReadonlySignal<number>
   y: ReadonlySignal<number>
 }
-
-export type BaseNodeElement = <Id, NodeType, NodeProps extends BaseNodeProps<Id, NodeType>>(
-  props: NodeProps
-) => JSX.Element

@@ -138,3 +138,9 @@ export class EnigraphFactory<
     return Enigraph
   }
 }
+
+type ComponentNames<Factory extends EnigraphFactory<any, any>> =
+  Factory extends EnigraphFactory<any, infer Components> ? keyof Components : never
+
+export type ComponentProps<Factory extends EnigraphFactory<any, any>, Name extends ComponentNames<Factory>> =
+  Factory extends EnigraphFactory<any, infer Components> ? Components[Name] : never

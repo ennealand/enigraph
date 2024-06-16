@@ -1,33 +1,26 @@
-import { EnigraphFactory } from '$lib/graph/factory'
+import { Alphabet } from '$lib/components/scg/alphabet'
+import { BasicNodeProps, Node } from '$lib/components/scg/node'
+import { ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withMovable } from '$lib/plugins/movable'
-import { ReadonlySignal, signal } from '@preact/signals'
+import { signal } from '@preact/signals'
 import { render } from 'preact'
 
 const style = signal('background:skyblue')
 
-const Enigraph = new EnigraphFactory()
-  .add('node', (props: { id: number; xyz: ReadonlySignal<string> }) => {
-    console.log('text is rendered')
-    return <text>{props.xyz}</text>
-  })
+const nodePadding = signal(10)
+const nodeSize = signal(10)
+
+const factory = new EnigraphFactory()
+  .add('node', (props: BasicNodeProps) => <Node {...props} padding={nodePadding} />)
   .plug(withMovable)
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
-  .plug(() => ({ MyHTMLComponent: () => <div>Three Apples</div> }))
-  .on('svg:mouseDown', (_, e) => {
-    e.preventDefault()
-    style.value = style.value === 'background:pink' ? 'background:skyblue' : 'background:pink'
-  })
-  .on('graph:mouseUp', (_, e) => {
-    e.preventDefault()
-    nodes.value[0].xyz.value = nodes.value[0].xyz.value === 'hello' ? 'world' : 'hello'
-  })
-  .configure(ctx => ({
-    svgProps: { style },
-    htmlAfter: [ctx.MyHTMLComponent],
-  }))
-  .create()
+  .configure(_ctx => ({ svgProps: { style }, staticBefore: [() => <Alphabet size={nodeSize} />] }))
 
-const nodes = signal([{ id: 0, xyz: signal('hello') }])
+const Enigraph = factory.create()
+const nodes = signal<ComponentProps<typeof factory, 'node'>[]>([
+  { id: 0, type: signal('const-tuple'), x: signal(0), y: signal(0), label: signal('hello') },
+  { id: 1, type: signal('var-norole'), x: signal(70), y: signal(50), label: signal('world') },
+])
 
 const result = <Enigraph width={signal(400)} height={signal(400)} nodes={nodes} />
 

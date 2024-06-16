@@ -68,7 +68,7 @@ export const BaseGraph = (props: Props) => {
         </g>
         {props.staticAfter?.map(Fn => <Fn />)}
       </svg>
-      <div
+      {props.htmlAfter?.length && <div
         class='htmlAfter'
         style={useComputed(
           () =>
@@ -77,7 +77,7 @@ export const BaseGraph = (props: Props) => {
         )}
       >
         {props.htmlAfter?.map(Fn => <Fn />)}
-      </div>
+      </div>}
     </div>
   )
 }
