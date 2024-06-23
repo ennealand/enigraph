@@ -15,6 +15,7 @@ type MovableContext = {
     zoom: Signal<number>
     moving: Signal<boolean>
   }>
+  zoom: ReadonlySignal<number>
   localize: (x: number, y: number) => readonly [number, number]
   globalize: (x: number, y: number) => readonly [number, number]
   onwheel: (e: WheelEvent) => void
@@ -75,6 +76,7 @@ export const withMovable = (props: Props): MovableContext => {
 
   return {
     transform,
+    zoom: useComputed(() => transform.value.zoom.value),
     localize,
     globalize,
     onwheel,
