@@ -1,9 +1,17 @@
-import { ReadonlySignal } from '@preact/signals'
+import { ReadonlySignal, Signal } from '@preact/signals'
+import { JSX } from 'preact/jsx-runtime'
 
-export type BaseNodeProps<Id extends string | number = string | number, NodeType = unknown> = {
+type DynamicSygnal<T, Mutability> = Mutability extends 'mutable' ? Signal<T> : ReadonlySignal<T>
+
+export type BaseNodeProps<
+  Id extends string | number = string | number,
+  NodeType = unknown,
+  Mutability extends 'mutable' | 'immutable' = 'immutable',
+> = {
   id: Id
-  type: ReadonlySignal<NodeType>
-  label?: ReadonlySignal<string>
-  x: ReadonlySignal<number>
-  y: ReadonlySignal<number>
+  type: DynamicSygnal<NodeType, Mutability>
+  label?: DynamicSygnal<string, Mutability>
+  x: DynamicSygnal<number, Mutability>
+  y: DynamicSygnal<number, Mutability>
+  onMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
 }

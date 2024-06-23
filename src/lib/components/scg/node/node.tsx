@@ -1,17 +1,17 @@
-import { ReadonlySignal, useComputed } from '@preact/signals'
+import { ReadonlySignal, Signal, useComputed } from '@preact/signals'
 import { BaseNodeProps } from './types'
 import './node.css'
 
-export type BasicNodeProps = BaseNodeProps<string | number, 'const-tuple' | 'var-norole'>
+export type BasicNodeProps = BaseNodeProps<number, 'const-tuple' | 'var-norole', 'mutable'>
 export interface NodeProps extends BasicNodeProps {
   padding: ReadonlySignal<number>
 }
 
-export const Node = ({ type, x, y, label, padding }: NodeProps) => {
+export const Node = ({ type, x, y, label, padding, onMouseDown }: NodeProps) => {
   console.log('node render')
   return (
     <g>
-      <g class='node-container'>
+      <g class='node-container' onMouseDown={onMouseDown}>
         {padding && <circle cx={x} cy={y} fill='transparent' />}
         <use class='node' xlinkHref={`#scg-node-${type}`} x={x} y={y} />
       </g>
