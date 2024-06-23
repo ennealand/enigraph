@@ -1,16 +1,20 @@
 import { type ReadonlySignal, useComputed } from '@preact/signals'
 import { type JSX, render } from 'preact'
-import { useRef } from 'preact/hooks'
+import { useEffect, useRef } from 'preact/hooks'
 import { BaseGraph } from './base-graph'
 
-type Events = {
-  [K in keyof JSX.HTMLAttributes<HTMLDivElement> as K extends `on${infer E}`
-    ? `graph:${Uncapitalize<E>}`
-    : never]-?: JSX.HTMLAttributes<HTMLDivElement>[K]
-} & {
-  [K in keyof JSX.HTMLAttributes<SVGSVGElement> as K extends `on${infer E}`
-    ? `svg:${Uncapitalize<E>}`
-    : never]-?: JSX.HTMLAttributes<SVGSVGElement>[K]
+type Events = EventValues<'graph', JSX.HTMLAttributes<HTMLDivElement>> &
+  EventValues<'svg', JSX.HTMLAttributes<SVGSVGElement>> &
+  EventValues<'global', JSX.HTMLAttributes<Document>>
+
+type CustomEvents<Components extends Record<string, { id: string | number }>> = keyof Components extends string
+  ? {
+      [Name in keyof Components]: EventValues<Name, Components[Name]>
+    }[keyof Components]
+  : never
+
+type EventValues<Base extends string, T extends Record<any, any>> = {
+  [K in keyof T as K extends `on${infer E}` ? `${Base}:${Uncapitalize<E>}` : never]-?: T[K]
 }
 
 type InitialContext = {
@@ -40,7 +44,7 @@ export class EnigraphFactory<
 
   #components = {} as { [Name in keyof Components]: (props: Components[Name]) => JSX.Element }
   #plugins: ((ctx: Context) => Record<string, unknown>)[] = []
-  #events = new Map<keyof Events, (ctx: Context, e: Parameters<Events[keyof Events]>[0]) => void>()
+  #events = new Map<string, (ctx: Context, e: any) => void>()
   #config?: (ctx: Context) => Config
 
   add<Name extends string, ComponentProps extends { id: string | number }>(
@@ -59,7 +63,19 @@ export class EnigraphFactory<
     return this as EnigraphFactory<{ [k in keyof (Context & Exports)]: (Context & Exports)[k] }, Components>
   }
 
-  on<T extends keyof Events>(event: T, fn: (ctx: Context, e: Parameters<Events[T]>[0]) => void) {
+  on<T extends string & keyof (Events & CustomEvents<Components>)>(
+    event: T,
+    fn: (
+      ctx: Context,
+      e: T extends keyof Events
+        ? Parameters<Events[T]>[0]
+        : T extends keyof CustomEvents<Components>
+          ? CustomEvents<Components>[T] extends (...args: infer Args) => any
+            ? Args[0]
+            : never
+          : never
+    ) => void
+  ) {
     this.#events.set(event, fn)
     return this
   }
@@ -69,19 +85,17 @@ export class EnigraphFactory<
     return this
   }
 
-  #getEventProps = <E extends Element>(
-    ctx: Context,
-    prefix: keyof Events extends `${infer P}:${string}` ? P : never,
-    base: JSX.HTMLAttributes<E> = {}
-  ) =>
+  #getEventProps = <E extends Element>(ctx: Context, prefix: string, base: JSX.HTMLAttributes<E> = {}) =>
     useComputed(
       (): JSX.HTMLAttributes<E> =>
         Array.from(this.#events.entries()).reduce(
           (a, [event, fn]) => (
             event.includes(prefix + ':') &&
-              (a[('on' + event[prefix.length + 1].toUpperCase() + event.slice(prefix.length + 2)) as keyof typeof a] = (
-                e: Parameters<Events[keyof Events]>[0]
-              ) => fn(ctx, e)),
+              (a[
+                (prefix === 'global'
+                  ? event.slice(prefix.length + 1).toLowerCase()
+                  : 'on' + event[prefix.length + 1].toUpperCase() + event.slice(prefix.length + 2)) as keyof typeof a
+              ] = (e: Parameters<Events[keyof Events]>[0]) => fn(ctx, e)),
             a
           ),
           base
@@ -121,12 +135,27 @@ export class EnigraphFactory<
           name: string
           component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
           items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
+          events: ReadonlySignal<JSX.HTMLAttributes<Element>>
         }
       })
 
       const { enigraphProps: baseEnigraphProps, svgProps: baseSvgProps, ...config } = this.#config?.(ctx) ?? {}
       const enigraphProps = this.#getEventProps<HTMLDivElement>(ctx, 'graph', baseEnigraphProps)
       const svgProps = this.#getEventProps<SVGSVGElement>(ctx, 'svg', baseSvgProps)
+      const globalProps = this.#getEventProps<SVGSVGElement>(ctx, 'global')
+
+      components.forEach(component => (component.events = this.#getEventProps(ctx, component.name)))
+
+      useEffect(() => {
+        for (const [event, handler] of Object.entries(globalProps.value)) {
+          document.addEventListener(event, handler)
+        }
+        return () => {
+          for (const [event, handler] of Object.entries(globalProps.value)) {
+            document.removeEventListener(event, handler)
+          }
+        }
+      }, [globalProps.value])
 
       console.log('enigraph is rendered')
 

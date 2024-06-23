@@ -8,6 +8,7 @@ type Props = {
     name: string
     component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
     items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
+    events: ReadonlySignal<JSX.HTMLAttributes<Element>>
   }[]
   enigraphProps: ReadonlySignal<JSX.HTMLAttributes<HTMLDivElement>>
   svgProps: ReadonlySignal<JSX.HTMLAttributes<SVGSVGElement>>
@@ -27,16 +28,18 @@ type Props = {
 export const List = <Props extends { id: string | number }>({
   Component,
   items,
+  events,
   ...props
 }: {
   Component: (props: Props) => JSX.Element
   items: ReadonlySignal<Props[]>
+  events: ReadonlySignal<JSX.HTMLAttributes<Element>>
 } & JSX.HTMLAttributes<SVGGElement>) => {
   console.log('list render')
   return items.value.length ? (
     <g {...props}>
       {items.value.map(item => (
-        <Component key={item.id} {...item} />
+        <Component key={item.id} {...events.value} {...item} />
       ))}
     </g>
   ) : null
@@ -64,8 +67,8 @@ export const BaseGraph = (props: Props) => {
           )}
         >
           {props.before?.map(Fn => <Fn />)}
-          {props.components.map(({ name, component, items }) => (
-            <List key={name} Component={component} items={items} />
+          {props.components.map(({ name, component, items, events }) => (
+            <List key={name} Component={component} items={items} events={events} />
           ))}
           {props.after?.map(Fn => <Fn />)}
         </g>
