@@ -12,7 +12,7 @@ export const Node = ({ type, x, y, label, padding }: NodeProps) => {
   return (
     <g>
       <g class='node-container'>
-        {padding && <circle cx={x} cy={y} r='var(--scg-node-padding, 15px)' fill='transparent' />}
+        {padding && <circle cx={x} cy={y} fill='transparent' />}
         <use class='node' xlinkHref={`#scg-node-${type}`} x={x} y={y} />
       </g>
       {label && (
