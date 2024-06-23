@@ -1,12 +1,25 @@
-export type AreaSelectionProps = { x1: number; y1: number; x2: number; y2: number }
+import { ReadonlySignal, useComputed } from '@preact/signals'
+
+export type AreaSelectionProps = {
+  shown: ReadonlySignal<boolean>
+  x1: ReadonlySignal<number>
+  y1: ReadonlySignal<number>
+  x2: ReadonlySignal<number>
+  y2: ReadonlySignal<number>
+}
 
 export const AreaSelection = (props: AreaSelectionProps) => {
-  return (
+  const x = useComputed(() => Math.min(props.x1.value, props.x2.value))
+  const y = useComputed(() => Math.min(props.y1.value, props.y2.value))
+  const width = useComputed(() => Math.abs(props.x1.value - props.x2.value))
+  const height = useComputed(() => Math.abs(props.y1.value - props.y2.value))
+  console.log('render area selection')
+  return props.shown.value ? (
     <rect
-      x={Math.min(props.x1, props.x2)}
-      y={Math.min(props.y1, props.y2)}
-      width={Math.abs(props.x1 - props.x2)}
-      height={Math.abs(props.y1 - props.y2)}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
       rx='1'
       ry='1'
       stroke-width='1'
@@ -14,5 +27,5 @@ export const AreaSelection = (props: AreaSelectionProps) => {
       stroke='#2669cf'
       pointer-events='none'
     />
-  )
+  ) : null
 }
