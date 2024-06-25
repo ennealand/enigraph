@@ -1,0 +1,99 @@
+@font-face {
+  font-family: __GeistSans_ac79ff;
+  src: url(https://vercel.com/_next/static/media/e11418ac562b8ac1.p.woff2) format('woff2');
+  font-display: swap;
+  font-weight: 100 900;
+}
+
+:root {
+  --bg: #ffffff;
+  --color: #09090b;
+  --grey: #f4f4f5;
+  --grey-hover: #f4f4f5cc;
+  --border: #e4e4e7;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --color: #09090b;
+    --grey: #f4f4f5;
+    --grey-hover: #f4f4f5cc;
+    --border: #e4e4e7;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #09090b;
+    --color: #fafafa;
+    --grey: #27272a;
+    --grey-hover: #27272acc;
+    --border: #27272a;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  height: 100dvh;
+  margin: 0;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-family: '__GeistSans_ac79ff';
+  -webkit-font-smoothing: antialiased;
+  color: var(--color);
+}
+
+.playground {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow:
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  height: 4rem;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--border);
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  margin-right: auto;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  background-color: var(--grey);
+  border: unset;
+  font-family: inherit;
+  color: inherit;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  box-shadow:
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+
+  &:hover {
+    background-color: var(--grey-hover);
+  }
+}
+
+.enigraph {
+  width: 90vw;
+  max-width: 1400px;
+  height: 80dvh;
+}
