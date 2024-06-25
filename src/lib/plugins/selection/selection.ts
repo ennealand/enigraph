@@ -7,7 +7,6 @@ type Props<Id extends string | number> = {
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
   onSelectionStop?: (selection: Set<Id>) => void
-  inversion?: true
   padding?: number
 }
 
@@ -16,8 +15,8 @@ export type SelectionContext<Id extends string | number> = {
   selection: ReadonlySignal<Set<Id>>
   isSelecting: ReadonlySignal<boolean>
   clearSelection: () => void
-  startSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; clear?: boolean }) => void
-  updateSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => void
+  startSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }) => void
+  updateSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; inversion?: boolean }) => void
   stopSelection: () => void
 }
 
@@ -39,7 +38,10 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     if (values.value.size) values.value = new Set()
   }
 
-  const startSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; clear?: boolean }) => {
+  const startSelection = (
+    e: MouseEvent,
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }
+  ) => {
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
 
     // Select a single node is clicked on it
@@ -52,7 +54,7 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     const newProgress = options?.clear ? new Set<Id>() : new Set(values.value)
     if (clickedNode) {
       const processSingleClick = (values: Set<Id>) => {
-        if (!options?.deselection && !(props.inversion && !options?.selection && values.has(clickedNode.id))) {
+        if (!options?.deselection && !(options?.inversion && !options?.selection && values.has(clickedNode.id))) {
           values.add(clickedNode.id)
         } else values.delete(clickedNode.id)
       }
@@ -79,7 +81,7 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     })
   }
 
-  const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean }) => {
+  const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean, inversion?: boolean }) => {
     if (!areaSelection.value.shown.value) return
 
     // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
@@ -109,7 +111,7 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     for (const index of props.nodes.value.keys()) {
       const node = props.nodes.value.at(-index - 1)!
       if (node.x.value >= fromX && node.x.value <= toX && node.y.value >= fromY && node.y.value <= toY) {
-        if (!options?.deselection && !(props.inversion && !options?.selection && values.value.has(node.id))) {
+        if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(node.id))) {
           newProgress.add(node.id)
         }
       } else if (values.value.has(node.id)) {
