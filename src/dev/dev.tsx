@@ -5,7 +5,7 @@ import { withAutohide } from '$lib/plugins/autohide'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
 import { AreaSelection, withSelection } from '$lib/plugins/selection'
-import { signal } from '@preact/signals'
+import { signal, useComputed } from '@preact/signals'
 import { render } from 'preact'
 
 const style = signal('background:skyblue')
@@ -30,6 +30,7 @@ const factory = new EnigraphFactory()
   .on('graph:mouseDown', (ctx, e) => {
     if (e.buttons === 1) {
       ctx.startSelection(e, {
+        inversion: true,
         deselection: e.altKey,
         selection: e.ctrlKey || e.metaKey,
         clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
@@ -49,8 +50,11 @@ const factory = new EnigraphFactory()
       return
     }
   })
+  .on('node:sharedProps', (ctx, id) => ({
+    selected: useComputed(() => ctx.selection.value.has(id)),
+  }))
   .on('global:mouseMove', (ctx, e) => {
-    ctx.updateSelection(e, { deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
+    ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
   })
   .on('global:mouseUp', (ctx, _e) => {
