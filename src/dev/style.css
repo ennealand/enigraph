@@ -12,7 +12,20 @@
   --grey-hover: #f4f4f5cc;
   --border: #e4e4e7;
 
-  --scg-node-fill: skyblue;
+  --scg-node-fill: #121215;
+  --scg-node-color: #fff;
+  --scg-node-color-hover: #99bdf2;
+  --scg-node-shadow-color-hover: #99bdf296;
+  --scg-node-color-selected: #4186f0;
+  --scg-node-text: #fff;
+  --scg-node-text-hover: #fff;
+
+  --selection-area-fill: #1c80d712;
+  --selection-area-color: #1c80d7;
+  --selection-area-fill-deselection: #d71c1c12;
+  --selection-area-color-deselection: #c02323;
+  --selection-area-fill-selection: #1cd73812;
+  --selection-area-color-selection: #269b37;
 }
 
 @media (prefers-color-scheme: light) {
@@ -98,4 +111,5 @@ button {
   width: 90vw;
   max-width: 1400px;
   height: 80dvh;
+  background-color: var(--scg-node-fill);
 }

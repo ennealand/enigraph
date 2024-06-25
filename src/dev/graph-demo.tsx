@@ -9,7 +9,6 @@ import { RenamingArea, withRenaming } from '$lib/plugins/renaming'
 import { AreaSelection, withSelection } from '$lib/plugins/selection'
 import { signal, useComputed } from '@preact/signals'
 
-export const demoSVGStyle = signal('background:skyblue')
 const nodePadding = signal(10)
 const nodeSize = signal(10)
 
@@ -71,7 +70,6 @@ const factory = new EnigraphFactory()
     ctx.stopDragging()
   })
   .configure(ctx => ({
-    svgProps: { style: demoSVGStyle },
     staticBefore: [() => <Alphabet size={nodeSize} />],
     staticAfter: [() => <AreaSelection {...ctx.areaSelection.value} shown={ctx.isSelecting} />],
     htmlAfter: [() => <RenamingArea data={ctx.renamingProps} />],

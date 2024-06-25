@@ -1,5 +1,5 @@
 import { BaseNodeProps } from '$lib/components/scg/node/types'
-import { batch, ReadonlySignal, useComputed, useSignal } from '@preact/signals'
+import { batch, ReadonlySignal, signal, useComputed, useSignal } from '@preact/signals'
 import { type AreaSelectionProps } from './area-selection'
 
 type Props<Id extends string | number> = {
@@ -15,21 +15,31 @@ export type SelectionContext<Id extends string | number> = {
   selection: ReadonlySignal<Set<Id>>
   isSelecting: ReadonlySignal<boolean>
   clearSelection: () => void
-  startSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }) => void
-  updateSelection: (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean; inversion?: boolean }) => void
+  startSelection: (
+    e: MouseEvent,
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }
+  ) => void
+  updateSelection: (
+    e: MouseEvent,
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean }
+  ) => void
   stopSelection: () => void
 }
 
 export const withSelection = <Id extends string | number>(props: Props<Id>): SelectionContext<Id> => {
   const localize = props.localize ?? ((x, y) => [x, y])
 
-  const areaSelection = useSignal({
-    shown: useSignal(false),
-    x1: useSignal(0),
-    y1: useSignal(0),
-    x2: useSignal(0),
-    y2: useSignal(0),
-  } satisfies AreaSelectionProps)
+  const areaSelection = useComputed(
+    () =>
+      ({
+        shown: signal(false),
+        type: signal<'deselection' | 'selection' | 'inversion' | undefined>('deselection'),
+        x1: signal(0),
+        y1: signal(0),
+        x2: signal(0),
+        y2: signal(0),
+      }) satisfies AreaSelectionProps
+  )
   const progress = useSignal(new Set<Id>())
   const values = useSignal(new Set<Id>())
   const postponedClickedNodeId = useSignal(null as Id | null)
@@ -76,12 +86,22 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
       areaSelection.value.y1.value = y
       areaSelection.value.x2.value = x
       areaSelection.value.y2.value = y
+      areaSelection.value.type.value = options?.deselection
+        ? 'deselection'
+        : options?.selection
+          ? 'selection'
+          : options?.inversion && !options.clear
+            ? 'inversion'
+            : undefined
       progress.value = dontClear ? new Set(values.value) : newProgress
       if (options?.clear && !dontClear) values.value = new Set<Id>()
     })
   }
 
-  const updateSelection = (e: MouseEvent, options?: { deselection?: boolean; selection?: boolean, inversion?: boolean }) => {
+  const updateSelection = (
+    e: MouseEvent,
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean }
+  ) => {
     if (!areaSelection.value.shown.value) return
 
     // NOTE: I don't think this ever even happens.. We ONLY postpone the click on a highlighted node
@@ -96,8 +116,17 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     // this node will be automatically picked up later in this function
 
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-    areaSelection.value.x2.value = x
-    areaSelection.value.y2.value = y
+    batch(() => {
+      areaSelection.value.x2.value = x
+      areaSelection.value.y2.value = y
+      areaSelection.value.type.value = options?.deselection
+        ? 'deselection'
+        : options?.selection
+          ? 'selection'
+          : options?.inversion && values.value.size
+            ? 'inversion'
+            : undefined
+    })
 
     const padding = props.padding ?? 16
     const [x1, y1] = localize(areaSelection.value.x1.value, areaSelection.value.y1.value)

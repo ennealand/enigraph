@@ -1,7 +1,9 @@
 import { ReadonlySignal, useComputed } from '@preact/signals'
+import './area-selection.css'
 
 export type AreaSelectionProps = {
   shown: ReadonlySignal<boolean>
+  type: ReadonlySignal<'deselection' | 'selection' | 'inversion' | undefined>
   x1: ReadonlySignal<number>
   y1: ReadonlySignal<number>
   x2: ReadonlySignal<number>
@@ -16,6 +18,8 @@ export const AreaSelection = (props: AreaSelectionProps) => {
   console.log('render area selection')
   return props.shown.value ? (
     <rect
+      class={'selection-area'}
+      data-type={props.type.value}
       x={x}
       y={y}
       width={width}
@@ -23,8 +27,6 @@ export const AreaSelection = (props: AreaSelectionProps) => {
       rx='1'
       ry='1'
       stroke-width='1'
-      fill='#0048b61a'
-      stroke='#2669cf'
       pointer-events='none'
     />
   ) : null

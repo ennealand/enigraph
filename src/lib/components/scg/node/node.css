@@ -9,7 +9,7 @@
     }
     filter: var(
       --scg-node-filter,
-      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color, var(--scg-node-color-hover, #2669cf)))
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-hover, var(--scg-node-shadow-color, var(--scg-node-color-hover, #2669cf))))
     );
   }
 
@@ -19,7 +19,7 @@
     }
     filter: var(
       --scg-node-filter,
-      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf)))
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-selected, var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf))))
     );
   }
 
@@ -29,7 +29,7 @@
     }
     filter: var(
       --scg-node-filter,
-      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf)))
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-selected, var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf))))
     );
   }
 
@@ -37,7 +37,7 @@
     fill: var(--scg-node-fill, white);
     stroke: var(--scg-node-color, #000);
     stroke-width: var(--scg-node-stroke, 3px);
-    transition: var(--scg-node-transition, 0.1s stroke);
+    transition: var(--scg-node-transition, 0.2s stroke);
   }
 
   & > circle {
