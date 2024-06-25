@@ -1,15 +1,15 @@
-.component {
+.renaming-component {
   position: absolute;
   background: radial-gradient(circle at -20% -40%, transparent 20%, #ffffff 25%);
   top: 1rem;
   border-left: 2px solid #2669cf;
   border-bottom: 2px solid #2669cf;
   border-bottom-left-radius: 12px;
-  padding-left: 4.4px;
-  padding-top: 2.5px;
+  padding-left: 3.5px;
+  padding-top: 3.45px;
 }
 
-.input {
+.renaming-input {
   background: transparent;
   outline: unset;
   border: unset;

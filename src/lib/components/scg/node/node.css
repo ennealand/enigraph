@@ -1,7 +1,7 @@
 .node-container {
   user-select: none;
   cursor: pointer;
-  transition: 0.15s filter;
+  transition: 0.1s filter;
   filter: var(--scg-node-filter, drop-shadow(0 0 var(--scg-node-shadow-size, 5px) transparent));
   &:hover {
     .node {

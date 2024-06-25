@@ -1,55 +1,46 @@
-import { INode } from '$lib/types'
-import { useSignal } from '@preact/signals'
-import { DeepSignal } from 'deepsignal'
-import { useEffect, useRef } from 'preact/hooks'
-import { JSX } from 'preact/jsx-runtime'
-import style from './renaming.module.css'
+import { BaseNodeProps } from '$lib/components/scg/node/types'
+import { ReadonlySignal, useComputed, useSignal } from '@preact/signals'
+import { type RenamingAreaData } from './renaming-area'
+import './renaming.css'
 
-type Props = {
-  submit?: (element: INode, newValue: string) => void
+type Props<NodeProps extends BaseNodeProps> = {
+  changeNodeLabel: (node: NodeProps, label: string) => void
 }
 
-export const useRenaming = (props: Props) => {
-  const isRenaming = useSignal(null as { node: DeepSignal<INode> } | null)
-  const startRenaming = (node: DeepSignal<INode>) => {
-    isRenaming.value = { node }
+type RenamingContext<NodeProps extends BaseNodeProps> = {
+  startRenaming: (node: NodeProps) => void
+  stopRenaming: () => void
+  isRenaming: ReadonlySignal<boolean>
+  renamingNode: ReadonlySignal<NodeProps | null>
+  renamingProps: ReadonlySignal<{
+    x: ReadonlySignal<number>
+    y: ReadonlySignal<number>
+    value: ReadonlySignal<string> | undefined
+    changeNodeLabel: (value: string) => void
+  } | null>
+}
+
+export const withRenaming = <NodeProps extends BaseNodeProps>(props: Props<NodeProps>): RenamingContext<NodeProps> => {
+  const renamingNode = useSignal<NodeProps | null>(null)
+  const isRenaming = useComputed(() => !!renamingNode.value)
+  const startRenaming = (node: NodeProps) => {
+    renamingNode.value = node
   }
 
   const stopRenaming = () => {
-    isRenaming.value = null
+    renamingNode.value = null
   }
 
-  const renamingProps = isRenaming.value && {
-    x: Math.round(isRenaming.value.node.x) || 0,
-    y: Math.round(isRenaming.value.node.y) || 0,
-    value: isRenaming.value.node.label ?? '',
-    submit: (value: string) => isRenaming.value && (props.submit?.(isRenaming.value.node, value), stopRenaming()),
-  }
-
-  return { startRenaming, stopRenaming, isRenaming, renamingProps }
-}
-
-export const RenamingArea = (props: { x: number; y: number; value: string; submit: (newValue: string) => void }) => {
-  const ref = useRef<HTMLInputElement>(null)
-  useEffect(() => ref.current?.focus(), [])
-
-  const onKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') props.submit(e.currentTarget.value)
-  }
-
-  return (
-    <div
-      class={style.component}
-      style={{ transform: `translate(${props.x + 19 - 5.8 - 3.5}px, ${props.y - 11 - 5.8}px)` }}
-    >
-      <input
-        ref={ref}
-        class={style.input}
-        type='text'
-        value={props.value}
-        onKeyDown={onKeyDown}
-        onBlur={e => props.submit(e.currentTarget.value)}
-      />
-    </div>
+  const renamingProps: RenamingAreaData = useComputed(
+    () =>
+      renamingNode.value && {
+        x: renamingNode.value.x,
+        y: renamingNode.value.y,
+        value: renamingNode.value.label,
+        changeNodeLabel: (value: string) =>
+          renamingNode.value && (props.changeNodeLabel?.(renamingNode.value, value), stopRenaming()),
+      }
   )
+
+  return { startRenaming, stopRenaming, isRenaming, renamingNode, renamingProps }
 }

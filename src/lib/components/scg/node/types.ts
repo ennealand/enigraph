@@ -9,7 +9,7 @@ export type BaseNodeProps<
 > = {
   id: Id
   type: DynamicSygnal<NodeType, Mutability>
-  label?: DynamicSygnal<string, Mutability>
+  label: DynamicSygnal<string, Mutability>
   x: DynamicSygnal<number, Mutability>
   y: DynamicSygnal<number, Mutability>
 }
