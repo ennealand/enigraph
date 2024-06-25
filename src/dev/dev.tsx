@@ -74,6 +74,29 @@ const nodes = signal<ComponentProps<typeof factory, 'node'>[]>([
   { id: 2, type: signal('const-tuple'), x: signal(0), y: signal(0), label: signal('hello') },
 ])
 
-const result = <Enigraph width={signal(400)} height={signal(400)} nodes={nodes} />
+const App = () => {
+  return (
+    <div class='app'>
+      <Enigraph width={signal(400)} height={signal(400)} nodes={nodes} />
+      <div class='controls'>
+        <button class='button' onClick={() => (style.value = 'background:skyblue')}>
+          Skyblue
+        </button>
+        <button class='button' onClick={() => (style.value = 'background:lightblue')}>
+          Lightblue
+        </button>
+        <button class='button' onClick={() => (style.value = 'background:blue')}>
+          Blue
+        </button>
+        <button class='button' onClick={() => (style.value = 'background:green')}>
+          Green
+        </button>
+        <button class='button' onClick={() => (style.value = 'background:red')}>
+          Red
+        </button>
+      </div>
+    </div>
+  )
+}
 
-render(result, document.getElementById('app')!)
+render(<App />, document.getElementById('app')!)
