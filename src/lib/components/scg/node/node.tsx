@@ -15,12 +15,15 @@ export interface NodeProps extends BasicNodeProps {
 
 export type SharedProps = {
   selected: ReadonlySignal<boolean>
+  renaming: ReadonlySignal<boolean>
 }
 
 export const Node = ({ id, type, x, y, label, padding, onMouseDown, onTextDoubleClick, onSharedProps }: NodeProps) => {
   console.log('node render')
   const sharedProps = onSharedProps?.(id)
-  const className = useComputed(() => cl('node-container', sharedProps?.selected.value && 'selected'))
+  const className = useComputed(() =>
+    cl('node-container', sharedProps?.selected.value && 'selected', sharedProps?.renaming.value && 'renaming')
+  )
   return (
     <g>
       <g class={className} onMouseDown={onMouseDown}>
@@ -37,6 +40,6 @@ export const Node = ({ id, type, x, y, label, padding, onMouseDown, onTextDouble
           {label}
         </text>
       )}
-  </g>
+    </g>
   )
 }

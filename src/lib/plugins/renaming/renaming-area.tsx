@@ -26,7 +26,7 @@ export const RenamingAreaComponent = (props: { data: RenamingAreaData }) => {
       class='renaming-component'
       style={useComputed(() =>
         props.data.value
-          ? `transform:translate(${props.data.value.x.value + 9.7}px, ${props.data.value.y.value - 16}px)`
+          ? `transform:translate(${props.data.value.x.value + 9.5}px, ${props.data.value.y.value - 16}px)`
           : undefined
       )}
     >

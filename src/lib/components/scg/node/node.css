@@ -23,6 +23,16 @@
     );
   }
 
+  &.renaming {
+    .node {
+      stroke: var(--scg-node-color-renaming, #2669cf);
+    }
+    filter: var(
+      --scg-node-filter,
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf)))
+    );
+  }
+
   .node {
     fill: var(--scg-node-fill, white);
     stroke: var(--scg-node-color, #000);

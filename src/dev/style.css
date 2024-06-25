@@ -11,6 +11,8 @@
   --grey: #f4f4f5;
   --grey-hover: #f4f4f5cc;
   --border: #e4e4e7;
+
+  --scg-node-fill: skyblue;
 }
 
 @media (prefers-color-scheme: light) {

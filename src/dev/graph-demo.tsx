@@ -60,6 +60,7 @@ const factory = new EnigraphFactory()
   })
   .on('node:sharedProps', (ctx, id) => ({
     selected: useComputed(() => ctx.selection.value.has(id)),
+    renaming: useComputed(() => ctx.renamingNode.value?.id === id),
   }))
   .on('global:mouseMove', (ctx, e) => {
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
