@@ -12,7 +12,8 @@ type Props = {
   }[]
   enigraphProps: ReadonlySignal<JSX.HTMLAttributes<HTMLDivElement>>
   svgProps: ReadonlySignal<JSX.HTMLAttributes<SVGSVGElement>>
-  pref?: Ref<SVGSVGElement>
+  svgRef?: Ref<SVGSVGElement>
+  baseRef?: Ref<HTMLDivElement>
   width: ReadonlySignal<number>
   height: ReadonlySignal<number>
   centerX: ReadonlySignal<number>
@@ -48,14 +49,14 @@ export const List = <Props extends { id: string | number }>({
 export const BaseGraph = (props: Props) => {
   console.log('Base enigraph is rendered')
   return (
-    <div class='enigraph' {...props.enigraphProps.value}>
+    <div ref={props.baseRef} class='enigraph' {...props.enigraphProps.value}>
       <svg
-        ref={props.pref}
+        ref={props.svgRef}
         xmlns='http://www.w3.org/2000/svg'
         xmlnsXlink='http://www.w3.org/1999/xlink'
-        viewBox={`-${props.centerX} -${props.centerY} ${props.width} ${props.height}`}
-        width={`${props.width}px`}
-        height={`${props.height}px`}
+        viewBox={useComputed(() => `-${props.centerX} -${props.centerY} ${props.width} ${props.height}`)}
+        width={useComputed(() => `${props.width}px`)}
+        height={useComputed(() => `${props.height}px`)}
         {...props.svgProps.value}
       >
         {props.staticBefore?.map(Fn => <Fn />)}

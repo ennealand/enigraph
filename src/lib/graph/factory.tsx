@@ -1,6 +1,6 @@
-import { type ReadonlySignal, useComputed } from '@preact/signals'
+import { type ReadonlySignal, useComputed, useSignal } from '@preact/signals'
 import { type JSX, render } from 'preact'
-import { useEffect, useRef } from 'preact/hooks'
+import { type Ref, useEffect, useRef } from 'preact/hooks'
 import { BaseGraph } from './base-graph'
 
 type Events = EventValues<'graph', JSX.HTMLAttributes<HTMLDivElement>> &
@@ -23,6 +23,7 @@ type InitialContext = {
   centerX: ReadonlySignal<number>
   centerY: ReadonlySignal<number>
   getInnerPoint: (x: number, y: number) => [number, number]
+  ref: Ref<HTMLDivElement>
 }
 
 type PropertiesOnly<T> = { [K in keyof T as K extends `on${string}` ? never : K]?: T[K] }
@@ -37,15 +38,15 @@ type Config = {
 }
 
 export class EnigraphFactory<
-  Context extends Record<string, unknown> = InitialContext,
+  Context extends Record<string, unknown> = Record<never, never>,
   Components extends Record<string, { id: string | number }> = Record<never, never>,
 > {
   constructor() {}
 
   #components = {} as { [Name in keyof Components]: (props: Components[Name]) => JSX.Element }
-  #plugins: ((ctx: Context) => Record<string, unknown>)[] = []
-  #events = new Map<string, (ctx: Context, e: any) => void>()
-  #config?: (ctx: Context) => Config
+  #plugins: ((ctx: Context & InitialContext) => Record<string, unknown>)[] = []
+  #events = new Map<string, (ctx: Context & InitialContext, e: any) => void>()
+  #config?: (ctx: Context & InitialContext) => Config
 
   add<Name extends string, ComponentProps extends { id: string | number }>(
     name: Name,
@@ -58,7 +59,7 @@ export class EnigraphFactory<
     >
   }
 
-  plug<Exports extends Record<string, unknown>>(plugin: (ctx: Context) => Exports) {
+  plug<Exports extends Record<string, unknown>>(plugin: (ctx: Context & InitialContext) => Exports) {
     this.#plugins.push(plugin)
     return this as EnigraphFactory<{ [k in keyof (Context & Exports)]: (Context & Exports)[k] }, Components>
   }
@@ -66,7 +67,7 @@ export class EnigraphFactory<
   on<T extends string & keyof (Events & CustomEvents<Components>)>(
     event: T,
     fn: (
-      ctx: Context,
+      ctx: Context & InitialContext,
       e: T extends keyof Events
         ? Parameters<Events[T]>[0]
         : T extends keyof CustomEvents<Components>
@@ -80,12 +81,16 @@ export class EnigraphFactory<
     return this
   }
 
-  configure(config: (ctx: Context) => Config) {
+  configure(config: (ctx: Context & InitialContext) => Config) {
     this.#config = config
     return this
   }
 
-  #getEventProps = <E extends Element>(ctx: Context, prefix: string, base: JSX.HTMLAttributes<E> = {}) =>
+  #getEventProps = <E extends Element>(
+    ctx: Context & InitialContext,
+    prefix: string,
+    base: JSX.HTMLAttributes<E> = {}
+  ) =>
     useComputed(
       (): JSX.HTMLAttributes<E> =>
         Array.from(this.#events.entries()).reduce(
@@ -103,21 +108,25 @@ export class EnigraphFactory<
     )
 
   create() {
-    type Props = {
+    type Props = { width?: ReadonlySignal<number>; height?: ReadonlySignal<number> } & {
       [Name in keyof Components as Name extends string ? `${Name}s` : never]: ReadonlySignal<Components[Name][]>
-    } & { width: ReadonlySignal<number>; height: ReadonlySignal<number> } // Allow to override using plugins?
-    const Enigraph = ({ width, height, ...props }: Props) => {
-      const ref = useRef<SVGSVGElement>(null)
+    }
+    const Enigraph = (props: Props) => {
+      const width = props.width ?? useSignal(500)
+      const height = props.height ?? useSignal(500)
+
+      const baseRef = useRef<HTMLDivElement>(null)
+      const svgRef = useRef<SVGSVGElement>(null)
 
       const centerX = useComputed(() => width.value / 2)
       const centerY = useComputed(() => height.value / 2)
       const getInnerPoint = (x: number, y: number): [number, number] => {
-        if (!ref.current) return [0, 0]
-        const rect = ref.current.getBoundingClientRect()
+        if (!svgRef.current) return [0, 0]
+        const rect = svgRef.current.getBoundingClientRect()
         return [x - rect.x - centerX.value, y - rect.y - centerY.value]
       }
 
-      let ctx = { width, height, centerX, centerY, getInnerPoint } as unknown as Context
+      let ctx = { width, height, centerX, centerY, getInnerPoint, ref: baseRef } as Context & InitialContext
 
       for (const name of Object.keys(this.#components)) {
         const items = (props as Record<string, unknown>)[name + 's']
@@ -169,7 +178,7 @@ export class EnigraphFactory<
         svgProps,
         transform: ctx.transform as never,
       }
-      return <BaseGraph pref={ref} {...data} {...config} />
+      return <BaseGraph baseRef={baseRef} svgRef={svgRef} {...data} {...config} />
     }
     Enigraph.mount = (selector: string, props: Props) =>
       render(<Enigraph {...props} />, document.querySelector(selector)!)
@@ -177,7 +186,7 @@ export class EnigraphFactory<
   }
 }
 
-type ComponentNames<Factory extends EnigraphFactory<any, any>> =
+export type ComponentNames<Factory extends EnigraphFactory<any, any>> =
   Factory extends EnigraphFactory<any, infer Components> ? keyof Components : never
 
 export type ComponentProps<Factory extends EnigraphFactory<any, any>, Name extends ComponentNames<Factory>> =
