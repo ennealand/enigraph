@@ -26,6 +26,10 @@
   --selection-area-color-deselection: #c02323;
   --selection-area-fill-selection: #1cd73812;
   --selection-area-color-selection: #269b37;
+
+  --scg-edge-color: #fff;
+  --scg-edge-fill: #121215;
+  /* --scg-arrow-color: pink; */
 }
 
 @media (prefers-color-scheme: light) {
