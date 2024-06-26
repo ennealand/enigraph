@@ -7,10 +7,11 @@ type Events = EventValues<'graph', JSX.HTMLAttributes<HTMLDivElement>> &
   EventValues<'svg', JSX.HTMLAttributes<SVGSVGElement>> &
   EventValues<'global', JSX.HTMLAttributes<Document>>
 
+type UnionToIntersection<T> = (T extends unknown ? (x: T) => void : never) extends (x: infer I) => void ? I : never
 type CustomEvents<Components extends Record<string, { id: string | number }>> = keyof Components extends string
-  ? {
+  ? UnionToIntersection<{
       [Name in keyof Components]: EventValues<Name, Components[Name]>
-    }[keyof Components]
+    }[keyof Components]>
   : never
 
 type EventValues<Base extends string, T extends Record<any, any>> = {
