@@ -1,5 +1,5 @@
 import { BaseNodeProps } from '$lib/components/scg/node/types'
-import { ReadonlySignal, useSignal } from '@preact/signals'
+import { batch, ReadonlySignal, useSignal } from '@preact/signals'
 
 type Props<Id extends string | number> = {
   nodes: ReadonlySignal<BaseNodeProps<Id>[]>
@@ -38,10 +38,12 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     const shiftX = startPoint.value.x - x
     const shiftY = startPoint.value.y - y
     const zoom = props.zoom?.value ?? 1
-    for (const node of props.nodes.value) {
-      if (!props.selection.value.has(node.id)) continue
-      props.changeNodePosition?.(node, node.x.value - shiftX / zoom, node.y.value - shiftY / zoom)
-    }
+    batch(() => {
+      for (const node of props.nodes.value) {
+        if (!props.selection.value.has(node.id)) continue
+        props.changeNodePosition?.(node, node.x.value - shiftX / zoom, node.y.value - shiftY / zoom)
+      }
+    })
     totalShift.value.x += shiftX
     totalShift.value.y += shiftY
     startPoint.value.x = x
