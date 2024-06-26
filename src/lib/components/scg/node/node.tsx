@@ -1,8 +1,8 @@
+import { cl } from '$lib/utils'
 import { ReadonlySignal, useComputed } from '@preact/signals'
 import { JSX } from 'preact/jsx-runtime'
 import './node.css'
 import { BaseNodeProps } from './types'
-import { cl } from '$lib/utils'
 
 export type BasicNodeProps = BaseNodeProps<number, 'const-tuple' | 'var-norole', 'mutable'> & {
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
@@ -10,7 +10,7 @@ export type BasicNodeProps = BaseNodeProps<number, 'const-tuple' | 'var-norole',
   onSharedProps?: (id: number) => SharedProps
 }
 export interface NodeProps extends BasicNodeProps {
-  padding: ReadonlySignal<number>
+  padding?: boolean
 }
 
 export type SharedProps = {
