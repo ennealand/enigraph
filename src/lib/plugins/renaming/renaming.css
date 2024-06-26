@@ -17,4 +17,5 @@
   font-size: inherit;
   padding: 2px;
   border-radius: 5px;
+  color: var(--scg-node-text, #000);
 }
