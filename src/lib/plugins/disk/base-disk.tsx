@@ -1,54 +1,40 @@
-import { Edge, Node } from '$lib/graph/alphabet'
 import { JSX } from 'preact/jsx-runtime'
-import style from './disk.module.css'
-import type { DiskEdgeOptions, DiskNodeOptions } from './options'
-import { EdgeType, NodeType } from '$lib/types'
+import { DiskOptions } from './options'
+import './disk.css'
+import { ReadonlySignal } from '@preact/signals'
 
-type BaseDiskProps = {
-  x: number
-  y: number
-  edgeOptions: DiskEdgeOptions
-  nodeOptions: DiskNodeOptions
-} & (
-  | {
-      type: 'node'
-      click: (type: 'node', x: number, y: number, e: JSX.TargetedMouseEvent<SVGGElement>, value: NodeType) => void
-    }
-  | {
-      type: 'edge'
-      click: (type: 'edge', x: number, y: number, e: JSX.TargetedMouseEvent<SVGGElement>, value: EdgeType) => void
-    }
-)
-export const BaseDisk = (props: BaseDiskProps) => (
+export type BaseDiskProps<Name, Type, Props> = {
+  shown: ReadonlySignal<boolean>
+  x: ReadonlySignal<number>
+  y: ReadonlySignal<number>
+  options: ReadonlySignal<DiskOptions<Type, Props>>
+  component: (props: Props & { type: Type }) => JSX.Element
+  name: Name
+  click: (
+    type: Name,
+    x: ReadonlySignal<number>,
+    y: ReadonlySignal<number>,
+    e: JSX.TargetedMouseEvent<SVGGElement>,
+    value: Type
+  ) => void
+}
+
+export const BaseDisk = <Name extends string, Type extends unknown, Props>(props: BaseDiskProps<Name, Type, Props>) => (
   <g transform={`translate(${props.x} ${props.y})`}>
-    <g class={style.disk}>
-      {props.type === 'node'
-        ? props.nodeOptions.map(({ type, x1, y1, x2, y2, textX, textY, nodeX, nodeY }, index) => (
-            <g
-              key={type}
-              onMouseDown={e => e.stopPropagation()}
-              onMouseUp={e => props.click(props.type, props.x, props.y, e, type)}
-            >
-              <path d={`M ${x1} ${y1} A 70 70 0 0 1 ${x2} ${y2}`} stroke-width='90' />
-              <text x={textX} y={textY} stroke-width='90'>
-                {index + 1}
-              </text>
-              <Node x={nodeX} y={nodeY} type={type} noselect />
-            </g>
-          ))
-        : props.edgeOptions.map(({ type, x1, y1, x2, y2, textX, textY, edgeX1, edgeY1, edgeX2, edgeY2 }, index) => (
-            <g
-              key={type}
-              onMouseDown={e => e.stopPropagation()}
-              onMouseUp={e => props.click(props.type, props.x, props.y, e, type)}
-            >
-              <path d={`M ${x1} ${y1} A 70 70 0 0 1 ${x2} ${y2}`} stroke-width='90' />
-              <text x={textX} y={textY} stroke-width='90'>
-                {index + 1}
-              </text>
-              <Edge x1={edgeX1} y1={edgeY1} x2={edgeX2} y2={edgeY2} type={type} noselect />
-            </g>
-          ))}
+    <g class='disk'>
+      {props.options.value.map(({ type, x1, y1, x2, y2, textX, textY, componentProps }, index) => (
+        <g
+          key={type}
+          onMouseDown={e => e.stopPropagation()}
+          onMouseUp={e => props.click(props.name, props.x, props.y, e, type)}
+        >
+          <path d={`M ${x1} ${y1} A 70 70 0 0 1 ${x2} ${y2}`} stroke-width='90' />
+          <text x={textX} y={textY} stroke-width='90'>
+            {index + 1}
+          </text>
+          <props.component type={type} {...componentProps} />
+        </g>
+      ))}
     </g>
   </g>
 )
