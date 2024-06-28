@@ -37,7 +37,8 @@ const factory = new EnigraphFactory()
         types: ['var-norole', 'const-tuple'],
         factory: getNodeProps,
         handler: (type, x, y) => {
-          addNode({ type: signal(type), x: signal(x.value), y: signal(y.value) })
+          const [gx, gy] = ctx.localize(x.value, y.value)
+          addNode({ type: signal(type), x: signal(gx), y: signal(gy) })
           console.log('node clicked')
         },
       }),
