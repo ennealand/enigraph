@@ -4,7 +4,7 @@ import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withAutohide } from '$lib/plugins/autohide'
 import { withAutosize } from '$lib/plugins/autosize'
-import { createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
+import { BaseDisk, createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
 import { RenamingArea, withRenaming } from '$lib/plugins/renaming'
@@ -19,7 +19,7 @@ const factory = new EnigraphFactory()
   .plug(withAutosize)
   .plug(withMovable)
   .plug(withSelection)
-  .plug(() => {
+  .plug(ctx => {
     const changeNodePosition = (node: BasicNodeProps, x: number, y: number) => {
       node.x.value = x
       node.y.value = y
@@ -27,16 +27,27 @@ const factory = new EnigraphFactory()
     const changeNodeLabel = (node: BasicNodeProps, label: string) => {
       node.label!.value = label
     }
+    const addNode = (node: Omit<BasicNodeProps, 'id'>) => {
+      // @ts-expect-error
+      ctx.nodes.value = [...ctx.nodes.value, { ...node, id: ctx.nodes.value.length + 1 }]
+    }
     const diskComponents = {
       nodes: createDiskComponent({
         component: Node,
-        types: ['var-norole', 'var-norole'],
+        types: ['var-norole', 'const-tuple'],
         factory: getNodeProps,
+        handler: (type, x, y) => {
+          addNode({ type: signal(type), x: signal(x.value), y: signal(y.value) })
+          console.log('node clicked')
+        },
       }),
       edges: createDiskComponent({
         component: Edge,
-        types: ['var-norole', 'var-norole'],
+        types: ['var-norole', 'const-tuple'],
         factory: getEdgeProps,
+        handler: () => {
+          console.log('edge clicked')
+        },
       }),
     }
     return { changeNodePosition, changeNodeLabel, diskComponents }
@@ -48,6 +59,7 @@ const factory = new EnigraphFactory()
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .on('graph:mouseDown', (ctx, e) => {
     if (e.buttons === 1) {
+      ctx.hideDisk()
       ctx.startSelection(e, {
         inversion: true,
         deselection: e.altKey,
@@ -56,7 +68,15 @@ const factory = new EnigraphFactory()
       })
       return
     }
+
+    if (e.buttons === 2) {
+      if (e.shiftKey) return
+
+      ctx.showDisk('nodes', ...ctx.getInnerPoint(e.clientX, e.clientY))
+      return
+    }
   })
+  .on('graph:contextMenu', (_, e) => e.preventDefault())
   .on('node:mouseDown', (ctx, e) => {
     if (e.buttons === 1) {
       if (e.shiftKey) return
@@ -89,7 +109,10 @@ const factory = new EnigraphFactory()
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],
-    staticAfter: [() => <AreaSelection {...ctx.areaSelection.value} shown={ctx.isSelecting} />],
+    staticAfter: [
+      () => <AreaSelection {...ctx.areaSelection.value} shown={ctx.isSelecting} />,
+      () => <BaseDisk {...ctx.diskProps.value} />,
+    ],
     htmlAfter: [() => <RenamingArea data={ctx.renamingProps} />],
   }))
 

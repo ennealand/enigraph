@@ -30,6 +30,13 @@
   --scg-edge-color: #fff;
   --scg-edge-fill: #121215;
   /* --scg-arrow-color: pink; */
+
+  --disk-fill: #0e0e10;
+  --disk-fill-hover: #0a0a0b;
+  --disk-scg-node-color: #ececec;
+  --disk-text: #d3d3d3;
+  --disk-hover-scg-node-color: #498cf0;
+  --disk-hover-text: #5b94e8;
 }
 
 @media (prefers-color-scheme: light) {
@@ -67,6 +74,7 @@ body {
 .playground {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
+  overflow: hidden;
   box-shadow:
     rgba(0, 0, 0, 0) 0px 0px 0px 0px,
     rgba(0, 0, 0, 0) 0px 0px 0px 0px,

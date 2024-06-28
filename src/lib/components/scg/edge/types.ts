@@ -1,6 +1,6 @@
 import { ReadonlySignal, Signal } from '@preact/signals'
 
-type DynamicSygnal<T, Mutability> = Mutability extends 'mutable' ? Signal<T> : ReadonlySignal<T>
+export type DynamicSygnal<T, Mutability> = Mutability extends 'mutable' ? Signal<T> : ReadonlySignal<T>
 
 export type BaseEdgeProps<
   Id extends string | number = string | number,
