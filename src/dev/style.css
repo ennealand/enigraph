@@ -37,6 +37,7 @@
   --disk-text: #d3d3d3;
   --disk-hover-scg-node-color: #498cf0;
   --disk-hover-text: #5b94e8;
+  --disk-border-color: #8a8a8a0f;
 }
 
 @media (prefers-color-scheme: light) {
