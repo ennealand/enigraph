@@ -115,9 +115,9 @@ const factory = new EnigraphFactory()
     selected: useComputed(() => ctx.selection.value.has(id)),
     renaming: useComputed(() => ctx.renamingNode.value?.id === id),
   }))
-  .on('edge:sharedProps', (ctx, { sourceId, targetId }) => ({
-    selected: useComputed(() => ctx.selection.value.has(sourceId) || ctx.selection.value.has(targetId)),
-  }))
+  // .on('edge:sharedProps', (ctx, { sourceId, targetId }) => ({
+  //   selected: useComputed(() => ctx.selection.value.has(sourceId) || ctx.selection.value.has(targetId)),
+  // }))
   .on('global:mouseMove', (ctx, e) => {
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
