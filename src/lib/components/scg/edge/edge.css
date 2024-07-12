@@ -10,6 +10,9 @@
     .edge-fill {
       stroke: var(--scg-edge-fill-hover, #2669cf);
     }
+    .edge-arrow {
+      fill: var(--scg-edge-color-hover, #000);
+    }
     /* filter: var(
       --scg-node-filter,
       drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-hover, var(--scg-node-shadow-color, var(--scg-node-color-hover, #2669cf))))
@@ -23,6 +26,9 @@
     .edge-fill {
       stroke: var(--scg-edge-fill-selected, #2669cf);
     }
+    .edge-arrow {
+      fill: var(--scg-edge-color-selected, #2669cf);
+    }
     /* filter: var(
       --scg-node-filter,
       drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-selected, var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf))))
@@ -35,5 +41,10 @@
 
   .edge-fill {
     stroke: var(--scg-edge-fill, #2669cf);
+  }
+
+  .edge-arrow {
+    transition: var(--scg-edge-arrow-transition, 0.2s fill);
+    fill: var(--scg-edge-color, #000);
   }
 }
