@@ -28,6 +28,12 @@ export const Bus = ({ id, x, y, dx, dy, padding, onMouseDown, onThumbMouseDown, 
         onMouseDown={e => onThumbMouseDown?.({ e, id })}
         cx={useComputed(() => x.value + dx.value)}
         cy={useComputed(() => y.value + dy.value)}
+        class='bus-thumb-padding'
+      />
+      <circle
+        onMouseDown={e => onThumbMouseDown?.({ e, id })}
+        cx={useComputed(() => x.value + dx.value)}
+        cy={useComputed(() => y.value + dy.value)}
         class='bus-thumb'
       />
     </g>
