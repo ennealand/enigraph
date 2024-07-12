@@ -5,6 +5,7 @@ import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withAutohide } from '$lib/plugins/autohide'
 import { withAutosize } from '$lib/plugins/autosize'
+import { withBusDraggable } from '$lib/plugins/bus-draggable'
 import { BaseDisk, createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
@@ -22,6 +23,10 @@ const factory = new EnigraphFactory()
   .plug(withMovable)
   .plug(withSelection)
   .plug(ctx => {
+    const changeBusPosition = (bus: BasicBusProps, x: number, y: number) => {
+      bus.dx.value = x
+      bus.dy.value = y
+    }
     const changeNodePosition = (node: BasicNodeProps, x: number, y: number) => {
       node.x.value = x
       node.y.value = y
@@ -53,12 +58,23 @@ const factory = new EnigraphFactory()
         },
       }),
     }
-    return { changeNodePosition, changeNodeLabel, diskComponents }
+    return { changeNodePosition, changeNodeLabel, diskComponents, changeBusPosition }
   })
   .plug(withDraggable)
   .plug(withAutohide)
   .plug(withRenaming)
   .plug(withDisk)
+  .plug(withBusDraggable)
+  .on('bus:thumbMouseDown', (ctx, { e, id }) => {
+    console.log('thumb mouse down')
+    e.stopPropagation()
+    ctx.startBusDragginig(e, ctx.buss.value.find(b => b.id === id)!)
+  })
+  .on('bus:sharedProps', (ctx, id) => ({
+    selected: useComputed(
+      () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buss.value.find(b => b.id === id)!.sourceId)
+    ),
+  }))
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .on('graph:mouseDown', (ctx, e) => {
     if (e.buttons === 1) {
@@ -105,10 +121,12 @@ const factory = new EnigraphFactory()
   .on('global:mouseMove', (ctx, e) => {
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
+    ctx.updateBusDragging(e)
   })
   .on('global:mouseUp', (ctx, _e) => {
     ctx.stopSelection()
     ctx.stopDragging()
+    ctx.stopBusDragging()
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],
