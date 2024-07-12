@@ -1,4 +1,5 @@
 import { Alphabet } from '$lib/components/scg/alphabet'
+import { BasicBusProps, Bus } from '$lib/components/scg/bus/bus'
 import { BasicEdgeProps, Edge } from '$lib/components/scg/edge'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
@@ -14,6 +15,7 @@ import { signal, useComputed } from '@preact/signals'
 const nodeSize = signal(10)
 
 const factory = new EnigraphFactory()
+  .add('bus', (props: BasicBusProps) => <Bus {...props} padding />)
   .add('edge', (props: BasicEdgeProps) => <Edge {...props} />)
   .add('node', (props: BasicNodeProps) => <Node {...props} />)
   .plug(withAutosize)

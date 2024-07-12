@@ -6,13 +6,13 @@
 }
 
 :root {
-  --bg: #ffffff;
+  --bg: #121215;
   --color: #09090b;
   --grey: #f4f4f5;
   --grey-hover: #f4f4f5cc;
   --border: #e4e4e7;
 
-  --scg-node-fill: #121215;
+  --scg-node-fill: var(--bg);
   --scg-node-color: #fff;
   --scg-node-color-hover: #99bdf2;
   --scg-node-shadow-color-hover: #99bdf296;
@@ -28,8 +28,11 @@
   --selection-area-color-selection: #269b37;
 
   --scg-edge-color: #fff;
-  --scg-edge-fill: #121215;
-  /* --scg-arrow-color: pink; */
+  --scg-edge-fill: var(--bg);
+  --scg-edge-fill-hover: var(--bg);
+  --scg-edge-color-hover: #99bdf2;
+  --scg-edge-color-selected: #4186f0;
+  --scg-arrow-color: pink;
 
   --disk-fill: #0e0e10;
   --disk-fill-hover: #0a0a0b;
@@ -38,6 +41,19 @@
   --disk-hover-scg-node-color: #498cf0;
   --disk-hover-text: #5b94e8;
   --disk-border-color: #8a8a8a0f;
+
+  --scg-bus-color: #fff;
+  --scg-bus-color-hover: #99bdf2;
+  --scg-bus-color-selected: #4186f0;
+  --scg-bus-thumb-size: 3.25;
+  --scg-bus-thumb-size-selected: 3.25;
+  --scg-bus-thumb-fill: var(--bg);
+  --scg-bus-thumb-color: #99bdf2;
+  --scg-bus-thumb-color-hover: #99bdf2;
+  --scg-bus-thumb-fill-hover: white;
+  --scg-bus-thumb-color-selected: #4186f0;
+  --scg-bus-thumb-fill-selected: white;
+  --scg-bus-thumb-border: 1.5;
 }
 
 @media (prefers-color-scheme: light) {

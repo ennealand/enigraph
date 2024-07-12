@@ -5,6 +5,7 @@ import './style.css'
 
 const N = 10
 const E = 12
+const B = 6
 
 const label = signal('bye')
 const nodes = signal<DemoComponentProps<'node'>>(
@@ -34,6 +35,19 @@ Array.from({ length: E }, (_, i) => {
   })
 })
 
+const buss = signal<DemoComponentProps<'bus'>>([])
+Array.from({ length: B }, (_, i) => {
+  const n1 = nodes.value[Math.trunc(Math.random() * N)]
+  buss.value.push({
+    id: i + 1,
+    sourceId: n1.id,
+    x: n1.x,
+    y: n1.y,
+    dx: signal(Math.round(Math.random() * 1000) - 500),
+    dy: signal(Math.round(Math.random() * 600) - 300),
+  })
+})
+
 const App = () => {
   return (
     <div class='playground'>
@@ -41,7 +55,7 @@ const App = () => {
         <h2>Playground</h2>
         <button>Clear</button>
       </div>
-      <EnigraphDemo nodes={nodes} edges={edges} />
+      <EnigraphDemo nodes={nodes} edges={edges} buss={buss} />
     </div>
   )
 }
