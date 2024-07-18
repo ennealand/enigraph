@@ -13,4 +13,6 @@ export type BaseEdgeProps<
   y1: DynamicSygnal<number, Mutability>
   x2: DynamicSygnal<number, Mutability>
   y2: DynamicSygnal<number, Mutability>
+  sourceRadius?: DynamicSygnal<number, Mutability>
+  targetRadius?: DynamicSygnal<number, Mutability>
 }

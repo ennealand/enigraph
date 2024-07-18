@@ -2,6 +2,7 @@ import { computed, signal } from '@preact/signals'
 import { render } from 'preact'
 import { DemoComponentProps, EnigraphDemo } from './graph-demo'
 import './style.css'
+import { getContentRadius } from '$lib/components/scg/content'
 
 const GR = 1
 const GW = 1000
@@ -72,6 +73,11 @@ Array.from({ length: E }, (_, i) => {
     y1: n1.y,
     x2: 'dx' in e2 ? computed(() => e2.x.value + e2.dx.value / 2 + 3.2) : e2.x,
     y2: 'dy' in e2 ? computed(() => e2.y.value + e2.dy.value / 2 + 3.2) : e2.y,
+    sourceRadius: computed(() => 25),
+    targetRadius: computed(() => {
+      if (!('dx' in e2)) return 25
+      return getContentRadius(e2, n1.x, n1.y, 15)
+    }),
     sourceId: n1.id,
     targetId: e2.id,
   })

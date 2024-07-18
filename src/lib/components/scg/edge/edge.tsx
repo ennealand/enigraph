@@ -17,23 +17,21 @@ export type SharedProps = {
   selected: ReadonlySignal<boolean>
 }
 
-export const Edge = ({ id, x1, y1, x2, y2, sourceId, targetId, onSharedProps }: BasicEdgeProps) => {
+export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId, targetId, onSharedProps }: BasicEdgeProps) => {
   console.log('node render')
   const sharedProps = onSharedProps?.({ id, sourceId, targetId })
   const className = useComputed(() => cl('edge-container', sharedProps?.selected.value && 'selected'))
   const rad = useComputed(() => Math.atan2(y2.value - y1.value, x2.value - x1.value))
-  const d = useComputed(
-    () => `M ${x1.value} ${y1.value} L ${x2.value - Math.cos(rad.value) * 10} ${y2.value - Math.sin(rad.value) * 10}`
-  )
+  const d = useComputed(() => `M ${x1.value + Math.cos(rad.value) * ((sourceRadius?.value ?? 0) - 10)} ${y1.value + Math.sin(rad.value) * ((sourceRadius?.value ?? 0) - 10)} L ${x2.value - Math.cos(rad.value) * (targetRadius?.value ?? 0)} ${y2.value - Math.sin(rad.value) * (targetRadius?.value ?? 0)}`)
 
   const arrowPoints = useComputed(() => {
-    const arrowLength = 16.5
+    const arrowLength = 6.5
     const arrowWidth = 7.5
     // Calculate the arrowhead points
-    const xx2 = x2.value - Math.cos(rad.value) * 5
-    const yy2 = y2.value - Math.sin(rad.value) * 5
-    const x3 = x2.value - Math.cos(rad.value) * arrowLength
-    const y3 = y2.value - Math.sin(rad.value) * arrowLength
+    const xx2 = x2.value - Math.cos(rad.value) * (-10 + (targetRadius?.value ?? 0))
+    const yy2 = y2.value - Math.sin(rad.value) * (-10 + (targetRadius?.value ?? 0))
+    const x3 = x2.value - Math.cos(rad.value) * (arrowLength + (targetRadius?.value ?? 0))
+    const y3 = y2.value - Math.sin(rad.value) * (arrowLength + (targetRadius?.value ?? 0))
     const x4 = x3 + Math.cos(rad.value + Math.PI / 6) * arrowWidth
     const y4 = y3 + Math.sin(rad.value + Math.PI / 6) * arrowWidth
     const x5 = x3 + Math.cos(rad.value - Math.PI / 6) * arrowWidth
