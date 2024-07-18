@@ -45,15 +45,18 @@ export class EnigraphFactory<
   constructor() {}
 
   #components = {} as { [Name in keyof Components]: (props: Components[Name]) => JSX.Element }
+  #componentsMetadata = {} as { [Name in keyof Components]: { html: boolean } }
   #plugins: ((ctx: Context & InitialContext) => Record<string, unknown>)[] = []
   #events = new Map<string, (ctx: Context & InitialContext, e: any) => void>()
   #config?: (ctx: Context & InitialContext) => Config
 
   add<Name extends string, ComponentProps extends { id: string | number }>(
     name: Name,
-    component: (props: ComponentProps) => JSX.Element
+    component: (props: ComponentProps) => JSX.Element,
+    options?: { html: true }
   ) {
     ;(this.#components as Record<Name, unknown>)[name] = component
+    this.#componentsMetadata[name] = { html: Boolean(options?.html) }
     return this as unknown as EnigraphFactory<
       Context & Record<`${Name}s`, ReadonlySignal<ComponentProps[]>>,
       Components & Record<Name, ComponentProps>
@@ -141,11 +144,13 @@ export class EnigraphFactory<
 
       const components = Object.entries(this.#components).map(([name, component]) => {
         const items = (ctx as Record<string, unknown>)[name + 's']
-        return { name, component, items } as {
+        const { html } = this.#componentsMetadata[name]
+        return { name, component, items, html } as {
           name: string
           component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
           items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
           events: ReadonlySignal<JSX.HTMLAttributes<Element>>
+          html: boolean
         }
       })
 

@@ -11,4 +11,10 @@
   & > * {
     pointer-events: auto;
   }
+  & > .html-list {
+    pointer-events: none;
+    & > * {
+      pointer-events: auto;
+    }
+  }
 }

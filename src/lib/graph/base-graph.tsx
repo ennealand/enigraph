@@ -9,6 +9,7 @@ type Props = {
     component: (props: { id: string | number } & Record<string, unknown>) => JSX.Element
     items: ReadonlySignal<({ id: string | number } & Record<string, unknown>)[]>
     events: ReadonlySignal<JSX.HTMLAttributes<Element>>
+    html: boolean
   }[]
   enigraphProps: ReadonlySignal<JSX.HTMLAttributes<HTMLDivElement>>
   svgProps: ReadonlySignal<JSX.HTMLAttributes<SVGSVGElement>>
@@ -30,19 +31,29 @@ export const List = <Props extends { id: string | number }>({
   Component,
   items,
   events,
+  html,
   ...props
 }: {
   Component: (props: Props) => JSX.Element
   items: ReadonlySignal<Props[]>
   events: ReadonlySignal<JSX.HTMLAttributes<Element>>
-} & JSX.HTMLAttributes<SVGGElement>) => {
+  html?: true
+} & JSX.HTMLAttributes<HTMLDivElement | SVGGElement>) => {
   console.log('list render')
   return items.value.length ? (
-    <g {...props}>
-      {items.value.map(item => (
-        <Component key={item.id} {...events.value} {...item} />
-      ))}
-    </g>
+    html ? (
+      <div {...props as JSX.HTMLAttributes<HTMLDivElement>}>
+        {items.value.map(item => (
+          <Component key={item.id} {...events.value} {...item} />
+        ))}
+      </div>
+    ) : (
+      <g {...props as JSX.HTMLAttributes<SVGGElement>}>
+        {items.value.map(item => (
+          <Component key={item.id} {...events.value} {...item} />
+        ))}
+      </g>
+    )
   ) : null
 }
 
@@ -68,9 +79,11 @@ export const BaseGraph = (props: Props) => {
           )}
         >
           {props.before?.map(Fn => <Fn />)}
-          {props.components.map(({ name, component, items, events }) => (
-            <List key={name} Component={component} items={items} events={events} />
-          ))}
+          {props.components
+            .filter(_ => !_.html)
+            .map(({ name, component, items, events }) => (
+              <List key={name} Component={component} items={items} events={events} />
+            ))}
           {props.after?.map(Fn => <Fn />)}
         </g>
         {props.staticAfter?.map(Fn => <Fn />)}
@@ -84,6 +97,11 @@ export const BaseGraph = (props: Props) => {
               `transform:translate(${props.transform.value.x}px, ${props.transform.value.y}px) scale(${props.transform.value.zoom}) translate(50%, 50%)`
           )}
         >
+          {props.components
+            .filter(_ => _.html)
+            .map(({ name, component, items, events }) => (
+              <List key={name} Component={component} items={items} events={events} html class='html-list' />
+            ))}
           {props.htmlAfter?.map(Fn => <Fn />)}
         </div>
       )}
