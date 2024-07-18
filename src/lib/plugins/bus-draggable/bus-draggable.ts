@@ -10,7 +10,7 @@ type Props<Id extends string | number> = {
 
 type DraggingContext<Id extends string | number> = {
   isDragging: ReadonlySignal<boolean>
-  startBusDragginig: (e: MouseEvent, bus: BaseBusProps<Id>) => void
+  startBusDragging: (e: MouseEvent, bus: BaseBusProps<Id>) => void
   updateBusDragging: (e: MouseEvent) => void
   abortBusDragging: (options?: { revert: boolean }) => void
   stopBusDragging: () => void
@@ -23,7 +23,7 @@ export const withBusDraggable = <Id extends string | number>(props: Props<Id>): 
   const draggedBus = useSignal<BaseBusProps<Id> | null>(null)
   const isDragging = useComputed(() => !!draggedBus.value)
 
-  const startBusDragginig = (e: MouseEvent, bus: BaseBusProps<Id>) => {
+  const startBusDragging = (e: MouseEvent, bus: BaseBusProps<Id>) => {
     draggedBus.value = bus
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
     startPoint.value.x = x
@@ -70,5 +70,5 @@ export const withBusDraggable = <Id extends string | number>(props: Props<Id>): 
     draggedBus.value = null
   }
 
-  return { isDragging, startBusDragginig, updateBusDragging, abortBusDragging, stopBusDragging, draggedBus }
+  return { isDragging, startBusDragging, updateBusDragging, abortBusDragging, stopBusDragging, draggedBus }
 }

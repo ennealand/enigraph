@@ -97,7 +97,7 @@ export const Graph = ({
     () => objectSelection?.values || nolabels.value || selectedGroup.value || selection.value
   )
 
-  const { startDragginig, updateDragging, isDragging, abortDragging } = withDraggable({
+  const { startDragging, updateDragging, isDragging, abortDragging } = withDraggable({
     nodes: elements.nodes,
     selection: highlight,
     getInnerPoint,
@@ -268,7 +268,7 @@ export const Graph = ({
             e.stopPropagation()
             return
           }
-          startDragginig(e)
+          startDragging(e)
           return
         }
 
@@ -312,7 +312,7 @@ export const Graph = ({
                 if (isDiskOpened) hideDisk()
 
                 e.stopPropagation()
-                startDragginig(e)
+                startDragging(e)
                 if (selectedGroupId.value === id) {
                   const mouseup = () => {
                     closeAllGroups()

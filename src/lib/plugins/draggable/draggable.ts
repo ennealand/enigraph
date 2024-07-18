@@ -12,7 +12,7 @@ type Props<Id extends string | number> = {
 
 type DraggingContext = {
   isDragging: ReadonlySignal<boolean>
-  startDragginig: (e: MouseEvent) => void
+  startDragging: (e: MouseEvent) => void
   updateDragging: (e: MouseEvent) => void
   abortDragging: (options?: { revert: boolean }) => void
   stopDragging: () => void
@@ -23,7 +23,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   const startPoint = useSignal({ x: 0, y: 0 })
   const totalShift = useSignal({ x: 0, y: 0 })
 
-  const startDragginig = (e: MouseEvent) => {
+  const startDragging = (e: MouseEvent) => {
     isDragging.value = true
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
     startPoint.value.x = x
@@ -77,5 +77,5 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     isDragging.value = false
   }
 
-  return { isDragging, startDragginig, updateDragging, abortDragging, stopDragging }
+  return { isDragging, startDragging, updateDragging, abortDragging, stopDragging }
 }

@@ -76,7 +76,7 @@ const factory = new EnigraphFactory()
   .on('bus:thumbMouseDown', (ctx, { e, id }) => {
     console.log('thumb mouse down')
     e.stopPropagation()
-    ctx.startBusDragginig(e, ctx.buss.value.find(b => b.id === id)!)
+    ctx.startBusDragging(e, ctx.buss.value.find(b => b.id === id)!)
   })
   .on('bus:sharedProps', (ctx, id) => ({
     selected: useComputed(
@@ -120,7 +120,7 @@ const factory = new EnigraphFactory()
         e.stopPropagation()
         return
       }
-      ctx.startDragginig(e)
+      ctx.startDragging(e)
       return
     }
   })
