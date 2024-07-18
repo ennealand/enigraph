@@ -28,14 +28,14 @@
     transition-property: r, fill, stroke;
     transition-duration: 0.1s;
     stroke-width: var(--scg-bus-thumb-border, 4);
-    r: var(--scg-bus-thumb-size, 2.2);
+    r: var(--scg-bus-thumb-size, 2.2px);
     fill: var(--scg-bus-color, #000000);
     stroke: var(--scg-bus-color, #000000);
   }
 
   &:hover {
     .bus-thumb {
-      r: var(--scg-bus-thumb-size-selected, 5);
+      r: var(--scg-bus-thumb-size-selected, 5px);
       fill: var(--scg-bus-thumb-fill, #fff);
       stroke: var(--scg-bus-thumb-color, red);
     }
@@ -43,14 +43,14 @@
 
   &.selected {
     .bus-thumb {
-      r: var(--scg-bus-thumb-size-selected, 5);
+      r: var(--scg-bus-thumb-size-selected, 5px);
       fill: var(--scg-bus-thumb-fill-selected, #fff);
       stroke: var(--scg-bus-thumb-color-selected, red);
     }
   }
 
   .bus-thumb-padding {
-    r: var(--scg-bus-thumb-padding, 12);
+    r: var(--scg-bus-thumb-padding, 12px);
     fill: transparent;
 
     &:hover + .bus-thumb {
