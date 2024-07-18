@@ -1,11 +1,13 @@
 import { Alphabet } from '$lib/components/scg/alphabet'
 import { BasicBusProps, Bus } from '$lib/components/scg/bus/bus'
+import { BasicContentProps, Content } from '$lib/components/scg/content'
 import { BasicEdgeProps, Edge } from '$lib/components/scg/edge'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withAutohide } from '$lib/plugins/autohide'
 import { withAutosize } from '$lib/plugins/autosize'
 import { withBusDraggable } from '$lib/plugins/bus-draggable'
+import { withContentDraggable } from '$lib/plugins/content-draggable'
 import { BaseDisk, createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
@@ -16,6 +18,7 @@ import { signal, useComputed } from '@preact/signals'
 const nodeSize = signal(10)
 
 const factory = new EnigraphFactory()
+  .add('content', (props: BasicContentProps) => <Content {...props} />, { html: true })
   .add('bus', (props: BasicBusProps) => <Bus {...props} padding />)
   .add('edge', (props: BasicEdgeProps) => <Edge {...props} />)
   .add('node', (props: BasicNodeProps) => <Node {...props} />)
@@ -26,6 +29,10 @@ const factory = new EnigraphFactory()
     const changeBusPosition = (bus: BasicBusProps, x: number, y: number) => {
       bus.dx.value = x
       bus.dy.value = y
+    }
+    const changeContentPosition = (content: BasicContentProps, x: number, y: number) => {
+      content.x.value = x
+      content.y.value = y
     }
     const changeNodePosition = (node: BasicNodeProps, x: number, y: number) => {
       node.x.value = x
@@ -58,13 +65,14 @@ const factory = new EnigraphFactory()
         },
       }),
     }
-    return { changeNodePosition, changeNodeLabel, diskComponents, changeBusPosition }
+    return { changeNodePosition, changeNodeLabel, diskComponents, changeBusPosition, changeContentPosition }
   })
   .plug(withDraggable)
   .plug(withAutohide)
   .plug(withRenaming)
   .plug(withDisk)
   .plug(withBusDraggable)
+  .plug(withContentDraggable)
   .on('bus:thumbMouseDown', (ctx, { e, id }) => {
     console.log('thumb mouse down')
     e.stopPropagation()
@@ -74,6 +82,14 @@ const factory = new EnigraphFactory()
     selected: useComputed(
       () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buss.value.find(b => b.id === id)!.sourceId)
     ),
+  }))
+  .on('content:mouseDown', (ctx, { e, id }) => {
+    e.stopPropagation()
+    e.preventDefault()
+    ctx.startContentDragging(e, ctx.contents.value.find(b => b.id === id)!)
+  })
+  .on('content:sharedProps', (ctx, id) => ({
+    selected: useComputed(() => ctx.draggedContent.value?.id === id || ctx.selection.value.has(id)),
   }))
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .on('graph:mouseDown', (ctx, e) => {
@@ -122,11 +138,13 @@ const factory = new EnigraphFactory()
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
     ctx.updateBusDragging(e)
+    ctx.updateContentDragging(e)
   })
   .on('global:mouseUp', (ctx, _e) => {
     ctx.stopSelection()
     ctx.stopDragging()
     ctx.stopBusDragging()
+    ctx.stopContentDragging()
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],
