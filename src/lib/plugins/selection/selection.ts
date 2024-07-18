@@ -3,7 +3,7 @@ import { batch, ReadonlySignal, signal, useComputed, useSignal } from '@preact/s
 import { type AreaSelectionProps } from './area-selection'
 
 type Props<Id extends string | number> = {
-  nodes: ReadonlySignal<BaseNodeProps<Id>[]>
+  nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
   onSelectionStop?: (selection: Set<Id>) => void
@@ -57,7 +57,7 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     // Select a single node is clicked on it
     const [localX, localY] = localize(x, y) ?? [x, y]
     const padding = props.padding ?? 15
-    const clickedNode = props.nodes.value.findLast(
+    const clickedNode = props.nodes?.value.findLast(
       ({ x, y }) => Math.sqrt((x.value - localX) ** 2 + (y.value - localY) ** 2) <= padding
     )
 
@@ -136,18 +136,20 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     const fromY = Math.min(y1, y2) - padding
     const toY = Math.max(y1, y2) + padding
 
-    const newProgress = new Set<Id>()
-    for (const index of props.nodes.value.keys()) {
-      const node = props.nodes.value.at(-index - 1)!
-      if (node.x.value >= fromX && node.x.value <= toX && node.y.value >= fromY && node.y.value <= toY) {
-        if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(node.id))) {
+    if (props.nodes) {
+      const newProgress = new Set<Id>()
+      for (const index of props.nodes.value.keys()) {
+        const node = props.nodes.value.at(-index - 1)!
+        if (node.x.value >= fromX && node.x.value <= toX && node.y.value >= fromY && node.y.value <= toY) {
+          if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(node.id))) {
+            newProgress.add(node.id)
+          }
+        } else if (values.value.has(node.id)) {
           newProgress.add(node.id)
         }
-      } else if (values.value.has(node.id)) {
-        newProgress.add(node.id)
       }
+      progress.value = newProgress
     }
-    progress.value = newProgress
   }
 
   const stopSelection = () => {
