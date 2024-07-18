@@ -1,5 +1,5 @@
 import { Alphabet } from '$lib/components/scg/alphabet'
-import { BasicBusProps, Bus } from '$lib/components/scg/bus/bus'
+import { BasicBusProps, Bus } from '$lib/components/scg/bus'
 import { BasicContentProps, Content } from '$lib/components/scg/content'
 import { BasicEdgeProps, Edge } from '$lib/components/scg/edge'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
