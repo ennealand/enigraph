@@ -59,7 +59,7 @@
     }
     &:active + .bus-thumb {
       stroke: var(--scg-bus-thumb-color-selected, red) !important;
-      fill: var(--scg-bus-thumb-fill-selected, #000000) !important;
+      fill: var(--scg-bus-thumb-fill-active, #000000) !important;
     }
   }
 }
