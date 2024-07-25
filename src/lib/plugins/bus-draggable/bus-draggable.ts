@@ -3,6 +3,7 @@ import { batch, ReadonlySignal, useComputed, useSignal } from '@preact/signals'
 
 type Props<Id extends string | number> = {
   getInnerPoint: (x: number, y: number) => readonly [number, number]
+  localize: (x: number, y: number) => readonly [number, number]
   changeBusPosition?(element: BaseBusProps<Id>, x: number, y: number): void
   busPositionChanged?(element: BaseBusProps<Id>): void
   zoom: ReadonlySignal<number>
@@ -18,48 +19,34 @@ type DraggingContext<Id extends string | number> = {
 }
 
 export const withBusDraggable = <Id extends string | number>(props: Props<Id>): DraggingContext<Id> => {
-  const startPoint = useSignal({ x: 0, y: 0 })
-  const totalShift = useSignal({ x: 0, y: 0 })
+  const startPoint = useSignal({ dx: 0, dy: 0 })
   const draggedBus = useSignal<BaseBusProps<Id> | null>(null)
   const isDragging = useComputed(() => !!draggedBus.value)
 
-  const startBusDragging = (e: MouseEvent, bus: BaseBusProps<Id>) => {
+  const startBusDragging = (_e: MouseEvent, bus: BaseBusProps<Id>) => {
     draggedBus.value = bus
-    const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-    startPoint.value.x = x
-    startPoint.value.y = y
-    totalShift.value.x = 0
-    totalShift.value.y = 0
+    startPoint.value.dx = bus.dx.value
+    startPoint.value.dy = bus.dy.value
   }
 
   const updateBusDragging = (e: MouseEvent) => {
     if (!isDragging.value) return
-    const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
-    const shiftX = startPoint.value.x - x
-    const shiftY = startPoint.value.y - y
-    const zoom = props.zoom?.value ?? 1
+    const [x, y] = props.localize(...props.getInnerPoint(e.clientX, e.clientY))
+    let newDX = x - draggedBus.value!.x.value
+    let newDY = y - draggedBus.value!.y.value
+    if (e.shiftKey) {
+      if (Math.abs(draggedBus.value!.x.value - x) > Math.abs(draggedBus.value!.y.value - y)) newDY = 0
+      else newDX = 0
+    }
     batch(() => {
-      props.changeBusPosition?.(
-        draggedBus.value!,
-        draggedBus.value!.dx.value - shiftX / zoom,
-        draggedBus.value!.dy.value - shiftY / zoom
-      )
+      props.changeBusPosition?.(draggedBus.value!, newDX, newDY)
     })
-    totalShift.value.x += shiftX
-    totalShift.value.y += shiftY
-    startPoint.value.x = x
-    startPoint.value.y = y
   }
 
   const abortBusDragging = (options?: { revert: boolean }) => {
     if (!isDragging.value) return
     if (options?.revert) {
-      const zoom = props.zoom?.value ?? 1
-      props.changeBusPosition?.(
-        draggedBus.value!,
-        draggedBus.value!.dx.value + totalShift.value.x / zoom,
-        draggedBus.value!.dy.value + totalShift.value.y / zoom
-      )
+      props.changeBusPosition?.(draggedBus.value!, startPoint.value.dx, startPoint.value.dy)
     }
     stopBusDragging()
   }
