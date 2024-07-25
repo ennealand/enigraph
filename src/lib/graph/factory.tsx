@@ -163,7 +163,8 @@ export class EnigraphFactory<
 
       useEffect(() => {
         for (const [event, handler] of Object.entries(globalProps.value)) {
-          document.addEventListener(event, handler)
+          const options = event === 'mousemove' ? { passive: true, capture: true } : undefined
+          document.addEventListener(event, handler, options)
         }
         return () => {
           for (const [event, handler] of Object.entries(globalProps.value)) {
