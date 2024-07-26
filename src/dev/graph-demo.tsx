@@ -5,6 +5,7 @@ import { BasicEdgeProps, Edge } from '$lib/components/scg/edge'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withAutohide } from '$lib/plugins/autohide'
+import { withAutolayout } from '$lib/plugins/autolayout'
 import { withAutosize } from '$lib/plugins/autosize'
 import { withBusDraggable } from '$lib/plugins/bus-draggable'
 import { withContentDraggable } from '$lib/plugins/content-draggable'
@@ -24,6 +25,7 @@ const factory = new EnigraphFactory()
   .add('node', (props: BasicNodeProps) => <Node {...props} />)
   .plug(withAutosize)
   .plug(withMovable)
+  .plug(withAutolayout)
   .plug(withSelection)
   .plug(ctx => {
     const changeBusPosition = (bus: BasicBusProps, x: number, y: number) => {

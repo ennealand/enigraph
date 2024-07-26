@@ -5,7 +5,7 @@ type DynamicSygnal<T, Mutability> = Mutability extends 'mutable' ? Signal<T> : R
 export type BaseNodeProps<
   Id extends string | number = string | number,
   NodeType = unknown,
-  Mutability extends 'mutable' | 'immutable' = 'immutable',
+  Mutability extends 'mutable' | 'immutable' = 'mutable',
 > = {
   id: Id
   type: DynamicSygnal<NodeType, Mutability>

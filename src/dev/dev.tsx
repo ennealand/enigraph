@@ -8,12 +8,12 @@ const GR = 1
 const GW = 1000
 const GH = 600
 
-const N = 20
-const E = 50
+const N = 500
+const E = 300
 const B = 0
 const C = 0
 
-const label = signal('bye')
+const label = signal('')
 const nodes = signal<DemoComponentProps<'node'>>(
   Array.from({ length: N }, (_, i) => ({
     id: i + 1,
@@ -61,7 +61,7 @@ Array.from({ length: C }, (_, i) => {
 const edges = signal<DemoComponentProps<'edge'>>([])
 Array.from({ length: E }, (_, i) => {
   const n1 = nodes.value[Math.trunc(Math.random() * N)]
-  const isNode = !i || Math.random() > 0.7
+  const isNode = true || !i || Math.random() > 0.7
   const e2 = isNode
     ? nodes.value[Math.trunc(Math.random() * N)]
     : contents.value[Math.trunc(((Math.random() * i) / N) * C)]

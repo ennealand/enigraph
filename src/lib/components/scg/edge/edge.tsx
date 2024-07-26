@@ -8,8 +8,6 @@ export type BasicEdgeProps = BaseEdgeProps<number, 'const-tuple' | 'var-norole',
   onMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
   onTextDoubleClick?: (data: { e: JSX.TargetedMouseEvent<SVGGElement>; id: number }) => void
   onSharedProps?: (data: { id: number; sourceId: number; targetId: number }) => SharedProps
-  sourceId: number
-  targetId: number
   padding?: boolean
 }
 
