@@ -58,15 +58,16 @@ export const withMovable = (props: Props): MovableContext => {
   // Touch-based moving
   const onwheel = (e: WheelEvent) => {
     e.preventDefault()
+    const [offsetX, offsetY] = props.getInnerPoint(e.clientX, e.clientY)
     if (e.ctrlKey) {
       let deltaZoom = e.deltaY * 0.01
       if (transform.value.zoom.value - deltaZoom < 0.1) deltaZoom = transform.value.zoom.value - 0.1
-      else if (transform.value.zoom.value - deltaZoom > 5) deltaZoom = transform.value.zoom.value - 5
+      else if (transform.value.zoom.value - deltaZoom > 10) deltaZoom = transform.value.zoom.value - 10
 
       transform.value.x.value +=
-        (deltaZoom / transform.value.zoom.value) * (e.offsetX - props.centerX.value - transform.value.x.value)
+        (deltaZoom / transform.value.zoom.value) * (offsetX - transform.value.x.value)
       transform.value.y.value +=
-        (deltaZoom / transform.value.zoom.value) * (e.offsetY - props.centerY.value - transform.value.y.value)
+        (deltaZoom / transform.value.zoom.value) * (offsetY - transform.value.y.value)
       transform.value.zoom.value -= deltaZoom
     } else {
       transform.value.x.value -= e.deltaX
