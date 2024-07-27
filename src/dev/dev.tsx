@@ -8,10 +8,10 @@ const GR = 1
 const GW = 1000
 const GH = 600
 
-const N = 500
-const E = 300
-const B = 0
-const C = 0
+const N = 10
+const E = 20
+const B = 1
+const C = 2
 
 const label = signal('')
 const nodes = signal<DemoComponentProps<'node'>>(
@@ -28,7 +28,7 @@ const buss = signal<DemoComponentProps<'bus'>>([])
 Array.from({ length: B }, (_, i) => {
   const n1 = nodes.value[Math.trunc(Math.random() * N)]
   buss.value.push({
-    id: i + 1,
+    id: N ** 2 + i + 1,
     sourceId: n1.id,
     x: n1.x,
     y: n1.y,
@@ -48,7 +48,7 @@ Array.from({ length: C }, (_, i) => {
         }
       : { type: 'text' as const, value: 'hellooooooooooooooo there' }
   contents.value.push({
-    id: i + 1,
+    id: N ** 2 + B ** 2 + i + 1,
     type: signal(type),
     value: signal(value),
     x: signal(Math.round(Math.random() * GW * GR) - GW * GR / 2),
@@ -67,7 +67,7 @@ Array.from({ length: E }, (_, i) => {
     : contents.value[Math.trunc(((Math.random() * i) / N) * C)]
   if (!e2) return
   edges.value.push({
-    id: i + 1,
+    id: N ** 2 + B ** 2 + C ** 2 + i + 1,
     type: signal('const-tuple'),
     x1: n1.x,
     y1: n1.y,
