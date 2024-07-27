@@ -14,7 +14,7 @@
     inset: -8px;
   }
 
-  &:hover {
+  &:not(.noselect):hover {
     background: var(--scg-content-border-color-hover, #999);
 
     .content {
@@ -22,7 +22,7 @@
     }
   }
 
-  &:active {
+  &:not(.noselect):active {
     background: var(--scg-content-border-color-active, #999);
 
     .content {
@@ -31,10 +31,10 @@
   }
 
   &.selected {
-    background: var(--scg-content-border-color-selected, #999);
+    background: var(--scg-content-border-color-selected, #999) !important;
 
     .content {
-      background: var(--scg-content-fill-selected, #fff);
+      background: var(--scg-content-fill-selected, #fff) !important;
     }
   }
 

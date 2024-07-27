@@ -110,7 +110,8 @@ const factory = new EnigraphFactory()
     }
   })
   .on('content:sharedProps', (ctx, id) => ({
-    selected: useComputed(() => ctx.draggedContent.value?.id === id || ctx.selection.value.has(id)),
+    selected: useComputed(() => ctx.selection.value.has(id)),
+    noselect: ctx.isSelecting,
   }))
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .on('graph:mouseDown', (ctx, e) => {
