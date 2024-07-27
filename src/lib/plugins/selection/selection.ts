@@ -1,9 +1,13 @@
+import { BaseContentProps } from '$lib/components/scg/content/types'
+import { BaseEdgeProps } from '$lib/components/scg/edge/types'
 import { BaseNodeProps } from '$lib/components/scg/node/types'
 import { batch, ReadonlySignal, signal, useComputed, useSignal } from '@preact/signals'
 import { type AreaSelectionProps } from './area-selection'
 
 type Props<Id extends string | number> = {
   nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
+  edges?: ReadonlySignal<BaseEdgeProps<Id>[]>
+  contents?: ReadonlySignal<BaseContentProps<Id>[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
   onSelectionStop?: (selection: Set<Id>) => void
@@ -17,7 +21,8 @@ export type SelectionContext<Id extends string | number> = {
   clearSelection: () => void
   startSelection: (
     e: MouseEvent,
-    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean },
+    clickedId?: Id
   ) => void
   updateSelection: (
     e: MouseEvent,
@@ -50,30 +55,28 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
 
   const startSelection = (
     e: MouseEvent,
-    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean }
+    options?: { deselection?: boolean; selection?: boolean; inversion?: boolean; clear?: boolean },
+    clickedId?: Id
   ) => {
     const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
 
-    // Select a single node is clicked on it
-    const [localX, localY] = localize(x, y) ?? [x, y]
-    const padding = props.padding ?? 15
-    const clickedNode = props.nodes?.value.findLast(
-      ({ x, y }) => Math.sqrt((x.value - localX) ** 2 + (y.value - localY) ** 2) <= padding
-    )
-
     const newProgress = options?.clear ? new Set<Id>() : new Set(values.value)
-    if (clickedNode) {
+
+    // Select a single node is clicked on it
+    if (clickedId !== undefined) {
       const processSingleClick = (values: Set<Id>) => {
-        if (!options?.deselection && !(options?.inversion && !options?.selection && values.has(clickedNode.id))) {
-          values.add(clickedNode.id)
-        } else values.delete(clickedNode.id)
+        if (!options?.deselection && !(options?.inversion && !options?.selection && values.has(clickedId))) {
+          values.add(clickedId)
+        } else {
+          values.delete(clickedId)
+        }
       }
       // If clear => select now; otherwise select later (on mouse move??! might be excessive -- it is!!)
       //       ^ mouse down ^                  ^ mouse move ^  or  ^ mouse up ^ (whatever fires first)
       // The problem is that mouse move might not be triggered (so we need to process stuff on mouse up - uh oh)
       if (options?.clear) {
         // process on mouse up
-        postponedClickedNodeId.value = clickedNode.id
+        postponedClickedNodeId.value = clickedId
       } else {
         processSingleClick(newProgress)
       }
@@ -131,16 +134,21 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     const padding = props.padding ?? 16
     const [x1, y1] = localize(areaSelection.value.x1.value, areaSelection.value.y1.value)
     const [x2, y2] = localize(areaSelection.value.x2.value, areaSelection.value.y2.value)
-    const fromX = Math.min(x1, x2) - padding
-    const toX = Math.max(x1, x2) + padding
-    const fromY = Math.min(y1, y2) - padding
-    const toY = Math.max(y1, y2) + padding
+    const fromX = Math.min(x1, x2)
+    const toX = Math.max(x1, x2)
+    const fromY = Math.min(y1, y2)
+    const toY = Math.max(y1, y2)
 
+    const newProgress = new Set<Id>()
     if (props.nodes) {
-      const newProgress = new Set<Id>()
       for (const index of props.nodes.value.keys()) {
         const node = props.nodes.value.at(-index - 1)!
-        if (node.x.value >= fromX && node.x.value <= toX && node.y.value >= fromY && node.y.value <= toY) {
+        if (
+          node.x.value >= fromX - padding &&
+          node.x.value <= toX + padding &&
+          node.y.value >= fromY - padding &&
+          node.y.value <= toY + padding
+        ) {
           if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(node.id))) {
             newProgress.add(node.id)
           }
@@ -148,8 +156,25 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
           newProgress.add(node.id)
         }
       }
-      progress.value = newProgress
     }
+    if (props.contents) {
+      for (const index of props.contents.value.keys()) {
+        const content = props.contents.value.at(-index - 1)!
+        if (
+          content.x.value + content.dx.value + 6.4 >= fromX &&
+          content.x.value <= toX &&
+          content.y.value + content.dy.value + 6.4 >= fromY &&
+          content.y.value <= toY
+        ) {
+          if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(content.id))) {
+            newProgress.add(content.id)
+          }
+        } else if (values.value.has(content.id)) {
+          newProgress.add(content.id)
+        }
+      }
+    }
+    progress.value = newProgress
   }
 
   const stopSelection = () => {

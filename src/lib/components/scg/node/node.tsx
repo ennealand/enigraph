@@ -5,7 +5,7 @@ import './node.css'
 import { BaseNodeProps } from './types'
 
 export type BasicNodeProps = BaseNodeProps<number, 'const-tuple' | 'var-norole', 'mutable'> & {
-  onMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
+  onMouseDown?: (data: { e: JSX.TargetedMouseEvent<SVGGElement>; id: number }) => void
   onTextDoubleClick?: (data: { e: JSX.TargetedMouseEvent<SVGGElement>; id: number }) => void
   onSharedProps?: (id: number) => SharedProps
 }
@@ -26,7 +26,7 @@ export const Node = ({ id, type, x, y, label, padding, onMouseDown, onTextDouble
   )
   return (
     <g>
-      <g class={className} onMouseDown={onMouseDown}>
+      <g class={className} onMouseDown={e => onMouseDown?.({ e, id })}>
         {padding && <circle cx={x} cy={y} fill='transparent' />}
         <use class='node' xlinkHref={`#scg-node-${type}`} x={x} y={y} />
       </g>

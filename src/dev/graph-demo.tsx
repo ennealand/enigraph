@@ -8,7 +8,6 @@ import { withAutohide } from '$lib/plugins/autohide'
 import { withAutolayout } from '$lib/plugins/autolayout'
 import { withAutosize } from '$lib/plugins/autosize'
 import { withBusDraggable } from '$lib/plugins/bus-draggable'
-import { withContentDraggable } from '$lib/plugins/content-draggable'
 import { BaseDisk, createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
@@ -74,7 +73,6 @@ const factory = new EnigraphFactory()
   .plug(withRenaming)
   .plug(withDisk)
   .plug(withBusDraggable)
-  .plug(withContentDraggable)
   .on('bus:thumbMouseDown', (ctx, { e, id }) => {
     console.log('thumb mouse down')
     e.stopPropagation()
@@ -86,9 +84,30 @@ const factory = new EnigraphFactory()
     ),
   }))
   .on('content:mouseDown', (ctx, { e, id }) => {
-    e.stopPropagation()
     e.preventDefault()
-    ctx.startContentDragging(e, ctx.contents.value.find(b => b.id === id)!)
+    if (e.buttons === 1) {
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        e.stopPropagation()
+        return
+      }
+
+      if (!e.shiftKey) {
+        ctx.startDragging(e)
+      }
+
+      ctx.startSelection(
+        e,
+        {
+          inversion: true,
+          deselection: e.altKey,
+          selection: e.ctrlKey || e.metaKey,
+          clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+        },
+        id
+      )
+      e.stopPropagation()
+      return
+    }
   })
   .on('content:sharedProps', (ctx, id) => ({
     selected: useComputed(() => ctx.draggedContent.value?.id === id || ctx.selection.value.has(id)),
@@ -114,15 +133,28 @@ const factory = new EnigraphFactory()
     }
   })
   .on('graph:contextMenu', (_, e) => e.preventDefault())
-  .on('node:mouseDown', (ctx, e) => {
+  .on('node:mouseDown', (ctx, { e, id }) => {
     if (e.buttons === 1) {
-      if (e.shiftKey) return
-
       if (e.ctrlKey || e.metaKey || e.altKey) {
         e.stopPropagation()
         return
       }
-      ctx.startDragging(e)
+
+      if (!e.shiftKey) {
+        ctx.startDragging(e)
+      }
+
+      ctx.startSelection(
+        e,
+        {
+          inversion: true,
+          deselection: e.altKey,
+          selection: e.ctrlKey || e.metaKey,
+          clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+        },
+        id
+      )
+      e.stopPropagation()
       return
     }
   })
@@ -140,13 +172,11 @@ const factory = new EnigraphFactory()
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
     ctx.updateBusDragging(e)
-    ctx.updateContentDragging(e)
   })
   .on('global:mouseUp', (ctx, _e) => {
     ctx.stopSelection()
     ctx.stopDragging()
     ctx.stopBusDragging()
-    ctx.stopContentDragging()
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],
