@@ -12,14 +12,15 @@ const N = 10
 const E = 20
 const B = 1
 const C = 2
+const G = 1
 
 const label = signal('')
 const nodes = signal<DemoComponentProps<'node'>>(
   Array.from({ length: N }, (_, i) => ({
     id: i + 1,
     type: signal('const-tuple'),
-    x: signal(Math.round(Math.random() * GW * GR) - GW * GR / 2),
-    y: signal(Math.round(Math.random() * GH * GR) - GH * GR / 2),
+    x: signal(Math.round(Math.random() * GW * GR) - (GW * GR) / 2),
+    y: signal(Math.round(Math.random() * GH * GR) - (GH * GR) / 2),
     label,
   }))
 )
@@ -32,8 +33,8 @@ Array.from({ length: B }, (_, i) => {
     sourceId: n1.id,
     x: n1.x,
     y: n1.y,
-    dx: signal(Math.round(Math.random() * GW * GR) - GW * GR / 2),
-    dy: signal(Math.round(Math.random() * GH * GR) - GH * GR / 2),
+    dx: signal(Math.round(Math.random() * GW * GR) - (GW * GR) / 2),
+    dy: signal(Math.round(Math.random() * GH * GR) - (GH * GR) / 2),
   })
 })
 
@@ -51,8 +52,8 @@ Array.from({ length: C }, (_, i) => {
     id: N ** 2 + B ** 2 + i + 1,
     type: signal(type),
     value: signal(value),
-    x: signal(Math.round(Math.random() * GW * GR) - GW * GR / 2),
-    y: signal(Math.round(Math.random() * GH * GR) - GH * GR / 2),
+    x: signal(Math.round(Math.random() * GW * GR) - (GW * GR) / 2),
+    y: signal(Math.round(Math.random() * GH * GR) - (GH * GR) / 2),
     dx: signal(200),
     dy: signal(200),
   })
@@ -83,6 +84,21 @@ Array.from({ length: E }, (_, i) => {
   })
 })
 
+const groups = signal<DemoComponentProps<'group'>>([])
+Array.from({ length: G }, (_, i) => {
+  const x1 = Math.round(Math.random() * GW * GR) - (GW * GR) / 2
+  const y1 = Math.round(Math.random() * GH * GR) - (GH * GR) / 2
+  const x2 = Math.round(Math.random() * GW * GR) - (GW * GR) / 2
+  const y2 = Math.round(Math.random() * GH * GR) - (GH * GR) / 2
+  groups.value.push({
+    id: N ** 2 + B ** 2 + C ** 2 + E ** 2 + i + 1,
+    x: signal(Math.min(x1, x2)),
+    y: signal(Math.min(y1, y2)),
+    dx: signal(Math.abs(x1 - x2)),
+    dy: signal(Math.abs(y1 - y2)),
+  })
+})
+
 const App = () => {
   return (
     <div class='playground'>
@@ -90,7 +106,7 @@ const App = () => {
         <h2>Playground</h2>
         <button>Clear</button>
       </div>
-      <EnigraphDemo nodes={nodes} edges={edges} buss={buss} contents={contents} />
+      <EnigraphDemo nodes={nodes} edges={edges} buss={buss} contents={contents} groups={groups} />
     </div>
   )
 }

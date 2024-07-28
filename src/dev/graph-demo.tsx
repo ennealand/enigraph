@@ -2,6 +2,7 @@ import { Alphabet } from '$lib/components/scg/alphabet'
 import { BasicBusProps, Bus } from '$lib/components/scg/bus'
 import { BasicContentProps, Content } from '$lib/components/scg/content'
 import { BasicEdgeProps, Edge } from '$lib/components/scg/edge'
+import { BasicGroupProps, Group } from '$lib/components/scg/group'
 import { BasicNodeProps, Node } from '$lib/components/scg/node'
 import { ComponentNames, ComponentProps, EnigraphFactory } from '$lib/graph/factory'
 import { withAutohide } from '$lib/plugins/autohide'
@@ -18,6 +19,7 @@ import { signal, useComputed } from '@preact/signals'
 const nodeSize = signal(10)
 
 const factory = new EnigraphFactory()
+  .add('group', (props: BasicGroupProps) => <Group {...props} padding />)
   .add('content', (props: BasicContentProps) => <Content {...props} />, { html: true })
   .add('bus', (props: BasicBusProps) => <Bus {...props} padding />)
   .add('edge', (props: BasicEdgeProps) => <Edge {...props} padding />)
