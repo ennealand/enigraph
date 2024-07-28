@@ -40,7 +40,7 @@ export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId,
   })
   return (
     <g class={className} onMouseDown={e => onMouseDown?.({ e, id })}>
-      {padding && <path stroke-width='20' d={d} stroke='transparent' />}
+      {padding && <path stroke-width='21' d={d} stroke='transparent' />}
       <path stroke-width='7.5' d={d} class='edge-stroke' />
       <path stroke-width='5' class='edge-fill' d={d} />
       <polygon points={arrowPoints} stroke-width='0' class='edge-arrow' />

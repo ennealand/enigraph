@@ -1,3 +1,4 @@
+import { BaseBusProps } from '$lib/components/scg/bus/types'
 import { BaseContentProps } from '$lib/components/scg/content/types'
 import { BaseEdgeProps } from '$lib/components/scg/edge/types'
 import { BaseNodeProps } from '$lib/components/scg/node/types'
@@ -8,6 +9,7 @@ type Props<Id extends string | number> = {
   nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
   edges?: ReadonlySignal<BaseEdgeProps<Id>[]>
   contents?: ReadonlySignal<BaseContentProps<Id>[]>
+  buss?: ReadonlySignal<BaseBusProps<Id>[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
   onSelectionStop?: (selection: Set<Id>) => void
@@ -140,9 +142,36 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     const toY = Math.max(y1, y2)
 
     const newProgress = new Set<Id>()
+    const ignoreSet = new Set<Id>()
+    if (props.buss) {
+      for (const index of props.buss.value.keys()) {
+        const bus = props.buss.value.at(-index - 1)!
+        if (
+          lineIntersectsRect(
+            bus.x.value,
+            bus.x.value + bus.dx.value,
+            bus.y.value,
+            bus.y.value + bus.dy.value,
+            x1,
+            x2,
+            y1,
+            y2,
+            8
+          )
+        ) {
+          if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(bus.sourceId))) {
+            newProgress.add(bus.sourceId)
+          }
+          ignoreSet.add(bus.sourceId)
+        } else if (values.value.has(bus.sourceId)) {
+          newProgress.add(bus.sourceId)
+        }
+      }
+    }
     if (props.nodes) {
       for (const index of props.nodes.value.keys()) {
         const node = props.nodes.value.at(-index - 1)!
+        if (ignoreSet.has(node.id)) continue
         if (
           node.x.value >= fromX - padding &&
           node.x.value <= toX + padding &&
@@ -160,7 +189,7 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     if (props.edges) {
       for (const index of props.edges.value.keys()) {
         const edge = props.edges.value.at(-index - 1)!
-        if (lineIntersectsRect(edge.x1.value, edge.x2.value, edge.y1.value, edge.y2.value, x1, x2, y1, y2)) {
+        if (lineIntersectsRect(edge.x1.value, edge.x2.value, edge.y1.value, edge.y2.value, x1, x2, y1, y2, 6)) {
           if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(edge.id))) {
             newProgress.add(edge.id)
           }

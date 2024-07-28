@@ -78,6 +78,32 @@ const factory = new EnigraphFactory()
     e.stopPropagation()
     ctx.startBusDragging(e, ctx.buss.value.find(b => b.id === id)!)
   })
+  .on('bus:mouseDown', (ctx, { e, sourceId }) => {
+    e.preventDefault()
+    if (e.buttons === 1) {
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        e.stopPropagation()
+        return
+      }
+
+      if (!e.shiftKey) {
+        ctx.startDragging(e)
+      }
+
+      ctx.startSelection(
+        e,
+        {
+          inversion: true,
+          deselection: e.altKey,
+          selection: e.ctrlKey || e.metaKey,
+          clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+        },
+        sourceId
+      )
+      e.stopPropagation()
+      return
+    }
+  })
   .on('bus:sharedProps', (ctx, id) => ({
     selected: useComputed(
       () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buss.value.find(b => b.id === id)!.sourceId)
