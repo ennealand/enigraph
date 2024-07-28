@@ -157,6 +157,18 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
         }
       }
     }
+    if (props.edges) {
+      for (const index of props.edges.value.keys()) {
+        const edge = props.edges.value.at(-index - 1)!
+        if (lineIntersectsRect(edge.x1.value, edge.x2.value, edge.y1.value, edge.y2.value, x1, x2, y1, y2)) {
+          if (!options?.deselection && !(options?.inversion && !options?.selection && values.value.has(edge.id))) {
+            newProgress.add(edge.id)
+          }
+        } else if (values.value.has(edge.id)) {
+          newProgress.add(edge.id)
+        }
+      }
+    }
     if (props.contents) {
       for (const index of props.contents.value.keys()) {
         const content = props.contents.value.at(-index - 1)!
@@ -210,4 +222,73 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
     updateSelection,
     stopSelection,
   }
+}
+
+function lineIntersectsRect(
+  lineX1: number,
+  lineX2: number,
+  lineY1: number,
+  lineY2: number,
+  rectX1: number,
+  rectX2: number,
+  rectY1: number,
+  rectY2: number,
+  padding: number = 0
+): boolean {
+  // Normalize the rectangle coordinates
+  const rectLeft = Math.min(rectX1, rectX2) - padding
+  const rectRight = Math.max(rectX1, rectX2) + padding
+  const rectTop = Math.min(rectY1, rectY2) - padding
+  const rectBottom = Math.max(rectY1, rectY2) + padding
+
+  // Check if the line is completely outside of the rectangle
+  if (
+    Math.max(lineX1, lineX2) < rectLeft ||
+    Math.min(lineX1, lineX2) > rectRight ||
+    Math.max(lineY1, lineY2) < rectTop ||
+    Math.min(lineY1, lineY2) > rectBottom
+  ) {
+    return false
+  }
+
+  // Check if the line is completely inside the rectangle
+  if (
+    lineX1 >= rectLeft &&
+    lineX1 <= rectRight &&
+    lineY1 >= rectTop &&
+    lineY1 <= rectBottom &&
+    lineX2 >= rectLeft &&
+    lineX2 <= rectRight &&
+    lineY2 >= rectTop &&
+    lineY2 <= rectBottom
+  ) {
+    return true
+  }
+
+  // Check if the line crosses any of the rectangle's sides
+  function lineIntersectsLine(
+    Ax1: number,
+    Ay1: number,
+    Ax2: number,
+    Ay2: number,
+    Bx1: number,
+    By1: number,
+    Bx2: number,
+    By2: number
+  ) {
+    const denominator = (Bx2 - Bx1) * (Ay2 - Ay1) - (By2 - By1) * (Ax2 - Ax1)
+    if (denominator === 0) return false // Lines are parallel
+
+    const ua = ((By2 - By1) * (Ax1 - Bx1) - (Bx2 - Bx1) * (Ay1 - By1)) / denominator
+    const ub = ((Ay2 - Ay1) * (Ax1 - Bx1) - (Ax2 - Ax1) * (Ay1 - By1)) / denominator
+
+    return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1
+  }
+
+  if (lineIntersectsLine(lineX1, lineY1, lineX2, lineY2, rectLeft, rectTop, rectRight, rectTop)) return true // Top side
+  if (lineIntersectsLine(lineX1, lineY1, lineX2, lineY2, rectLeft, rectBottom, rectRight, rectBottom)) return true // Bottom side
+  if (lineIntersectsLine(lineX1, lineY1, lineX2, lineY2, rectLeft, rectTop, rectLeft, rectBottom)) return true // Left side
+  if (lineIntersectsLine(lineX1, lineY1, lineX2, lineY2, rectRight, rectTop, rectRight, rectBottom)) return true // Right side
+
+  return false
 }

@@ -5,7 +5,7 @@ import './edge.css'
 import { BaseEdgeProps } from './types'
 
 export type BasicEdgeProps = BaseEdgeProps<number, 'const-tuple' | 'var-norole', 'mutable'> & {
-  onMouseDown?: (e: JSX.TargetedMouseEvent<SVGGElement>) => void
+  onMouseDown?: (data: { e: JSX.TargetedMouseEvent<SVGGElement>; id: number }) => void
   onTextDoubleClick?: (data: { e: JSX.TargetedMouseEvent<SVGGElement>; id: number }) => void
   onSharedProps?: (data: { id: number; sourceId: number; targetId: number }) => SharedProps
   padding?: boolean
@@ -15,7 +15,8 @@ export type SharedProps = {
   selected: ReadonlySignal<boolean>
 }
 
-export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId, targetId, onSharedProps }: BasicEdgeProps) => {
+// prettier-ignore
+export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId, targetId, onSharedProps, onMouseDown, padding }: BasicEdgeProps) => {
   console.log('node render')
   const sharedProps = onSharedProps?.({ id, sourceId, targetId })
   const className = useComputed(() => cl('edge-container', sharedProps?.selected.value && 'selected'))
@@ -38,7 +39,8 @@ export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId,
     return `${xx2},${yy2} ${x4},${y4} ${x5},${y5}`
   })
   return (
-    <g class={className}>
+    <g class={className} onMouseDown={e => onMouseDown?.({ e, id })}>
+      {padding && <path stroke-width='20' d={d} stroke='transparent' />}
       <path stroke-width='7.5' d={d} class='edge-stroke' />
       <path stroke-width='5' class='edge-fill' d={d} />
       <polygon points={arrowPoints} stroke-width='0' class='edge-arrow' />

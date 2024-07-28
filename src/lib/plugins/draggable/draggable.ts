@@ -12,6 +12,7 @@ type Props<Id extends string | number> = {
   changeNodePosition?(element: BaseNodeProps<Id>, x: number, y: number): void
   changeContentPosition?(element: BaseContentProps<Id>, x: number, y: number): void
   nodePositionChanged?(element: BaseNodeProps<Id>): void
+  edgePositionChanged?(element: BaseEdgeProps<Id>): void
   contentPositionChanged?(element: BaseContentProps<Id>): void
   zoom: ReadonlySignal<number>
 }
@@ -45,15 +46,23 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     const shiftY = startPoint.value.y - y
     const zoom = props.zoom?.value ?? 1
     batch(() => {
+      const edgesSet = new Set<Id>()
+      if (props.edges) {
+        for (const edge of props.edges.value) {
+          if (!props.selection.value.has(edge.id)) continue
+          if (!props.selection.value.has(edge.sourceId)) edgesSet.add(edge.sourceId)
+          if (!props.selection.value.has(edge.targetId)) edgesSet.add(edge.targetId)
+        }
+      }
       if (props.nodes) {
         for (const node of props.nodes.value) {
-          if (!props.selection.value.has(node.id)) continue
+          if (!props.selection.value.has(node.id) && !edgesSet.has(node.id)) continue
           props.changeNodePosition?.(node, node.x.value - shiftX / zoom, node.y.value - shiftY / zoom)
         }
       }
       if (props.contents) {
         for (const content of props.contents.value) {
-          if (!props.selection.value.has(content.id)) continue
+          if (!props.selection.value.has(content.id) && !edgesSet.has(content.id)) continue
           props.changeContentPosition?.(content, content.x.value - shiftX / zoom, content.y.value - shiftY / zoom)
         }
       }
@@ -69,9 +78,17 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     if (options?.revert) {
       const zoom = props.zoom?.value ?? 1
       batch(() => {
+        const edgesSet = new Set<Id>()
+        if (props.edges) {
+          for (const edge of props.edges.value) {
+            if (!props.selection.value.has(edge.id)) continue
+            if (!props.selection.value.has(edge.sourceId)) edgesSet.add(edge.sourceId)
+            if (!props.selection.value.has(edge.targetId)) edgesSet.add(edge.targetId)
+          }
+        }
         if (props.nodes) {
           for (const node of props.nodes.value) {
-            if (!props.selection.value.has(node.id)) continue
+            if (!props.selection.value.has(node.id) && !edgesSet.has(node.id)) continue
             props.changeNodePosition?.(
               node,
               node.x.value + totalShift.value.x / zoom,
@@ -81,7 +98,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         }
         if (props.contents) {
           for (const content of props.contents.value) {
-            if (!props.selection.value.has(content.id)) continue
+            if (!props.selection.value.has(content.id) && !edgesSet.has(content.id)) continue
             props.changeContentPosition?.(
               content,
               content.x.value + totalShift.value.x / zoom,
@@ -97,15 +114,23 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   const stopDragging = () => {
     if (!isDragging.value) return
     batch(() => {
+      const edgesSet = new Set<Id>()
+      if (props.edges) {
+        for (const edge of props.edges.value) {
+          if (!props.selection.value.has(edge.id)) continue
+          if (!props.selection.value.has(edge.sourceId)) edgesSet.add(edge.sourceId)
+          if (!props.selection.value.has(edge.targetId)) edgesSet.add(edge.targetId)
+        }
+      }
       if (props.nodes && props.nodePositionChanged) {
         for (const node of props.nodes.value) {
-          if (!props.selection.value.has(node.id)) continue
+          if (!props.selection.value.has(node.id) && !edgesSet.has(node.id)) continue
           props.nodePositionChanged(node)
         }
       }
       if (props.contents && props.contentPositionChanged) {
         for (const content of props.contents.value) {
-          if (!props.selection.value.has(content.id)) continue
+          if (!props.selection.value.has(content.id) && !edgesSet.has(content.id)) continue
           props.contentPositionChanged(content)
         }
       }

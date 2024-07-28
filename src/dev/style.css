@@ -33,6 +33,7 @@
   --scg-edge-fill-hover: var(--bg);
   --scg-edge-color-hover: #99bdf2;
   --scg-edge-color-selected: #4186f0;
+  --scg-edge-fill-selected: var(--bg);
   --scg-arrow-color: pink;
 
   --disk-fill: #0e0e10;

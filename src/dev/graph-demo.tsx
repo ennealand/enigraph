@@ -20,8 +20,8 @@ const nodeSize = signal(10)
 const factory = new EnigraphFactory()
   .add('content', (props: BasicContentProps) => <Content {...props} />, { html: true })
   .add('bus', (props: BasicBusProps) => <Bus {...props} padding />)
-  .add('edge', (props: BasicEdgeProps) => <Edge {...props} />)
-  .add('node', (props: BasicNodeProps) => <Node {...props} />)
+  .add('edge', (props: BasicEdgeProps) => <Edge {...props} padding />)
+  .add('node', (props: BasicNodeProps) => <Node {...props} padding />)
   .plug(withAutosize)
   .plug(withMovable)
   .plug(withAutolayout)
@@ -166,9 +166,35 @@ const factory = new EnigraphFactory()
     selected: useComputed(() => ctx.selection.value.has(id)),
     renaming: useComputed(() => ctx.renamingNode.value?.id === id),
   }))
-  // .on('edge:sharedProps', (ctx, { sourceId, targetId }) => ({
-  //   selected: useComputed(() => ctx.selection.value.has(sourceId) || ctx.selection.value.has(targetId)),
-  // }))
+  .on('edge:sharedProps', (ctx, { id }) => ({
+    selected: useComputed(() => ctx.selection.value.has(id)),
+  }))
+  .on('edge:mouseDown', (ctx, { e, id }) => {
+    e.preventDefault()
+    if (e.buttons === 1) {
+      if (e.ctrlKey || e.metaKey || e.altKey) {
+        e.stopPropagation()
+        return
+      }
+
+      if (!e.shiftKey) {
+        ctx.startDragging(e)
+      }
+
+      ctx.startSelection(
+        e,
+        {
+          inversion: true,
+          deselection: e.altKey,
+          selection: e.ctrlKey || e.metaKey,
+          clear: !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey,
+        },
+        id
+      )
+      e.stopPropagation()
+      return
+    }
+  })
   .on('global:mouseMove', (ctx, e) => {
     ctx.updateSelection(e, { inversion: true, deselection: e.altKey, selection: e.ctrlKey || e.metaKey })
     ctx.updateDragging(e)
