@@ -12,7 +12,7 @@ const N = 10
 const E = 20
 const B = 1
 const C = 2
-const G = 1
+const G = 3
 
 const label = signal('')
 const nodes = signal<DemoComponentProps<'node'>>(
@@ -47,7 +47,7 @@ Array.from({ length: C }, (_, i) => {
           value:
             'https://images.pexels.com/photos/1266810/pexels-photo-1266810.jpeg?cs=srgb&dl=pexels-8moments-1266810.jpg&fm=jpg',
         }
-      : { type: 'text' as const, value: 'hellooooooooooooooo there' }
+      : { type: 'text' as const, value: 'Ipsum loremsum ipsum loremsum' }
   contents.value.push({
     id: N ** 2 + B ** 2 + i + 1,
     type: signal(type),
@@ -94,8 +94,8 @@ Array.from({ length: G }, (_, i) => {
     id: N ** 2 + B ** 2 + C ** 2 + E ** 2 + i + 1,
     x: signal(Math.min(x1, x2)),
     y: signal(Math.min(y1, y2)),
-    dx: signal(Math.abs(x1 - x2)),
-    dy: signal(Math.abs(y1 - y2)),
+    dx: signal(600),
+    dy: signal(400),
   })
 })
 

@@ -1,15 +1,20 @@
 import { BaseContentProps } from '$lib/components/scg/content/types'
 import { BaseEdgeProps } from '$lib/components/scg/edge/types'
+import { BaseGroupProps } from '$lib/components/scg/group/types'
 import { BaseNodeProps } from '$lib/components/scg/node/types'
-import { batch, ReadonlySignal, useSignal } from '@preact/signals'
+import { batch, ReadonlySignal, useComputed, useSignal } from '@preact/signals'
+import { magneticGroupEffect } from './magnetic-group'
 
 type Props<Id extends string | number> = {
   nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
   edges?: ReadonlySignal<BaseEdgeProps<Id>[]>
   contents?: ReadonlySignal<BaseContentProps<Id>[]>
+  groups?: ReadonlySignal<BaseGroupProps<Id>[]>
   selection: ReadonlySignal<Set<Id>>
   isSelecting: ReadonlySignal<boolean>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
+  localize: (x: number, y: number) => readonly [number, number]
+  globalize: (x: number, y: number) => readonly [number, number]
   changeNodePosition?(element: BaseNodeProps<Id>, x: number, y: number): void
   changeContentPosition?(element: BaseContentProps<Id>, x: number, y: number): void
   nodePositionChanged?(element: BaseNodeProps<Id>): void
@@ -43,10 +48,25 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
 
   const updateDragging = (e: MouseEvent) => {
     if (!isDragging.value) return
-    const [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+    let [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+
+    // Handle dragging into groups
+    if (props.groups) {
+      const groups = props.groups.value
+      const P = 15
+      const I = 150
+      for (const group of groups) {
+        if (props.selection.value.has(group.id)) continue
+        const wasInside = !!magneticGroupEffect(props.globalize, group, startPoint.value.x, startPoint.value.y, P, I, { preview: true })
+        const isMagnetic = magneticGroupEffect(props.globalize, group, x, y, P, I, { revert: wasInside })
+        if (isMagnetic) [x, y] = isMagnetic
+      }
+    }
+
     const shiftX = startPoint.value.x - x
     const shiftY = startPoint.value.y - y
     const zoom = props.zoom?.value ?? 1
+
     batch(() => {
       const edgesSet = new Set<Id>()
       if (props.edges) {
