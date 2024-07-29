@@ -18,7 +18,7 @@ export type SharedProps = {
 export const Content = ({ id, x, y, dx, dy, type, value, onMouseDown, onSharedProps }: BasicContentProps) => {
   console.log('content render')
   const sharedProps = onSharedProps?.(id)
-  const className = useComputed(() => cl('content-container', sharedProps?.selected.value && 'selected', sharedProps?.noselect.value && 'noselect'))
+  const className = useComputed(() => cl('content-container', sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect'))
   const style = useComputed(() => `transform:translate(${x}px,${y}px);width:${dx}px;height:${dy}px`)
   const Component = { image: ImageContent, text: TextContent }[type as unknown as string] ?? null
   return (

@@ -22,4 +22,8 @@
     stroke-width: var(--scg-group-border, 2px);
     rx: var(--scg-group-rounded, 8px);
   }
+
+  &.noselect {
+    pointer-events: none;
+  }
 }

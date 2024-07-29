@@ -10,7 +10,7 @@ type Props<Id extends string | number> = {
 }
 
 type DraggingContext<Id extends string | number> = {
-  isDragging: ReadonlySignal<boolean>
+  isBusDragging: ReadonlySignal<boolean>
   startBusDragging: (e: MouseEvent, bus: BaseBusProps<Id>) => void
   updateBusDragging: (e: MouseEvent) => void
   abortBusDragging: (options?: { revert: boolean }) => void
@@ -21,7 +21,7 @@ type DraggingContext<Id extends string | number> = {
 export const withBusDraggable = <Id extends string | number>(props: Props<Id>): DraggingContext<Id> => {
   const startPoint = useSignal({ dx: 0, dy: 0 })
   const draggedBus = useSignal<BaseBusProps<Id> | null>(null)
-  const isDragging = useComputed(() => !!draggedBus.value)
+  const isBusDragging = useComputed(() => !!draggedBus.value)
 
   const startBusDragging = (_e: MouseEvent, bus: BaseBusProps<Id>) => {
     draggedBus.value = bus
@@ -30,7 +30,7 @@ export const withBusDraggable = <Id extends string | number>(props: Props<Id>): 
   }
 
   const updateBusDragging = (e: MouseEvent) => {
-    if (!isDragging.value) return
+    if (!isBusDragging.value) return
     const [x, y] = props.localize(...props.getInnerPoint(e.clientX, e.clientY))
     let newDX = x - draggedBus.value!.x.value
     let newDY = y - draggedBus.value!.y.value
@@ -44,7 +44,7 @@ export const withBusDraggable = <Id extends string | number>(props: Props<Id>): 
   }
 
   const abortBusDragging = (options?: { revert: boolean }) => {
-    if (!isDragging.value) return
+    if (!isBusDragging.value) return
     if (options?.revert) {
       props.changeBusPosition?.(draggedBus.value!, startPoint.value.dx, startPoint.value.dy)
     }
@@ -52,10 +52,10 @@ export const withBusDraggable = <Id extends string | number>(props: Props<Id>): 
   }
 
   const stopBusDragging = () => {
-    if (!isDragging.value) return
+    if (!isBusDragging.value) return
     props.busPositionChanged?.(draggedBus.value!)
     draggedBus.value = null
   }
 
-  return { isDragging, startBusDragging, updateBusDragging, abortBusDragging, stopBusDragging, draggedBus }
+  return { isBusDragging, startBusDragging, updateBusDragging, abortBusDragging, stopBusDragging, draggedBus }
 }

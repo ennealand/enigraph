@@ -62,4 +62,8 @@
       fill: var(--scg-bus-thumb-fill-active, #000000) !important;
     }
   }
+
+  &.noselect {
+    pointer-events: none;
+  }
 }

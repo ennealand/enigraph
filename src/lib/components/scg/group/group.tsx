@@ -13,12 +13,15 @@ export type BasicGroupProps = BaseGroupProps<number, 'mutable'> & {
 
 export type SharedProps = {
   selected: ReadonlySignal<boolean>
+  noselect: ReadonlySignal<boolean>
 }
 
 export const Group = (props: BasicGroupProps) => {
   const { id, x, y, dx, dy, padding, onMouseDown, onSharedProps } = props
   const sharedProps = onSharedProps?.(id)
-  const className = useComputed(() => cl('group-container', sharedProps?.selected.value && 'selected'))
+  const className = useComputed(() =>
+    cl('group-container', sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect')
+  )
   const P = 5
   return (
     <g class={className} onMouseDown={e => onMouseDown?.({ e, id })}>

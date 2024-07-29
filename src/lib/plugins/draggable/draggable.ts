@@ -8,6 +8,7 @@ type Props<Id extends string | number> = {
   edges?: ReadonlySignal<BaseEdgeProps<Id>[]>
   contents?: ReadonlySignal<BaseContentProps<Id>[]>
   selection: ReadonlySignal<Set<Id>>
+  isSelecting: ReadonlySignal<boolean>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   changeNodePosition?(element: BaseNodeProps<Id>, x: number, y: number): void
   changeContentPosition?(element: BaseContentProps<Id>, x: number, y: number): void
@@ -19,6 +20,7 @@ type Props<Id extends string | number> = {
 
 type DraggingContext = {
   isDragging: ReadonlySignal<boolean>
+  isNoselect: ReadonlySignal<boolean>
   startDragging: (e: MouseEvent) => void
   updateDragging: (e: MouseEvent) => void
   abortDragging: (options?: { revert: boolean }) => void
@@ -138,5 +140,6 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     isDragging.value = false
   }
 
-  return { isDragging, startDragging, updateDragging, abortDragging, stopDragging }
+  const isNoselect = useComputed(() => props.isSelecting.value || isDragging.value)
+  return { isDragging, startDragging, updateDragging, abortDragging, stopDragging, isNoselect }
 }

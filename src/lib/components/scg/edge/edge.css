@@ -41,4 +41,8 @@
     transition: var(--scg-edge-arrow-transition, 0.2s fill);
     fill: var(--scg-edge-color, #000);
   }
+
+  &.noselect {
+    pointer-events: none;
+  }
 }

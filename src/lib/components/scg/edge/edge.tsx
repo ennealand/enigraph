@@ -13,13 +13,13 @@ export type BasicEdgeProps = BaseEdgeProps<number, 'const-tuple' | 'var-norole',
 
 export type SharedProps = {
   selected: ReadonlySignal<boolean>
+  noselect: ReadonlySignal<boolean>
 }
 
-// prettier-ignore
 export const Edge = ({ id, x1, y1, x2, y2, sourceRadius, targetRadius, sourceId, targetId, onSharedProps, onMouseDown, padding }: BasicEdgeProps) => {
   console.log('node render')
   const sharedProps = onSharedProps?.({ id, sourceId, targetId })
-  const className = useComputed(() => cl('edge-container', sharedProps?.selected.value && 'selected'))
+  const className = useComputed(() => cl('edge-container', sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect'))
   const rad = useComputed(() => Math.atan2(y2.value - y1.value, x2.value - x1.value))
   const d = useComputed(() => `M ${x1.value + Math.cos(rad.value) * ((sourceRadius?.value ?? 0) - 10)} ${y1.value + Math.sin(rad.value) * ((sourceRadius?.value ?? 0) - 10)} L ${x2.value - Math.cos(rad.value) * (targetRadius?.value ?? 0)} ${y2.value - Math.sin(rad.value) * (targetRadius?.value ?? 0)}`)
 

@@ -43,6 +43,10 @@
   & > circle {
     r: var(--scg-node-padding, 15px);
   }
+
+  &.noselect {
+    pointer-events: none;
+  }
 }
 
 .node-label {

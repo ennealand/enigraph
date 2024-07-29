@@ -110,6 +110,7 @@ const factory = new EnigraphFactory()
     selected: useComputed(
       () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buss.value.find(b => b.id === id)!.sourceId)
     ),
+    noselect: ctx.isNoselect,
   }))
   .on('content:mouseDown', (ctx, { e, id }) => {
     e.preventDefault()
@@ -139,7 +140,7 @@ const factory = new EnigraphFactory()
   })
   .on('content:sharedProps', (ctx, id) => ({
     selected: useComputed(() => ctx.selection.value.has(id)),
-    noselect: ctx.isSelecting,
+    noselect: ctx.isNoselect,
   }))
   .on('graph:wheel', (ctx, e) => ctx.onwheel(e))
   .on('graph:mouseDown', (ctx, e) => {
@@ -193,9 +194,15 @@ const factory = new EnigraphFactory()
   .on('node:sharedProps', (ctx, id) => ({
     selected: useComputed(() => ctx.selection.value.has(id)),
     renaming: useComputed(() => ctx.renamingNode.value?.id === id),
+    noselect: ctx.isNoselect,
   }))
   .on('edge:sharedProps', (ctx, { id }) => ({
     selected: useComputed(() => ctx.selection.value.has(id)),
+    noselect: ctx.isNoselect,
+  }))
+  .on('group:sharedProps', (ctx, id) => ({
+    selected: useComputed(() => ctx.selection.value.has(id)),
+    noselect: ctx.isNoselect,
   }))
   .on('edge:mouseDown', (ctx, { e, id }) => {
     e.preventDefault()

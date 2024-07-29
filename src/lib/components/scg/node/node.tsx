@@ -16,13 +16,18 @@ export interface NodeProps extends BasicNodeProps {
 export type SharedProps = {
   selected: ReadonlySignal<boolean>
   renaming: ReadonlySignal<boolean>
+  noselect: ReadonlySignal<boolean>
 }
 
 export const Node = ({ id, type, x, y, label, padding, onMouseDown, onTextDoubleClick, onSharedProps }: NodeProps) => {
   console.log('node render')
   const sharedProps = onSharedProps?.(id)
   const className = useComputed(() =>
-    cl('node-container', sharedProps?.selected.value && 'selected', sharedProps?.renaming.value && 'renaming')
+    cl(
+      'node-container',
+      sharedProps?.renaming.value && 'renaming',
+      sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect'
+    )
   )
   return (
     <g>
