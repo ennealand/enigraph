@@ -25,10 +25,10 @@ const nodes = signal<DemoComponentProps<'node'>>(
   }))
 )
 
-const buss = signal<DemoComponentProps<'bus'>>([])
+const buses = signal<DemoComponentProps<'bus'>>([])
 Array.from({ length: B }, (_, i) => {
   const n1 = nodes.value[Math.trunc(Math.random() * N)]
-  buss.value.push({
+  buses.value.push({
     id: N ** 2 + i + 1,
     sourceId: n1.id,
     x: n1.x,
@@ -106,7 +106,7 @@ const App = () => {
         <h2>Playground</h2>
         <button>Clear</button>
       </div>
-      <EnigraphDemo nodes={nodes} edges={edges} buss={buss} contents={contents} groups={groups} />
+      <EnigraphDemo nodes={nodes} edges={edges} buses={buses} contents={contents} groups={groups} />
     </div>
   )
 }

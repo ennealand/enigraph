@@ -21,7 +21,7 @@ const nodeSize = signal(10)
 const factory = new EnigraphFactory()
   .add('group', (props: BasicGroupProps) => <Group {...props} padding />)
   .add('content', (props: BasicContentProps) => <Content {...props} />, { html: true })
-  .add('bus', (props: BasicBusProps) => <Bus {...props} padding />)
+  .add('bus', (props: BasicBusProps) => <Bus {...props} padding />, { plural: 'buses' })
   .add('edge', (props: BasicEdgeProps) => <Edge {...props} padding />)
   .add('node', (props: BasicNodeProps) => <Node {...props} padding />)
   .plug(withAutosize)
@@ -78,7 +78,7 @@ const factory = new EnigraphFactory()
   .on('bus:thumbMouseDown', (ctx, { e, id }) => {
     console.log('thumb mouse down')
     e.stopPropagation()
-    ctx.startBusDragging(e, ctx.buss.value.find(b => b.id === id)!)
+    ctx.startBusDragging(e, ctx.buses.value.find(b => b.id === id)!)
   })
   .on('bus:mouseDown', (ctx, { e, sourceId }) => {
     e.preventDefault()
@@ -108,7 +108,7 @@ const factory = new EnigraphFactory()
   })
   .on('bus:sharedProps', (ctx, id) => ({
     selected: useComputed(
-      () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buss.value.find(b => b.id === id)!.sourceId)
+      () => ctx.draggedBus.value?.id === id || ctx.selection.value.has(ctx.buses.value.find(b => b.id === id)!.sourceId)
     ),
     noselect: ctx.isNoselect,
   }))

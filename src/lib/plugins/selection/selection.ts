@@ -9,7 +9,7 @@ type Props<Id extends string | number> = {
   nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
   edges?: ReadonlySignal<BaseEdgeProps<Id>[]>
   contents?: ReadonlySignal<BaseContentProps<Id>[]>
-  buss?: ReadonlySignal<BaseBusProps<Id>[]>
+  buses?: ReadonlySignal<BaseBusProps<Id>[]>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
   localize?: (x: number, y: number) => readonly [number, number]
   onSelectionStop?: (selection: Set<Id>) => void
@@ -143,9 +143,9 @@ export const withSelection = <Id extends string | number>(props: Props<Id>): Sel
 
     const newProgress = new Set<Id>()
     const ignoreSet = new Set<Id>()
-    if (props.buss) {
-      for (const index of props.buss.value.keys()) {
-        const bus = props.buss.value.at(-index - 1)!
+    if (props.buses) {
+      for (const index of props.buses.value.keys()) {
+        const bus = props.buses.value.at(-index - 1)!
         if (
           lineIntersectsRect(
             bus.x.value,

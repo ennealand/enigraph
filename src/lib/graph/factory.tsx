@@ -9,9 +9,11 @@ type Events = EventValues<'graph', JSX.HTMLAttributes<HTMLDivElement>> &
 
 type UnionToIntersection<T> = (T extends unknown ? (x: T) => void : never) extends (x: infer I) => void ? I : never
 type CustomEvents<Components extends Record<string, { id: string | number }>> = keyof Components extends string
-  ? UnionToIntersection<{
-      [Name in keyof Components]: EventValues<Name, Components[Name]>
-    }[keyof Components]>
+  ? UnionToIntersection<
+      {
+        [Name in keyof Components]: EventValues<Name, Components[Name]>
+      }[keyof Components]
+    >
   : never
 
 type EventValues<Base extends string, T extends Record<any, any>> = {
@@ -41,31 +43,33 @@ type Config = {
 export class EnigraphFactory<
   Context extends Record<string, unknown> = Record<never, never>,
   Components extends Record<string, { id: string | number }> = Record<never, never>,
+  Metadata extends Record<string, { plural: string }> = Record<never, never>,
 > {
   constructor() {}
 
   #components = {} as { [Name in keyof Components]: (props: Components[Name]) => JSX.Element }
-  #componentsMetadata = {} as { [Name in keyof Components]: { html: boolean } }
+  #componentsMetadata = {} as { [Name in keyof Components]: { html: boolean; plural: string } }
   #plugins: ((ctx: Context & InitialContext) => Record<string, unknown>)[] = []
   #events = new Map<string, (ctx: Context & InitialContext, e: any) => void>()
   #config?: (ctx: Context & InitialContext) => Config
 
-  add<Name extends string, ComponentProps extends { id: string | number }>(
+  add<Name extends string, ComponentProps extends { id: string | number }, Plural extends string = `${Name}s`>(
     name: Name,
     component: (props: ComponentProps) => JSX.Element,
-    options?: { html: true }
+    options?: { html?: true; plural?: Plural }
   ) {
     ;(this.#components as Record<Name, unknown>)[name] = component
-    this.#componentsMetadata[name] = { html: Boolean(options?.html) }
+    this.#componentsMetadata[name] = { html: Boolean(options?.html), plural: options?.plural ?? name + 's' }
     return this as unknown as EnigraphFactory<
-      Context & Record<`${Name}s`, ReadonlySignal<ComponentProps[]>>,
-      Components & Record<Name, ComponentProps>
+      Context & Record<Plural, ReadonlySignal<ComponentProps[]>>,
+      Components & Record<Name, ComponentProps>,
+      Metadata & Record<Name, { plural: Plural }>
     >
   }
 
   plug<Exports extends Record<string, unknown>>(plugin: (ctx: Context & InitialContext) => Exports) {
     this.#plugins.push(plugin)
-    return this as EnigraphFactory<{ [k in keyof (Context & Exports)]: (Context & Exports)[k] }, Components>
+    return this as EnigraphFactory<{ [k in keyof (Context & Exports)]: (Context & Exports)[k] }, Components, Metadata>
   }
 
   on<T extends string & keyof (Events & CustomEvents<Components>)>(
@@ -113,7 +117,9 @@ export class EnigraphFactory<
 
   create() {
     type Props = { width?: ReadonlySignal<number>; height?: ReadonlySignal<number> } & {
-      [Name in keyof Components as Name extends string ? `${Name}s` : never]: ReadonlySignal<Components[Name][]>
+      [Name in keyof Components as Name extends keyof Metadata ? Metadata[Name]['plural'] : never]: ReadonlySignal<
+        Components[Name][]
+      >
     }
     const Enigraph = (props: Props) => {
       const width = props.width ?? useSignal(500)
@@ -133,9 +139,10 @@ export class EnigraphFactory<
       let ctx = { width, height, centerX, centerY, getInnerPoint, ref: baseRef } as Context & InitialContext
 
       for (const name of Object.keys(this.#components)) {
-        const items = (props as Record<string, unknown>)[name + 's']
-        if (!items) throw new Error(`Missing '${name}s' prop`)
-        ;(ctx as Record<string, unknown>)[name + 's'] = items
+        const plural = this.#componentsMetadata[name].plural
+        const items = (props as Record<string, unknown>)[plural]
+        if (!items) throw new Error(`Missing '${plural}' prop`)
+        ;(ctx as Record<string, unknown>)[plural] = items
       }
 
       for (const plugin of this.#plugins) {
@@ -143,7 +150,7 @@ export class EnigraphFactory<
       }
 
       const components = Object.entries(this.#components).map(([name, component]) => {
-        const items = (ctx as Record<string, unknown>)[name + 's']
+        const items = (ctx as Record<string, unknown>)[this.#componentsMetadata[name].plural]
         const { html } = this.#componentsMetadata[name]
         return { name, component, items, html } as {
           name: string
@@ -193,8 +200,8 @@ export class EnigraphFactory<
   }
 }
 
-export type ComponentNames<Factory extends EnigraphFactory<any, any>> =
-  Factory extends EnigraphFactory<any, infer Components> ? keyof Components : never
+export type ComponentNames<Factory extends EnigraphFactory<any, any, any>> =
+  Factory extends EnigraphFactory<any, infer Components, any> ? keyof Components : never
 
-export type ComponentProps<Factory extends EnigraphFactory<any, any>, Name extends ComponentNames<Factory>> =
-  Factory extends EnigraphFactory<any, infer Components> ? Components[Name] : never
+export type ComponentProps<Factory extends EnigraphFactory<any, any, any>, Name extends ComponentNames<Factory>> =
+  Factory extends EnigraphFactory<any, infer Components, any> ? Components[Name] : never
