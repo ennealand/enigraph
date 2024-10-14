@@ -1,0 +1,170 @@
+@font-face {
+  font-family: __GeistSans_ac79ff;
+  src: url(https://vercel.com/_next/static/media/e11418ac562b8ac1.p.woff2) format('woff2');
+  font-display: swap;
+  font-weight: 100 900;
+}
+
+:root {
+  --bg: #121215;
+  --color: #09090b;
+  --white: #e2e2e2;
+  --grey: #f4f4f5;
+  --grey-hover: #f4f4f5cc;
+  --border: #e4e4e7;
+
+  --scg-node-fill: var(--bg);
+  --scg-node-color: var(--white);
+  --scg-node-color-hover: #99bdf2;
+  --scg-node-shadow-color-hover: #99bdf296;
+  --scg-node-color-selected: #4186f0;
+  --scg-node-text: var(--white);
+  --scg-node-text-hover: var(--white);
+
+  --selection-area-fill: #1c80d712;
+  --selection-area-color: #1c80d7;
+  --selection-area-fill-deselection: #d71c1c12;
+  --selection-area-color-deselection: #c02323;
+  --selection-area-fill-selection: #1cd73812;
+  --selection-area-color-selection: #269b37;
+
+  --scg-edge-color: #5e5e63;
+  --scg-edge-fill: #131314;
+  --scg-edge-fill-hover: var(--bg);
+  --scg-edge-color-hover: #99bdf2;
+  --scg-edge-color-selected: #4186f0;
+  --scg-edge-fill-selected: var(--bg);
+  --scg-arrow-color: pink;
+
+  --disk-fill: #0e0e10;
+  --disk-fill-hover: hsl(240 7% 7%);
+  --disk-scg-node-color: #ececec;
+  --disk-text: #d3d3d3;
+  --disk-hover-scg-node-color: #498cf0;
+  --disk-hover-text: #5b94e8;
+  --disk-border-color: #8a8a8a0f;
+
+  --scg-bus-color: #36363b;
+  --scg-bus-color-hover: #99bdf2;
+  --scg-bus-color-selected: #4186f0;
+  --scg-bus-thumb-size: 3.25px;
+  --scg-bus-thumb-size-selected: 3.25px;
+  --scg-bus-thumb-fill: var(--bg);
+  --scg-bus-thumb-color: #99bdf2;
+  --scg-bus-thumb-color-hover: #99bdf2;
+  --scg-bus-thumb-fill-hover: var(--white);
+  --scg-bus-thumb-color-selected: #4186f0;
+  --scg-bus-thumb-fill-active: var(--white);
+  --scg-bus-thumb-fill-selected: var(--bg);
+  --scg-bus-thumb-border: 1.5px;
+
+  --scg-content-fill: #0e0e10;
+  --scg-content-fill-hover: hsl(240 7% 7%);
+  --scg-content-fill-active: hsl(240 7% 7%);
+  --scg-content-fill-selected: hsl(240 7% 7%);
+
+  --scg-content-border-color: #252527;
+  --scg-content-border-color-hover: #99bdf2;
+  --scg-content-border-color-active: #4186f0;
+  --scg-content-border-color-selected: #4186f0;
+
+  --scg-content-border: 0.2rem;
+  --scg-content-border-radius: 0.2rem;
+  --scg-content-border-inner-radius: 0.1rem;
+
+  --scg-group-color: #252527;
+  --scg-group-fill: rgb(255 255 255 / 2%);
+  --scg-group-color-hover: #99bdf2;
+  --scg-group-fill-hover: rgb(255 255 255 / 3%);
+  --scg-group-color-selected: #4186f0;
+  --scg-group-fill-selected: rgb(255 255 255 / 2%);
+  --scg-group-border: 1px;
+  --scg-group-rounded: 4px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: var(--white);
+    --color: #09090b;
+    --grey: #f4f4f5;
+    --grey-hover: #f4f4f5cc;
+    --border: #e4e4e7;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #09090b;
+    --color: #fafafa;
+    --grey: #27272a;
+    --grey-hover: #27272acc;
+    --border: #27272a;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  height: 100dvh;
+  margin: 0;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  font-family: '__GeistSans_ac79ff';
+  -webkit-font-smoothing: antialiased;
+  color: var(--color);
+}
+
+.playground {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow:
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  height: 4rem;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--border);
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  margin-right: auto;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  background-color: var(--grey);
+  border: unset;
+  font-family: inherit;
+  color: inherit;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  cursor: pointer;
+  box-shadow:
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+
+  &:hover {
+    background-color: var(--grey-hover);
+  }
+}
+
+.enigraph {
+  width: 90vw;
+  max-width: 1400px;
+  height: 80dvh;
+  background-color: var(--scg-node-fill);
+}

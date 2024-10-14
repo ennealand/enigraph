@@ -1,0 +1,29 @@
+.group-container {
+  user-select: none;
+  cursor: pointer;
+
+  &:hover {
+    .group {
+      stroke: var(--scg-group-color-hover, #000000);
+      fill: var(--scg-group-fill-hover, rgb(0 0 0 / 3%));
+    }
+  }
+
+  &.selected {
+    .group {
+      stroke: var(--scg-group-color-selected, #2669cf);
+      fill: var(--scg-group-fill-selected, rgb(0 0 0 / 3%));
+    }
+  }
+
+  .group {
+    stroke: var(--scg-group-color, #000000);
+    fill: var(--scg-group-fill, rgb(0 0 0 / 3%));
+    stroke-width: var(--scg-group-border, 2px);
+    rx: var(--scg-group-rounded, 8px);
+  }
+
+  &.noselect {
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,69 @@
+.bus-container {
+  user-select: none;
+  cursor: pointer;
+  &:hover {
+    .bus-fill {
+      stroke: var(--scg-bus-color-hover, #2669cf);
+    }
+  }
+
+  &.selected {
+    .bus-fill {
+      stroke: var(--scg-bus-color-selected, #2669cf) !important;
+    }
+  }
+
+  .bus-fill {
+    transition: stroke 0.1s;
+    stroke: var(--scg-bus-color, #000000);
+  }
+
+  .bus-padding {
+    stroke-width: var(--scg-bus-padding, 24);
+    stroke: transparent;
+  }
+
+  .bus-thumb {
+    pointer-events: none;
+    transition-property: r, fill, stroke;
+    transition-duration: 0.1s;
+    stroke-width: var(--scg-bus-thumb-border, 4);
+    r: var(--scg-bus-thumb-size, 2.2px);
+    fill: var(--scg-bus-color, #000000);
+    stroke: var(--scg-bus-color, #000000);
+  }
+
+  &:hover {
+    .bus-thumb {
+      r: var(--scg-bus-thumb-size-selected, 5px);
+      fill: var(--scg-bus-thumb-fill, #fff);
+      stroke: var(--scg-bus-thumb-color, red);
+    }
+  }
+
+  &.selected {
+    .bus-thumb {
+      r: var(--scg-bus-thumb-size-selected, 5px);
+      fill: var(--scg-bus-thumb-fill-selected, #fff);
+      stroke: var(--scg-bus-thumb-color-selected, red);
+    }
+  }
+
+  .bus-thumb-padding {
+    r: var(--scg-bus-thumb-padding, 12px);
+    fill: transparent;
+
+    &:hover + .bus-thumb {
+      stroke: var(--scg-bus-thumb-color-hover, red) !important;
+      fill: var(--scg-bus-thumb-fill-hover, #000000) !important;
+    }
+    &:active + .bus-thumb {
+      stroke: var(--scg-bus-thumb-color-selected, red) !important;
+      fill: var(--scg-bus-thumb-fill-active, #000000) !important;
+    }
+  }
+
+  &.noselect {
+    pointer-events: none;
+  }
+}

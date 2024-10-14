@@ -1,0 +1,19 @@
+.selection-area {
+  fill: var(--selection-area-fill, #0048b61a);
+  stroke: var(--selection-area-color, #2669cf);
+
+  &[data-type='deselection'] {
+    fill: var(--selection-area-fill-deselection, var(--selection-area-fill, #0048b61a));
+    stroke: var(--selection-area-color-deselection, var(--selection-area-color, #2669cf));
+  }
+
+  &[data-type='selection'] {
+    fill: var(--selection-area-fill-selection, var(--selection-area-fill, #0048b61a));
+    stroke: var(--selection-area-color-selection, var(--selection-area-color, #2669cf));
+  }
+
+  &[data-type='inversion'] {
+    fill: var(--selection-area-fill-inversion, var(--selection-area-fill, #0048b61a));
+    stroke: var(--selection-area-color-inversion, var(--selection-area-color, #2669cf));
+  }
+}

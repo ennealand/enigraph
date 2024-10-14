@@ -1,0 +1,60 @@
+.disk {
+  animation: show 0.1s forwards cubic-bezier(0.01, 0.87, 0.53, 0.96);
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.1));
+  --_scg-node-color: var(--disk-scg-node-color, var(--scg-node-color));
+  --_scg-node-fill: var(--disk-scg-node-fill, var(--scg-node-fill));
+  --_scg-node-color-hover: var(--scg-node-color-hover);
+
+  --_scg-edge-color: var(--disk-scg-edge-color, var(--scg-edge-color));
+  --_scg-edge-fill: var(--disk-scg-edge-fill, var(--scg-edge-fill));
+  --_scg-edge-color-hover: var(--scg-edge-color-hover);
+  --_scg-edge-fill-hover: var(--scg-edge-fill-hover);
+  & > g {
+    --scg-node-color: var(--_scg-node-color);
+    --scg-node-fill: var(--_scg-node-fill);
+
+    --scg-edge-color: var(--_scg-edge-color);
+    --scg-edge-fill: var(--_scg-edge-fill);
+    & > path {
+      fill: none;
+      stroke: var(--disk-fill, #fff);
+      cursor: pointer;
+      filter: drop-shadow(0px 0px 1px var(--disk-border-color, #00000029));
+      transition: stroke 0.05s;
+    }
+    & > text {
+      transition: fill 0.05s;
+    }
+  }
+  text {
+    font-family: monospace;
+    font-weight: 500;
+    font-size: 0.8rem;
+    fill: var(--disk-text, var(--disk-scg-node-color, #999));
+    user-select: none;
+  }
+  & > g:hover {
+    --scg-node-color: var(--disk-hover-scg-node-color, var(--_scg-node-color-hover));
+    --scg-node-color-hover: var(--disk-hover-scg-node-color, var(--_scg-node-color-hover));
+
+    --scg-edge-color: var(--disk-hover-scg-edge-color, var(--_scg-edge-color-hover));
+    --scg-edge-fill: var(--disk-hover-scg-edge-fill, var(--_scg-edge-fill-hover));
+    --scg-edge-color-hover: var(--disk-hover-scg-edge-color, var(--_scg-edge-color-hover));
+    --scg-edge-fill-hover: var(--disk-hover-scg-edge-fill, var(--_scg-edge-fill-hover));
+    & > path {
+      stroke: var(--disk-fill-hover, #d0def3);
+    }
+    text {
+      fill: var(--disk-hover-text, var(--disk-hover-scg-node-color, #2669cf));
+    }
+  }
+}
+
+@keyframes show {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
