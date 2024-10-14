@@ -7,10 +7,7 @@ type Props = {
   height: Signal<number>
 }
 
-type AutosizeContext = {
-  width: Signal<number>
-  height: Signal<number>
-}
+type AutosizeContext = {}
 
 export const withAutosize = (props: Props): AutosizeContext => {
   const resize = () => {
@@ -29,5 +26,5 @@ export const withAutosize = (props: Props): AutosizeContext => {
     }
   }, [])
 
-  return { width: props.width, height: props.height }
+  return {}
 }

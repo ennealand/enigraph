@@ -1,10 +1,6 @@
 import { ReadonlySignal, signal, Signal, useComputed, useSignal } from '@preact/signals'
 
 type Props = {
-  width: ReadonlySignal<number>
-  height: ReadonlySignal<number>
-  centerX: ReadonlySignal<number>
-  centerY: ReadonlySignal<number>
   getInnerPoint: (x: number, y: number) => readonly [number, number]
 }
 

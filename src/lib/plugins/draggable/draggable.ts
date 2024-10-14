@@ -18,7 +18,6 @@ type Props<Id extends string | number> = {
   changeNodePosition?(element: BaseNodeProps<Id>, x: number, y: number): void
   changeContentPosition?(element: BaseContentProps<Id>, x: number, y: number): void
   nodePositionChanged?(element: BaseNodeProps<Id>): void
-  edgePositionChanged?(element: BaseEdgeProps<Id>): void
   contentPositionChanged?(element: BaseContentProps<Id>): void
   zoom: ReadonlySignal<number>
 }
@@ -54,7 +53,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     if (props.groups) {
       const groups = props.groups.value
       const P = 15
-      const I = 150
+      const I = 50
       for (const group of groups) {
         if (props.selection.value.has(group.id)) continue
         const wasInside = !!magneticGroupEffect(props.globalize, group, startPoint.value.x, startPoint.value.y, P, I, { preview: true })

@@ -12,12 +12,7 @@ type RenamingContext<NodeProps extends BaseNodeProps> = {
   stopRenaming: () => void
   isRenaming: ReadonlySignal<boolean>
   renamingNode: ReadonlySignal<NodeProps | null>
-  renamingProps: ReadonlySignal<{
-    x: ReadonlySignal<number>
-    y: ReadonlySignal<number>
-    value: ReadonlySignal<string> | undefined
-    changeNodeLabel: (value: string) => void
-  } | null>
+  renamingProps: RenamingAreaData
 }
 
 export const withRenaming = <NodeProps extends BaseNodeProps>(props: Props<NodeProps>): RenamingContext<NodeProps> => {

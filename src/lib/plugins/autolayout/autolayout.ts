@@ -6,7 +6,6 @@ import { customForce } from './layout'
 type Props<Id extends string | number, NodeType extends unknown, EdgeType extends unknown> = {
   nodes: ReadonlySignal<BaseNodeProps<Id, NodeType>[]>
   edges: ReadonlySignal<BaseEdgeProps<Id, EdgeType>[]>
-  globalize: (x: number, y: number) => readonly [number, number]
   centerX: ReadonlySignal<number>
   centerY: ReadonlySignal<number>
 }
