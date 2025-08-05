@@ -26,4 +26,8 @@
   &.noselect {
     pointer-events: none;
   }
+
+  .magnet {
+    fill: var(--scg-group-magnet, #266acf75);;
+  }
 }

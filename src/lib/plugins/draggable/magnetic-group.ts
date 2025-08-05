@@ -1,5 +1,12 @@
 import { BaseGroupProps } from '$lib/components/scg/group/types'
 
+export type MagneticGroupEffect = {
+  x: number
+  y: number
+  mouse: { x: number; y: number }
+  revert: boolean
+}
+
 export const magneticGroupEffect = <Id extends string | number>(
   globalize: (x: number, y: number) => readonly [number, number],
   group: BaseGroupProps<Id>,
@@ -7,8 +14,9 @@ export const magneticGroupEffect = <Id extends string | number>(
   y: number,
   P: number,
   I: number,
+  maxI: number,
   { preview, revert }: { preview?: boolean; revert?: boolean }
-) => {
+): readonly [number, number] | undefined => {
   if (revert) P = -P
   const pLeft = globalize(group.x.value - P, 0)[0]
   const pRight = globalize(group.x.value + group.dx.value + P, 0)[0]
@@ -21,20 +29,25 @@ export const magneticGroupEffect = <Id extends string | number>(
   const bottom = (pBottom - y) * (revert ? 1 : 1)
 
   const min = Math.min(left, right, top, bottom)
+  const minX = Math.min(left, right)
+  const minY = Math.min(top, bottom)
+  const Ix = Math.min(Math.abs(group.dx.value / 3), maxI)
+  const Iy = Math.min(Math.abs(group.dy.value / 3), maxI)
   if (preview) {
-    console.log(min <= 0 ? 'OUT' : 'still IN', min)
+    // console.log(min <= 0 ? 'OUT' : 'still IN', min)
     return min <= 0 ? undefined : [x, y]
   }
   // console.log(revert ? 'RR' : 'OO', 'min', min)
   if (revert) {
+    // if (min > 0 || -minX > Ix || -minY > Iy) return
     if (min > 0 || -min > I) return
 
-    if (left <= 0 && -left <= I) x = pLeft
-    if (right <= 0 && right <= I) x = pRight
-    if (top <= 0 && top <= I) y = pTop
-    if (bottom <= 0 && bottom <= I) y = pBottom
+    if (left <= 0 && -left <= Ix) x = pLeft
+    if (right <= 0 && right <= Ix) x = pRight
+    if (top <= 0 && top <= Iy) y = pTop
+    if (bottom <= 0 && bottom <= Iy) y = pBottom
   } else {
-    if (min < 0 || min > I) return
+    if (min < 0 || (minX > Ix && minY > Iy)) return
 
     if (left === min) x = pLeft
     else if (right === min) x = pRight

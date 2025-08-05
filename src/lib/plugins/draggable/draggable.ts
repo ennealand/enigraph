@@ -3,7 +3,7 @@ import { BaseEdgeProps } from '$lib/components/scg/edge/types'
 import { BaseGroupProps } from '$lib/components/scg/group/types'
 import { BaseNodeProps } from '$lib/components/scg/node/types'
 import { batch, ReadonlySignal, useComputed, useSignal } from '@preact/signals'
-import { magneticGroupEffect } from './magnetic-group'
+import { MagneticGroupEffect, magneticGroupEffect } from './magnetic-group'
 
 type Props<Id extends string | number> = {
   nodes?: ReadonlySignal<BaseNodeProps<Id>[]>
@@ -29,12 +29,15 @@ type DraggingContext = {
   updateDragging: (e: MouseEvent) => void
   abortDragging: (options?: { revert: boolean }) => void
   stopDragging: () => void
+  magneticEffects: ReadonlySignal<Map<string | number, MagneticGroupEffect>>
 }
 
 export const withDraggable = <Id extends string | number>(props: Props<Id>): DraggingContext => {
   const isDragging = useSignal(false)
   const startPoint = useSignal({ x: 0, y: 0 })
   const totalShift = useSignal({ x: 0, y: 0 })
+
+  const magneticEffects = useSignal<Map<string | number, MagneticGroupEffect>>(new Map())
 
   const startDragging = (e: MouseEvent) => {
     isDragging.value = true
@@ -49,16 +52,56 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     if (!isDragging.value) return
     let [x, y] = props.getInnerPoint(e.clientX, e.clientY)
 
+    const newMagneticEffects: Map<string | number, MagneticGroupEffect> = new Map()
     // Handle dragging into groups
     if (props.groups) {
       const groups = props.groups.value
       const P = 15
-      const I = 50
+      const I = 80
+      const maxI = 200
+      const magneticPins: (readonly [number, number])[] = []
       for (const group of groups) {
         if (props.selection.value.has(group.id)) continue
-        const wasInside = !!magneticGroupEffect(props.globalize, group, startPoint.value.x, startPoint.value.y, P, I, { preview: true })
-        const isMagnetic = magneticGroupEffect(props.globalize, group, x, y, P, I, { revert: wasInside })
-        if (isMagnetic) [x, y] = isMagnetic
+        const wasInside = !!magneticGroupEffect(
+          props.globalize,
+          group,
+          startPoint.value.x,
+          startPoint.value.y,
+          P,
+          I,
+          maxI,
+          {
+            preview: true,
+          }
+        )
+        const isMagnetic = magneticGroupEffect(props.globalize, group, x, y, P, I, maxI, { revert: wasInside })
+        if (isMagnetic) {
+          const [mx, my] = props.localize(x, y)
+          newMagneticEffects.set(group.id, {
+            x: x - isMagnetic[0],
+            y: isMagnetic[1] - y,
+            mouse: { x: mx, y: my },
+            revert: wasInside,
+          })
+          magneticPins.push(isMagnetic)
+        }
+      }
+
+      if (magneticPins.length) {
+        let maxVx = 0
+        let maxVy = 0
+        for (const pin of magneticPins) {
+          const vx = Math.abs(x - pin[0])
+          const vy = Math.abs(y - pin[1])
+          if (vx > maxVx) {
+            x = pin[0]
+            maxVx = vx
+          }
+          if (vy > maxVy) {
+            y = pin[1]
+            maxVy = vy
+          }
+        }
       }
     }
 
@@ -67,6 +110,9 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     const zoom = props.zoom?.value ?? 1
 
     batch(() => {
+      if (newMagneticEffects.size || magneticEffects.value.size) {
+        magneticEffects.value = newMagneticEffects
+      }
       const edgesSet = new Set<Id>()
       if (props.edges) {
         for (const edge of props.edges.value) {
@@ -135,6 +181,9 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   const stopDragging = () => {
     if (!isDragging.value) return
     batch(() => {
+      if (magneticEffects.value.size) {
+        magneticEffects.value = new Map()
+      }
       const edgesSet = new Set<Id>()
       if (props.edges) {
         for (const edge of props.edges.value) {
@@ -160,5 +209,5 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   }
 
   const isNoselect = useComputed(() => props.isSelecting.value || isDragging.value)
-  return { isDragging, startDragging, updateDragging, abortDragging, stopDragging, isNoselect }
+  return { isDragging, startDragging, updateDragging, abortDragging, stopDragging, isNoselect, magneticEffects }
 }

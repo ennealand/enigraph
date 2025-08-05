@@ -163,6 +163,7 @@ const factory = new EnigraphFactory()
   .on('group:sharedProps', (ctx, id) => ({
     selected: useComputed(() => ctx.selection.value.has(id)),
     noselect: ctx.isNoselect,
+    magneticEffects: ctx.magneticEffects,
   }))
   .on('edge:mouseDown', (ctx, { e, id }) => {
     e.preventDefault()
