@@ -1,9 +1,4 @@
-@font-face {
-  font-family: __GeistSans_ac79ff;
-  src: url(https://vercel.com/_next/static/media/e11418ac562b8ac1.p.woff2) format('woff2');
-  font-display: swap;
-  font-weight: 100 900;
-}
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 
 :root {
   --bg: #121215;
