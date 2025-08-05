@@ -9,11 +9,12 @@ import { withAutohide } from '$lib/plugins/autohide'
 import { withAutolayout } from '$lib/plugins/autolayout'
 import { withAutosize } from '$lib/plugins/autosize'
 import { withBusDraggable } from '$lib/plugins/bus-draggable'
-import { BaseDisk, createDiskComponent, getEdgeProps, getNodeProps, withDisk } from '$lib/plugins/disk'
+import { BaseDisk, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
 import { withMovable } from '$lib/plugins/movable'
 import { RenamingArea, withRenaming } from '$lib/plugins/renaming'
 import { AreaSelection, withSelection } from '$lib/plugins/selection'
+import { withLocalState } from '$lib/plugins/states/local'
 import { signal, useComputed } from '@preact/signals'
 
 const nodeSize = signal(10)
@@ -28,48 +29,7 @@ const factory = new EnigraphFactory()
   .plug(withMovable)
   .plug(withAutolayout)
   .plug(withSelection)
-  .plug(ctx => {
-    const changeBusPosition = (bus: BasicBusProps, x: number, y: number) => {
-      bus.dx.value = x
-      bus.dy.value = y
-    }
-    const changeContentPosition = (content: BasicContentProps, x: number, y: number) => {
-      content.x.value = x
-      content.y.value = y
-    }
-    const changeNodePosition = (node: BasicNodeProps, x: number, y: number) => {
-      node.x.value = x
-      node.y.value = y
-    }
-    const changeNodeLabel = (node: BasicNodeProps, label: string) => {
-      node.label!.value = label
-    }
-    const addNode = (node: Omit<BasicNodeProps, 'id'>) => {
-      // @ts-expect-error
-      ctx.nodes.value = [...ctx.nodes.value, { ...node, id: ctx.nodes.value.length + 1 }]
-    }
-    const diskComponents = {
-      nodes: createDiskComponent({
-        component: Node,
-        types: ['var-norole', 'const-tuple'],
-        factory: getNodeProps,
-        handler: (type, x, y) => {
-          const [gx, gy] = ctx.localize(x.value, y.value)
-          addNode({ type: signal(type), x: signal(gx), y: signal(gy) })
-          console.log('node clicked')
-        },
-      }),
-      edges: createDiskComponent({
-        component: Edge,
-        types: ['var-norole', 'const-tuple'],
-        factory: getEdgeProps,
-        handler: () => {
-          console.log('edge clicked')
-        },
-      }),
-    }
-    return { changeNodePosition, changeNodeLabel, diskComponents, changeBusPosition, changeContentPosition }
-  })
+  .plug(withLocalState)
   .plug(withDraggable)
   .plug(withAutohide)
   .plug(withRenaming)
