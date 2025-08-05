@@ -818,12 +818,12 @@ See other available variables in the [style.css](../src/dev/style.css) file.
 ## Development
 Install dependencies:
 ```sh
-bun i
+deno install
 ```
 
 Start the dev server:
 ```sh
-bun dev
+deno task dev
 ```
 
 ## Conclusion
