@@ -1,5 +1,5 @@
 import { useComputed, type ReadonlySignal } from '@preact/signals'
-import type { Ref } from 'preact/hooks'
+import type { Ref } from 'preact'
 import type { JSX } from 'preact/jsx-runtime'
 import './base-graph.css'
 
@@ -42,13 +42,13 @@ export const List = <Props extends { id: string | number }>({
   console.log('list render')
   return items.value.length ? (
     html ? (
-      <div {...props as JSX.HTMLAttributes<HTMLDivElement>}>
+      <div {...(props as JSX.HTMLAttributes<HTMLDivElement>)}>
         {items.value.map(item => (
           <Component key={item.id} {...events.value} {...item} />
         ))}
       </div>
     ) : (
-      <g {...props as JSX.HTMLAttributes<SVGGElement>}>
+      <g {...(props as JSX.HTMLAttributes<SVGGElement>)}>
         {items.value.map(item => (
           <Component key={item.id} {...events.value} {...item} />
         ))}
@@ -86,7 +86,6 @@ export const BaseGraph = (props: Props) => {
             ))}
           {props.after?.map(Fn => <Fn />)}
         </g>
-        {props.staticAfter?.map(Fn => <Fn />)}
       </svg>
       {props.htmlAfter?.length && (
         <div
@@ -105,6 +104,17 @@ export const BaseGraph = (props: Props) => {
           {props.htmlAfter?.map(Fn => <Fn />)}
         </div>
       )}
+      {props.staticAfter?.length && <svg
+        xmlns='http://www.w3.org/2000/svg'
+        xmlnsXlink='http://www.w3.org/1999/xlink'
+        viewBox={useComputed(() => `-${props.centerX} -${props.centerY} ${props.width} ${props.height}`)}
+        width={useComputed(() => `${props.width}px`)}
+        height={useComputed(() => `${props.height}px`)}
+        class='staticAfter'
+        {...props.svgProps.value}
+      >
+        {props.staticAfter?.map(Fn => <Fn />)}
+      </svg>}
     </div>
   )
 }
