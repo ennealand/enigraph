@@ -36,6 +36,7 @@
   & > g:hover {
     --scg-node-color: var(--disk-hover-scg-node-color, var(--_scg-node-color-hover));
     --scg-node-color-hover: var(--disk-hover-scg-node-color, var(--_scg-node-color-hover));
+    --scg-node-fill: var(--disk-hover-scg-node-fill, var(--_scg-node-fill));
 
     --scg-edge-color: var(--disk-hover-scg-edge-color, var(--_scg-edge-color-hover));
     --scg-edge-fill: var(--disk-hover-scg-edge-fill, var(--_scg-edge-fill-hover));
