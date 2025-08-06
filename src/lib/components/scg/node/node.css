@@ -1,0 +1,59 @@
+.node-container {
+  user-select: none;
+  cursor: pointer;
+  transition: 0.1s filter;
+  /* filter: var(--scg-node-filter, drop-shadow(0 0 var(--scg-node-shadow-size, 5px) transparent)); */
+  &:hover {
+    .node {
+      stroke: var(--scg-node-color-hover, #2669cf);
+    }
+    /* filter: var(
+      --scg-node-filter,
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-hover, var(--scg-node-shadow-color, var(--scg-node-color-hover, #2669cf))))
+    ); */
+  }
+
+  &.selected {
+    .node {
+      stroke: var(--scg-node-color-selected, #2669cf);
+    }
+    /* filter: var(
+      --scg-node-filter,
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-selected, var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf))))
+    ); */
+  }
+
+  &.renaming {
+    .node {
+      stroke: var(--scg-node-color-renaming, #2669cf);
+    }
+    /* filter: var(
+      --scg-node-filter,
+      drop-shadow(0 0 var(--scg-node-shadow-size, 5px) var(--scg-node-shadow-color-selected, var(--scg-node-shadow-color, var(--scg-node-color-selected, #2669cf))))
+    ); */
+  }
+
+  .node {
+    fill: var(--scg-node-fill, white);
+    stroke: var(--scg-node-color, #000);
+    stroke-width: var(--scg-node-stroke, 3px);
+    transition: var(--scg-node-transition, 0.2s stroke);
+  }
+
+  & > circle {
+    r: var(--scg-node-padding, 15px);
+  }
+
+  &.noselect {
+    pointer-events: none;
+  }
+}
+
+.node-label {
+  cursor: pointer;
+  user-select: none;
+  fill: var(--scg-node-text, black);
+  &:hover {
+    fill: var(--scg-node-text-hover, #2669cf);
+  }
+}

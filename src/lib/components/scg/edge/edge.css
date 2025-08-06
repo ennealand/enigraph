@@ -1,0 +1,48 @@
+.edge-container {
+  user-select: none;
+  cursor: pointer;
+  transition: 0.1s filter;
+  &:hover {
+    --scg-arrow-color: var(--scg-edge-color-hover, #2669cf);
+    .edge-stroke {
+      stroke: var(--scg-edge-color-hover, #000);
+    }
+    .edge-fill {
+      stroke: var(--scg-edge-fill-hover, #fff);
+    }
+    .edge-arrow {
+      fill: var(--scg-edge-color-hover, #000);
+    }
+  }
+
+  &.selected {
+    .edge-stroke {
+      stroke: var(--scg-edge-color-selected, #2669cf);
+    }
+    .edge-fill {
+      stroke: var(--scg-edge-fill-selected, #fff);
+    }
+    .edge-arrow {
+      fill: var(--scg-edge-color-selected, #2669cf);
+    }
+  }
+
+  .edge-stroke {
+    transition: var(--scg-edge-transition, 0.2s stroke);
+    stroke: var(--scg-edge-color, #000);
+  }
+
+  .edge-fill {
+    transition: var(--scg-edge-transition, 0.2s stroke);
+    stroke: var(--scg-edge-fill, #fff);
+  }
+
+  .edge-arrow {
+    transition: var(--scg-edge-arrow-transition, 0.2s fill);
+    fill: var(--scg-edge-color, #000);
+  }
+
+  &.noselect {
+    pointer-events: none;
+  }
+}
