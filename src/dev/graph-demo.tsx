@@ -11,7 +11,6 @@ import { withAutosize } from '$lib/plugins/autosize'
 import { withBusDraggable } from '$lib/plugins/bus-draggable'
 import { BaseDisk, withDisk } from '$lib/plugins/disk'
 import { withDraggable } from '$lib/plugins/draggable'
-import { withModifiers } from '$lib/plugins/keyboard/modifiers'
 import { withMovable } from '$lib/plugins/movable'
 import { RenamingArea, withRenaming } from '$lib/plugins/renaming'
 import { AreaSelection, withSelection } from '$lib/plugins/selection'
@@ -26,7 +25,6 @@ const factory = new EnigraphFactory()
   .add('bus', (props: BasicBusProps) => <Bus {...props} padding />, { plural: 'buses' })
   .add('edge', (props: BasicEdgeProps) => <Edge {...props} padding />)
   .add('node', (props: BasicNodeProps) => <Node {...props} padding />)
-  .plug(withModifiers)
   .plug(withAutosize)
   .plug(withMovable)
   .plug(withAutolayout)
@@ -202,16 +200,6 @@ const factory = new EnigraphFactory()
     ctx.stopSelection()
     ctx.stopDragging()
     ctx.stopBusDragging()
-  })
-  .on('global:keyDown', (ctx, e) => {
-    if (e.key === 'Shift') ctx.modifiers.shiftKey.value = true
-    if (e.key === 'Control' || e.key === 'Meta') ctx.modifiers.cmdKey.value = true
-    if (e.key === 'Alt') ctx.modifiers.altKey.value = true
-  })
-  .on('global:keyUp', (ctx, e) => {
-    if (e.key === 'Shift') ctx.modifiers.shiftKey.value = false
-    if (e.key === 'Control' || e.key === 'Meta') ctx.modifiers.cmdKey.value = false
-    if (e.key === 'Alt') ctx.modifiers.altKey.value = false
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],

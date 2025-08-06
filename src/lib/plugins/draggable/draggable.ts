@@ -20,7 +20,6 @@ type Props<Id extends string | number> = {
   nodePositionChanged?(element: BaseNodeProps<Id>): void
   contentPositionChanged?(element: BaseContentProps<Id>): void
   zoom: ReadonlySignal<number>
-  modifiers: { shiftKey: ReadonlySignal<boolean>; altKey: ReadonlySignal<boolean> }
 }
 
 type DraggingContext = {
@@ -90,7 +89,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         }
       }
 
-      if (magneticPins.length && !props.modifiers.altKey.value) {
+      if (magneticPins.length && !e.altKey) {
         let maxVx = 0
         let maxVy = 0
         for (const pin of magneticPins) {
@@ -111,9 +110,8 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     let shiftX = startPoint.value.x - x
     let shiftY = startPoint.value.y - y
     const zoom = props.zoom?.value ?? 1
-    // console.log(totalShift.value)
     let newPinnedToY: boolean | null = null
-    if (props.modifiers.shiftKey.value) {
+    if (e.shiftKey) {
       newPinnedToY = Math.abs(totalShift.value.x + shiftX) > Math.abs(totalShift.value.y + shiftY)
       if (newPinnedToY) {
         shiftY = 0
