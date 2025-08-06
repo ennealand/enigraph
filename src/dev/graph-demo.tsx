@@ -211,6 +211,7 @@ const factory = new EnigraphFactory()
   .on('global:keyUp', (ctx, e) => {
     if (e.key === 'Shift') ctx.modifiers.shiftKey.value = false
     if (e.key === 'Control' || e.key === 'Meta') ctx.modifiers.cmdKey.value = false
+    if (e.key === 'Alt') ctx.modifiers.altKey.value = false
   })
   .configure(ctx => ({
     staticBefore: [() => <Alphabet size={nodeSize} />],
