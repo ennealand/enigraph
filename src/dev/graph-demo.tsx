@@ -164,6 +164,7 @@ const factory = new EnigraphFactory()
     selected: useComputed(() => ctx.selection.value.has(id)),
     noselect: ctx.isNoselect,
     magneticEffects: ctx.magneticEffects,
+    groupHighlights: ctx.groupHighlights,
   }))
   .on('edge:mouseDown', (ctx, { e, id }) => {
     e.preventDefault()

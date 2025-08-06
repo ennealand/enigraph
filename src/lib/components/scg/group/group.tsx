@@ -16,13 +16,19 @@ export type SharedProps = {
   selected: ReadonlySignal<boolean>
   noselect: ReadonlySignal<boolean>
   magneticEffects?: ReadonlySignal<Map<string | number, MagneticGroupEffect>>
+  groupHighlights?: ReadonlySignal<Set<string | number>>
 }
 
 export const Group = (props: BasicGroupProps) => {
   const { id, x, y, dx, dy, padding, onMouseDown, onSharedProps } = props
   const sharedProps = onSharedProps?.(id)
+  const highlight = useComputed(() => sharedProps?.groupHighlights?.value.get(id))
   const className = useComputed(() =>
-    cl('group-container', sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect')
+    cl(
+      'group-container',
+      sharedProps?.selected.value ? 'selected' : sharedProps?.noselect.value && 'noselect',
+      highlight.value && `highlight-${highlight.value}`
+    )
   )
   const shadowEffect = useComputed(() => {
     const magnet = sharedProps?.magneticEffects?.value.get(id)

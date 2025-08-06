@@ -7,16 +7,19 @@ export type MagneticGroupEffect = {
   revert: boolean
 }
 
+const Padding = 15
+const OutStrength = 80
+const InStrengthCoef = 5
+const MaxInStrength = 200
+
 export const magneticGroupEffect = <Id extends string | number>(
   globalize: (x: number, y: number) => readonly [number, number],
   group: BaseGroupProps<Id>,
   x: number,
   y: number,
-  P: number,
-  I: number,
-  maxI: number,
   { preview, revert }: { preview?: boolean; revert?: boolean }
 ): readonly [number, number] | undefined => {
+  let P = Padding
   if (revert) P = -P
   const pLeft = globalize(group.x.value - P, 0)[0]
   const pRight = globalize(group.x.value + group.dx.value + P, 0)[0]
@@ -31,8 +34,8 @@ export const magneticGroupEffect = <Id extends string | number>(
   const min = Math.min(left, right, top, bottom)
   const minX = Math.min(left, right)
   const minY = Math.min(top, bottom)
-  const Ix = Math.min(Math.abs(group.dx.value / 5), maxI)
-  const Iy = Math.min(Math.abs(group.dy.value / 5), maxI)
+  const Ix = Math.min(Math.abs(group.dx.value / InStrengthCoef), MaxInStrength)
+  const Iy = Math.min(Math.abs(group.dy.value / InStrengthCoef), MaxInStrength)
   if (preview) {
     // console.log(min <= 0 ? 'OUT' : 'still IN', min)
     return min <= 0 ? undefined : [x, y]
@@ -40,7 +43,7 @@ export const magneticGroupEffect = <Id extends string | number>(
   // console.log(revert ? 'RR' : 'OO', 'min', min)
   if (revert) {
     // if (min > 0 || -minX > Ix || -minY > Iy) return
-    if (min > 0 || -min > I) return
+    if (min > 0 || -min > OutStrength) return
 
     if (left <= 0 && -left <= Ix) x = pLeft
     if (right <= 0 && right <= Ix) x = pRight

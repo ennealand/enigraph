@@ -30,4 +30,16 @@
   .magnet {
     fill: var(--scg-group-magnet, #266acf75);;
   }
+
+  &.highlight-enter {
+    .group {
+      fill: #266acf75;
+    }
+  }
+
+  &.highlight-leave {
+    .group {
+      fill: #cf3f2675;
+    }
+  }
 }
