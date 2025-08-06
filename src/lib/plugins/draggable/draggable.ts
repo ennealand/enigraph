@@ -20,7 +20,7 @@ type Props<Id extends string | number> = {
   nodePositionChanged?(element: BaseNodeProps<Id>): void
   contentPositionChanged?(element: BaseContentProps<Id>): void
   zoom: ReadonlySignal<number>
-  modifiers: { shiftKey: ReadonlySignal<boolean> }
+  modifiers: { shiftKey: ReadonlySignal<boolean>; altKey: ReadonlySignal<boolean> }
 }
 
 type DraggingContext = {
@@ -37,6 +37,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   const isDragging = useSignal(false)
   const startPoint = useSignal({ x: 0, y: 0 })
   const totalShift = useSignal({ x: 0, y: 0 })
+  const pinnedToY = useSignal<boolean | null>(null)
 
   const magneticEffects = useSignal<Map<string | number, MagneticGroupEffect>>(new Map())
 
@@ -47,6 +48,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
     startPoint.value.y = y
     totalShift.value.x = 0
     totalShift.value.y = 0
+    pinnedToY.value = null
   }
 
   const updateDragging = (e: MouseEvent) => {
@@ -88,7 +90,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         }
       }
 
-      if (magneticPins.length && !props.modifiers.shiftKey.value) {
+      if (magneticPins.length && !props.modifiers.altKey.value) {
         let maxVx = 0
         let maxVy = 0
         for (const pin of magneticPins) {
@@ -106,11 +108,35 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
       }
     }
 
-    const shiftX = startPoint.value.x - x
-    const shiftY = startPoint.value.y - y
+    let shiftX = startPoint.value.x - x
+    let shiftY = startPoint.value.y - y
     const zoom = props.zoom?.value ?? 1
+    // console.log(totalShift.value)
+    let newPinnedToY: boolean | null = null
+    if (props.modifiers.shiftKey.value) {
+      newPinnedToY = Math.abs(totalShift.value.x + shiftX) > Math.abs(totalShift.value.y + shiftY)
+      if (newPinnedToY) {
+        shiftY = 0
+        if (pinnedToY.value !== newPinnedToY) {
+          if (pinnedToY.value !== null) shiftX += totalShift.value.x
+          shiftY -= totalShift.value.y
+          console.log('switch Y')
+        }
+      } else {
+        shiftX = 0
+        if (pinnedToY.value !== newPinnedToY) {
+          console.log('switch X')
+          if (pinnedToY.value !== null) shiftY += totalShift.value.y
+          shiftX -= totalShift.value.x
+        }
+      }
+    } else if (pinnedToY.value !== null) {
+      if (pinnedToY.value) shiftY += totalShift.value.y
+      else shiftX += totalShift.value.x
+    }
 
     batch(() => {
+      pinnedToY.value = newPinnedToY
       if (newMagneticEffects.size || magneticEffects.value.size) {
         magneticEffects.value = newMagneticEffects
       }
@@ -135,8 +161,8 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         }
       }
     })
-    totalShift.value.x += shiftX
-    totalShift.value.y += shiftY
+    totalShift.value.x += startPoint.value.x - x
+    totalShift.value.y += startPoint.value.y - y
     startPoint.value.x = x
     startPoint.value.y = y
   }
