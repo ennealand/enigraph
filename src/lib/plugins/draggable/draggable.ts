@@ -20,6 +20,7 @@ type Props<Id extends string | number> = {
   nodePositionChanged?(element: BaseNodeProps<Id>): void
   contentPositionChanged?(element: BaseContentProps<Id>): void
   zoom: ReadonlySignal<number>
+  modifiers: { shiftKey: ReadonlySignal<boolean> }
 }
 
 type DraggingContext = {
@@ -87,7 +88,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         }
       }
 
-      if (magneticPins.length) {
+      if (magneticPins.length && !props.modifiers.shiftKey.value) {
         let maxVx = 0
         let maxVy = 0
         for (const pin of magneticPins) {
