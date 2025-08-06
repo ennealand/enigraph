@@ -31,8 +31,8 @@ export const magneticGroupEffect = <Id extends string | number>(
   const min = Math.min(left, right, top, bottom)
   const minX = Math.min(left, right)
   const minY = Math.min(top, bottom)
-  const Ix = Math.min(Math.abs(group.dx.value / 3), maxI)
-  const Iy = Math.min(Math.abs(group.dy.value / 3), maxI)
+  const Ix = Math.min(Math.abs(group.dx.value / 5), maxI)
+  const Iy = Math.min(Math.abs(group.dy.value / 5), maxI)
   if (preview) {
     // console.log(min <= 0 ? 'OUT' : 'still IN', min)
     return min <= 0 ? undefined : [x, y]
