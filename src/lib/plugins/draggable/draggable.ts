@@ -51,6 +51,7 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
   const updateDragging = (e: MouseEvent) => {
     if (!isDragging.value) return
     let [x, y] = props.getInnerPoint(e.clientX, e.clientY)
+    const [mx, my] = props.localize(x, y)
 
     const newMagneticEffects: Map<string | number, MagneticGroupEffect> = new Map()
     // Handle dragging into groups
@@ -76,7 +77,6 @@ export const withDraggable = <Id extends string | number>(props: Props<Id>): Dra
         )
         const isMagnetic = magneticGroupEffect(props.globalize, group, x, y, P, I, maxI, { revert: wasInside })
         if (isMagnetic) {
-          const [mx, my] = props.localize(x, y)
           newMagneticEffects.set(group.id, {
             x: x - isMagnetic[0],
             y: isMagnetic[1] - y,
